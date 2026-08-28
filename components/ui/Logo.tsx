@@ -1,0 +1,80 @@
+import { cn } from "@/lib/utils";
+
+type LogoProps = {
+  /** "full" = icon + wordmark, "icon" = F mark only (favicon / avatar crop). */
+  variant?: "full" | "icon";
+  className?: string;
+  /** Accent the circuit dot in cyan instead of monochrome. Off by default. */
+  accentDot?: boolean;
+};
+
+/**
+ * Flow State logo.
+ *
+ * The mark is a stylized "F" letterform: two flowing, forward-leaning parallel
+ * curves reading as a data-stream / circuit trace, capped by a circular node at
+ * the top-right. Everything is `currentColor` so it inherits white on dark
+ * surfaces; the standalone icon crops cleanly to a square for favicons/avatars.
+ */
+export function FlowStateIcon({
+  className,
+  accentDot = false,
+}: {
+  className?: string;
+  accentDot?: boolean;
+}) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      role="img"
+      aria-label="Flow State"
+      className={cn("h-8 w-8", className)}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g
+        stroke="currentColor"
+        strokeWidth={6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {/* F stem — flowing, italic, curving up toward the node */}
+        <path d="M17 53C17 39 20 28 27 20c4-5 9.5-8.5 15.5-10.5" />
+        {/* parallel inner flow line */}
+        <path d="M24.5 53C24.5 41 27.5 32 32.5 25" />
+        {/* middle arm of the F */}
+        <path d="M27 34c6-3 12.5-3 18.5-1" />
+        {/* motion trails */}
+        <path d="M8 45h7" opacity="0.45" />
+        <path d="M6 37h5" opacity="0.3" />
+      </g>
+      {/* circuit node */}
+      <circle
+        cx="49"
+        cy="12.5"
+        r="6.5"
+        fill={accentDot ? "#00C8F0" : "currentColor"}
+      />
+    </svg>
+  );
+}
+
+export function Logo({ variant = "full", className, accentDot = false }: LogoProps) {
+  if (variant === "icon") {
+    return <FlowStateIcon className={className} accentDot={accentDot} />;
+  }
+
+  return (
+    <span
+      className={cn(
+        "inline-flex select-none items-center gap-2.5 text-text-primary",
+        className,
+      )}
+    >
+      <FlowStateIcon className="h-7 w-7 shrink-0" accentDot={accentDot} />
+      <span className="font-sans text-[1.35rem] font-bold leading-none tracking-[-0.01em]">
+        flowstate
+      </span>
+    </span>
+  );
+}
