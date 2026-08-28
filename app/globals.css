@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #080808;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display headlines — wide, heavy grotesque, tight tracking. Cal Sans (CDN)
+   with Space Grotesk 700 as the loaded fallback. */
+h1,
+h2,
+h3,
+.font-display {
+  font-family:
+    "Cal Sans", var(--font-space-grotesk), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgba(0, 200, 240, 0.25);
+  color: #ffffff;
+}
+
+/* Thin monochrome scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+/* Reveal system — CSS keyframe animations gated by an `.is-visible` class that
+   an IntersectionObserver adds (see lib/useReveal.ts). Keyframe animations
+   (rather than a JS engine or CSS transitions) settle to their end state via
+   `forwards` fill, so a section can never be left stuck invisible. Values match
+   the brief's Framer Motion spec. */
+@keyframes reveal-up-sm {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes reveal-up-lg {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal-up {
+  animation: reveal-up-sm 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.float-y {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+/* Data-viz intros — element rests at its FINAL state; the animation only
+   provides an entrance, so nothing is hidden if it never plays. */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes gauge-sweep {
+  from {
+    stroke-dashoffset: var(--from);
+  }
+}
+@keyframes draw-spoke {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes travel-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--to));
+  }
+}
+.anim-grow-x {
+  animation: grow-x 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.anim-gauge {
+  animation: gauge-sweep 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.anim-spoke {
+  animation: draw-spoke 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.anim-fade {
+  animation: fade-in 0.5s ease forwards;
+}
+.anim-travel {
+  animation: travel-x 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-grow-x,
+  .anim-gauge,
+  .anim-spoke,
+  .anim-fade,
+  .anim-travel,
+  .float-y,
+  .reveal-up {
+    animation: none !important;
+  }
+}
+
+.reveal {
+  opacity: 0;
+}
+.reveal.is-visible {
+  animation: reveal-up-lg 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Staggered children */
+.reveal-stagger > * {
+  opacity: 0;
+}
+.reveal-stagger.is-visible > * {
+  animation: reveal-up-sm 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.reveal-stagger.is-visible > *:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.reveal-stagger.is-visible > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+.reveal-stagger.is-visible > *:nth-child(4) {
+  animation-delay: 0.21s;
+}
+.reveal-stagger.is-visible > *:nth-child(5) {
+  animation-delay: 0.28s;
+}
+.reveal-stagger.is-visible > *:nth-child(6) {
+  animation-delay: 0.35s;
+}
+.reveal-stagger.is-visible > *:nth-child(7) {
+  animation-delay: 0.42s;
+}
+.reveal-stagger.is-visible > *:nth-child(8) {
+  animation-delay: 0.49s;
+}
+.reveal-stagger.is-visible > *:nth-child(n + 9) {
+  animation-delay: 0.56s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-visible,
+  .reveal-stagger > *,
+  .reveal-stagger.is-visible > * {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
