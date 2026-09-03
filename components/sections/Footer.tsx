@@ -5,10 +5,9 @@ const COLUMNS = [
   {
     heading: "Services",
     links: [
-      "Generative Engine Optimization",
-      "Citation & Authority Building",
-      "AI Visibility Monitoring",
-      "Reputation Architecture",
+      "Meta Ads",
+      "Google Ads",
+      "GEO — Generative Engine Optimization",
     ],
   },
   {
@@ -17,7 +16,7 @@ const COLUMNS = [
   },
   {
     heading: "Resources",
-    links: ["AI Visibility Guide", "Case Studies", "GEO Playbook", "Blog"],
+    links: ["Meta Ads Playbook", "Google Ads Guide", "GEO Playbook", "Case Studies"],
   },
   {
     heading: "Legal",
@@ -33,7 +32,7 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary">
-              Get found, cited, and recommended by AI.
+              Get found by AI. Get clicked on Google. Get discovered on Meta.
             </p>
           </div>
 

@@ -30,35 +30,37 @@ const SITE_URL = "https://flowstate.agency";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Flow State — Get found, cited, and recommended by AI.",
+    default:
+      "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
     template: "%s — Flow State",
   },
   description:
-    "Flow State is an AI Visibility & Growth agency. We help brands get found, cited, and recommended by ChatGPT, Gemini, Perplexity, and every AI system replacing traditional search.",
+    "Flow State is a marketing agency running Meta Ads, Google Ads, and GEO (Generative Engine Optimization). Get found by AI, get clicked on Google, get discovered on Meta.",
   keywords: [
-    "AI visibility",
+    "Meta Ads agency",
+    "Google Ads agency",
     "generative engine optimization",
     "GEO",
-    "LLM SEO",
+    "paid social",
+    "paid search",
     "AI search optimization",
     "ChatGPT citations",
-    "answer engine optimization",
   ],
   authors: [{ name: "Flow State" }],
   creator: "Flow State",
   openGraph: {
     type: "website",
     url: SITE_URL,
-    title: "Flow State — Get found, cited, and recommended by AI.",
+    title: "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
     description:
-      "AI is the new search engine. Flow State makes sure your brand is in it — cited by ChatGPT, Gemini, Perplexity, and Claude.",
+      "Get found by AI. Get clicked on Google. Get discovered on Meta. One agency across all three channels.",
     siteName: "Flow State",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flow State — Get found, cited, and recommended by AI.",
+    title: "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
     description:
-      "AI is the new search engine. Flow State makes sure your brand is in it.",
+      "Get found by AI. Get clicked on Google. Get discovered on Meta.",
   },
   robots: { index: true, follow: true },
 };

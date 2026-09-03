@@ -15,31 +15,31 @@ const STEPS = [
   {
     n: "01",
     title: "Audit",
-    body: "Baseline your visibility across every major model and query set.",
+    body: "Map where you show up — and where you don't — across AI, Google, and social.",
     Icon: IconSearch,
   },
   {
     n: "02",
-    title: "Optimize",
-    body: "Restructure content and markup so AI can parse and quote it.",
+    title: "Strategy",
+    body: "Pick the channels where your buyers actually are. Set targets and budget.",
     Icon: IconSliders,
   },
   {
     n: "03",
-    title: "Distribute",
-    body: "Seed the third-party sources that LLMs weight most heavily.",
+    title: "Launch",
+    body: "Ads live, landing pages shipped, citations seeded. Work in market fast.",
     Icon: IconBroadcast,
   },
   {
     n: "04",
-    title: "Monitor",
-    body: "Track citations, mentions, and sentiment in near real time.",
+    title: "Measure",
+    body: "Track what matters: citations, clicks, conversions, and cost per lead.",
     Icon: IconRadar,
   },
   {
     n: "05",
-    title: "Iterate",
-    body: "Feed results back into the next cycle. Compounds every month.",
+    title: "Compound",
+    body: "Double down on what works. Cut what doesn't. Repeat every month.",
     Icon: IconLoop,
   },
 ];
@@ -49,9 +49,9 @@ export function AgenticWorkflow() {
 
   return (
     <Section id="how-it-works">
-      <SectionLabel>The process</SectionLabel>
+      <SectionLabel>How it works</SectionLabel>
       <SectionHeading className="mt-4 max-w-2xl">
-        Our process runs while you sleep.
+        Same five steps, whatever channel you hire us for.
       </SectionHeading>
 
       <div ref={ref} className="relative mt-14">

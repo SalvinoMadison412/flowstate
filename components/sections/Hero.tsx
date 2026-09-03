@@ -160,9 +160,9 @@ function ScoreCard() {
       <div className="float-y rounded-xl border border-border-subtle bg-surface/90 p-4 backdrop-blur-sm shadow-card-lift">
         <div className="flex items-center justify-between">
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary">
-            AI Visibility Score
+            Visibility Index
           </span>
-          <span className="font-mono text-[10px] text-accent">improving</span>
+          <span className="font-mono text-[10px] text-accent">trending up</span>
         </div>
         <div className="mt-3 flex items-center gap-3">
           <div className="relative h-16 w-16">
@@ -224,24 +224,27 @@ export function Hero() {
           left mid-fade by a throttled tab. */}
       <div className="relative z-10 mx-auto max-w-3xl text-center">
         <p className="reveal-up font-mono text-xs uppercase tracking-[0.24em] text-text-secondary">
-          AI Visibility &amp; Growth
+          Meta Ads &nbsp;&middot;&nbsp; Google Ads &nbsp;&middot;&nbsp; GEO
         </p>
 
         <h1
-          className="reveal-up mt-5 font-display text-[2.25rem] font-bold leading-[1.05] tracking-display sm:text-5xl md:text-6xl lg:text-7xl"
+          className="reveal-up mt-5 font-display text-[1.9rem] font-bold leading-[1.08] tracking-display sm:text-5xl sm:leading-[1.05] md:text-6xl lg:text-7xl"
           style={{ animationDelay: "0.06s" }}
         >
-          AI is the new search engine.
-          <br />
-          <span className="text-text-secondary">Are you in it?</span>
+          <span className="block">Get found by AI.</span>
+          <span className="block">Get clicked on Google.</span>
+          <span className="block text-text-secondary">
+            Get discovered on Meta.
+          </span>
         </h1>
 
         <p
           className="reveal-up mx-auto mt-6 max-w-xl text-lg text-text-secondary sm:text-xl"
           style={{ animationDelay: "0.13s" }}
         >
-          Flow State helps brands get found, cited, and recommended by ChatGPT,
-          Gemini, Perplexity, and every AI system replacing traditional search.
+          Flow State runs GEO, Google Ads, and Meta Ads for brands that want to
+          be visible everywhere their customers look &mdash; AI answers, search
+          results, and social feeds.
         </p>
 
         <div
@@ -249,10 +252,10 @@ export function Hero() {
           style={{ animationDelay: "0.2s" }}
         >
           <Button href="#audit" variant="filled" size="lg">
-            Start Your AI Audit
+            Book a free strategy call
           </Button>
           <Button href="#how-it-works" variant="ghost" size="lg">
-            See How It Works
+            See how it works
           </Button>
         </div>
       </div>

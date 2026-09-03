@@ -12,3 +12,7 @@ next-env.d.ts
 
 # local editor / tooling
 .claude/settings.local.json
+
+# unrelated local data files (not part of the site)
+/*.csv
+/*.xlsx

@@ -4,40 +4,42 @@ import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { CountUp } from "@/components/ui/CountUp";
 
-const OLD_WORLD = [
-  "Keyword rankings",
-  "Backlink counts",
-  "Domain authority",
-  "SERP position tracking",
-  "Meta tag optimization",
-];
-
-const NEW_WORLD = [
-  "AI citations",
-  "LLM source trust",
-  "Generative answer presence",
-  "Entity recognition",
-  "Retrieval-layer visibility",
+const PLACES = [
+  {
+    name: "AI answers",
+    body: "Buyers ask ChatGPT and Perplexity before they open Google. If AI doesn't name you, you're not on the shortlist.",
+  },
+  {
+    name: "Search results",
+    body: "High intent still runs through Google. The top of the page is won with strategy and budget, not overnight.",
+  },
+  {
+    name: "Social feeds",
+    body: "Instagram and Facebook are where demand gets created — before anyone thinks to search for what you sell.",
+  },
 ];
 
 const STATS = [
   {
-    value: 72,
+    channel: "Meta Ads",
+    value: 40,
     suffix: "%",
-    label: "of AI responses cite fewer than 5 sources",
-    accent: true,
-  },
-  {
-    value: 46,
-    suffix: "%",
-    label: "of searches now show AI Overviews",
+    label: "lower CPM than industry average on managed accounts",
     accent: false,
   },
   {
-    value: 3.2,
+    channel: "Google Ads",
+    value: 4.2,
     suffix: "×",
     decimals: 1,
-    label: "more conversions from AI-referred traffic",
+    label: "average return on ad spend across active search campaigns",
+    accent: true,
+  },
+  {
+    channel: "GEO",
+    value: 3,
+    suffix: "×",
+    label: "more AI citations within the first 90 days",
     accent: false,
   },
 ];
@@ -45,63 +47,42 @@ const STATS = [
 export function Problem() {
   return (
     <Section id="problem">
-      <SectionLabel>The problem</SectionLabel>
+      <SectionLabel>Why Flow State</SectionLabel>
       <SectionHeading className="mt-4 max-w-2xl">
-        Traditional SEO can&rsquo;t see what AI sees.
+        Attention is fragmented. Most agencies aren&rsquo;t.
       </SectionHeading>
+      <p className="mt-5 max-w-2xl text-lg text-text-secondary">
+        People find brands in three places now. Most agencies cover one and hope
+        you don&rsquo;t notice the gap. We run all three.
+      </p>
 
-      <div className="mt-14 grid gap-4 md:grid-cols-2">
-        {/* Old World */}
-        <div className="rounded-2xl border border-border-subtle bg-surface p-7 opacity-60 grayscale">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs uppercase tracking-[0.18em] text-text-muted">
-              Old World
-            </span>
-            <span className="font-mono text-xs text-text-muted">2004&ndash;2023</span>
-          </div>
-          <ul className="mt-6 space-y-3">
-            {OLD_WORLD.map((item) => (
-              <li
-                key={item}
-                className="flex items-center gap-3 text-text-secondary line-through decoration-text-muted/60"
-              >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-text-muted" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* New World */}
-        <div className="rounded-2xl border border-border-active bg-surface-elevated p-7">
-          <div className="flex items-center justify-between">
+      <div className="mt-14 grid gap-4 md:grid-cols-3">
+        {PLACES.map((p) => (
+          <div
+            key={p.name}
+            className="rounded-2xl border border-border-subtle bg-surface p-7"
+          >
             <span className="font-mono text-xs uppercase tracking-[0.18em] text-text-primary">
-              New World
+              {p.name}
             </span>
-            <span className="font-mono text-xs text-text-secondary">Now</span>
+            <p className="mt-4 text-sm leading-relaxed text-text-secondary">
+              {p.body}
+            </p>
           </div>
-          <ul className="mt-6 space-y-3">
-            {NEW_WORLD.map((item) => (
-              <li
-                key={item}
-                className="flex items-center gap-3 text-text-primary"
-              >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
+        ))}
       </div>
 
       <Reveal className="mt-4 grid gap-4 sm:grid-cols-3">
         {STATS.map((stat) => (
           <div
-            key={stat.label}
+            key={stat.channel}
             className="rounded-2xl border border-border-subtle bg-surface p-6"
           >
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
+              {stat.channel}
+            </span>
             <div
-              className={`font-display text-4xl font-bold tracking-display sm:text-5xl ${
+              className={`mt-3 font-display text-4xl font-bold tracking-display sm:text-5xl ${
                 stat.accent ? "text-accent" : "text-text-primary"
               }`}
             >

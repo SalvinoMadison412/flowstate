@@ -1,8 +1,10 @@
 # Flow State
 
-Marketing homepage for **Flow State** — an AI Visibility & Growth agency.
+Marketing homepage for **Flow State** — a marketing agency running three
+standalone services: **Meta Ads**, **Google Ads**, and **GEO** (Generative
+Engine Optimization).
 
-> Get found, cited, and recommended by AI.
+> Get found by AI. Get clicked on Google. Get discovered on Meta.
 
 ## Stack
 
@@ -44,9 +46,12 @@ app/
   icon.svg            F-mark favicon
 components/
   ui/                 Logo, Nav, Button, Card, Section, CountUp, icons
-  sections/           Hero, Problem, Services, Dashboard, GEOMockup,
-                      AuthorityDiagram, AgenticWorkflow, Industries,
-                      CaseStudy, FinalCTA, Footer
+  sections/           Hero, Problem, Services (3 service panels), GEOMockup,
+                      AgenticWorkflow (How It Works), Industries, CaseStudy,
+                      FinalCTA, Footer
+                      — Dashboard.tsx and AuthorityDiagram.tsx are kept but no
+                        longer mounted (GEO-only visuals from the old single-
+                        service site)
 lib/utils.ts          cn(), shared motion presets
 ```
 
@@ -56,8 +61,9 @@ lib/utils.ts          cn(), shared motion presets
   functional elements: primary CTAs, one stat/metric, dashboard active states,
   the pipeline progress dot.
 - All animations respect `prefers-reduced-motion` (see `globals.css` + `usePrefersReducedMotion`).
-- The audit form is client-only (no backend) — wire `FinalCTA.tsx` /
-  `Nav.tsx#audit` to your CRM or a `/api/audit` route.
+- The strategy-call form is client-only (no backend). Every CTA on the page
+  links to `#audit` (the `FinalCTA.tsx` section) — wire it to your CRM, a
+  booking link (Calendly/Cal.com), or a `/api/lead` route.
 
 ## Notes
 

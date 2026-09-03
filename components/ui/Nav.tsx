@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { label: "Services", href: "#services" },
+  { label: "Meta Ads", href: "#meta-ads" },
+  { label: "Google Ads", href: "#google-ads" },
+  { label: "GEO", href: "#geo" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Industries", href: "#industries" },
   { label: "Case Study", href: "#case-study" },
 ];
 
@@ -44,7 +45,7 @@ export function Nav() {
           <Logo />
         </a>
 
-        <ul className="hidden items-center gap-8 md:flex">
+        <ul className="hidden items-center gap-7 lg:flex">
           {LINKS.map((link) => (
             <li key={link.href}>
               <a
@@ -57,9 +58,9 @@ export function Nav() {
           ))}
         </ul>
 
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <Button href="#audit" variant="outline" size="md">
-            Get AI Audit
+            Book a strategy call
           </Button>
         </div>
 
@@ -68,7 +69,7 @@ export function Nav() {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-subtle text-text-primary md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-subtle text-text-primary lg:hidden"
         >
           <span className="relative block h-4 w-5">
             <span
@@ -95,7 +96,7 @@ export function Nav() {
 
       <div
         className={cn(
-          "grid overflow-hidden border-border-subtle bg-black/90 backdrop-blur-md transition-all duration-300 md:hidden",
+          "grid overflow-hidden border-border-subtle bg-black/90 backdrop-blur-md transition-all duration-300 lg:hidden",
           open
             ? "grid-rows-[1fr] border-b opacity-100"
             : "grid-rows-[0fr] opacity-0",
@@ -122,7 +123,7 @@ export function Nav() {
                   className="w-full"
                   onClick={() => setOpen(false)}
                 >
-                  Get AI Audit
+                  Book a strategy call
                 </Button>
               </li>
             </ul>
