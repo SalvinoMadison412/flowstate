@@ -26,15 +26,17 @@ export function FinalCTA() {
         className={cn("reveal relative mx-auto max-w-2xl text-center", shown && "is-visible")}
       >
         <h2 className="font-display text-3xl font-bold leading-[1.1] tracking-display sm:text-5xl">
-          Find out where AI sees you &mdash; and where it doesn&rsquo;t.
+          Book a free strategy call.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-lg text-text-secondary">
-          Free AI Visibility Audit delivered in 48 hours.
+          Tell us where you want to grow. We&rsquo;ll show you which channels
+          &mdash; Meta, Google, GEO &mdash; get you there fastest. 30 minutes, no
+          pitch.
         </p>
 
         {submitted ? (
           <p className="mx-auto mt-9 max-w-md rounded-xl border border-border-active bg-surface px-5 py-4 text-sm text-text-primary">
-            Request received. Your audit lands in your inbox within 48 hours.
+            Got it. We&rsquo;ll email you a booking link within one business day.
           </p>
         ) : (
           <form
@@ -60,7 +62,7 @@ export function FinalCTA() {
               type="submit"
               className="h-12 shrink-0 rounded-full bg-white px-6 text-sm font-medium text-bg transition-colors hover:bg-text-secondary"
             >
-              Claim Free Audit
+              Book the call
             </button>
           </form>
         )}

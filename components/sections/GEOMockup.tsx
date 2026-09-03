@@ -62,7 +62,7 @@ export function GEOMockup() {
   const { ref, shown } = useReveal<HTMLDivElement>();
 
   return (
-    <Section id="geo">
+    <Section id="geo-example">
       <SectionLabel>GEO in practice</SectionLabel>
       <SectionHeading className="mt-4 max-w-2xl">
         Same content. Restructured so AI can read it.
