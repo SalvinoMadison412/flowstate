@@ -61,9 +61,11 @@ lib/utils.ts          cn(), shared motion presets
   functional elements: primary CTAs, one stat/metric, dashboard active states,
   the pipeline progress dot.
 - All animations respect `prefers-reduced-motion` (see `globals.css` + `usePrefersReducedMotion`).
-- The strategy-call form is client-only (no backend). Every CTA on the page
-  links to `#audit` (the `FinalCTA.tsx` section) — wire it to your CRM, a
-  booking link (Calendly/Cal.com), or a `/api/lead` route.
+- Every CTA links to `#audit` (`FinalCTA.tsx`). The form inserts a row into the
+  Supabase `leads` table via PostgREST as the `anon` role (`lib/leads.ts`) — no
+  client library, no backend route. Requires `NEXT_PUBLIC_SUPABASE_URL` and
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (see `.env.example`); without them the form
+  shows an error on submit.
 
 ## Notes
 
