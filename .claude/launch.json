@@ -7,6 +7,20 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "crm-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/salvinomadison/Desktop/FlowState/.claude/worktrees/lead-tracking-crm-777a02",
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
     }
   ]
 }
