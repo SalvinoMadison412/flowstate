@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,9 @@ export function Nav() {
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
+    // Without config there is no CRM to link to, and touching the client
+    // would throw — the marketing site must not depend on Supabase.
+    if (!isSupabaseConfigured) return;
     void supabase.auth
       .getSession()
       .then(({ data }) => setSignedIn(!!data.session));

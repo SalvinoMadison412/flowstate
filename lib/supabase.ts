@@ -1,14 +1,41 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+/** False when the env vars are missing — the CRM is unusable, the site is fine. */
+export const isSupabaseConfigured = Boolean(URL && KEY);
+
+let client: SupabaseClient | null = null;
+
+function getClient(): SupabaseClient {
+  if (!client) {
+    if (!isSupabaseConfigured)
+      throw new Error(
+        "Supabase is not configured — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      );
+    client = createClient(URL as string, KEY as string);
+  }
+  return client;
+}
 
 /**
  * Browser client for the CRM. Unlike `lib/leads.ts` (a single anon insert,
  * done with raw fetch) the CRM needs a real session — persistence and token
  * refresh — so it uses the client library.
+ *
+ * Built lazily behind a proxy: `createClient` throws on an empty URL, and this
+ * module is imported by the site nav, so eager construction would fail the
+ * whole build on a deploy that is missing the env vars. Importing is now always
+ * safe; only actually using the client requires configuration.
  */
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
-);
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const c = getClient() as unknown as Record<string | symbol, unknown>;
+    const value = c[prop];
+    return typeof value === "function" ? value.bind(c) : value;
+  },
+});
 
 export type Status =
   | "new"
