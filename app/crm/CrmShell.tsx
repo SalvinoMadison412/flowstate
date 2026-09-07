@@ -7,7 +7,7 @@ import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
-import { supabase, CHANNELS } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, CHANNELS } from "@/lib/supabase";
 import { input } from "./ui";
 
 const TABS = [
@@ -26,6 +26,10 @@ export function CrmShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setReady(true);
+      return;
+    }
     void supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setReady(true);
@@ -35,6 +39,22 @@ export function CrmShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!ready) return null;
+  if (!isSupabaseConfigured)
+    return (
+      <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-5 text-center">
+        <h1 className="font-display text-xl tracking-display">
+          CRM not configured
+        </h1>
+        <p className="mt-3 text-sm text-text-secondary">
+          Set <code className="text-text-primary">NEXT_PUBLIC_SUPABASE_URL</code>{" "}
+          and{" "}
+          <code className="text-text-primary">
+            NEXT_PUBLIC_SUPABASE_ANON_KEY
+          </code>{" "}
+          on this deployment, then redeploy.
+        </p>
+      </div>
+    );
   if (!session) return <AuthForm />;
 
   return (
