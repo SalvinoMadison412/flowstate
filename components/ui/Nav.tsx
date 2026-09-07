@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,19 @@ const LINKS = [
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  // The CRM link is private: it only appears once signed in, so visitors
+  // browsing the marketing site never see it.
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    void supabase.auth
+      .getSession()
+      .then(({ data }) => setSignedIn(!!data.session));
+    const { data } = supabase.auth.onAuthStateChange((_e, s) =>
+      setSignedIn(!!s),
+    );
+    return () => data.subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -30,6 +44,8 @@ export function Nav() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const links = signedIn ? [...LINKS, { label: "CRM", href: "/crm" }] : LINKS;
 
   return (
     <header
@@ -46,7 +62,7 @@ export function Nav() {
         </a>
 
         <ul className="hidden items-center gap-7 lg:flex">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
@@ -104,7 +120,7 @@ export function Nav() {
       >
         <div className="min-h-0 overflow-hidden">
           <ul className="flex flex-col gap-1 px-5 py-4">
-              {LINKS.map((link) => (
+              {links.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
