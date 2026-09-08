@@ -12,6 +12,7 @@ import {
   LEADS_TABLE,
   TIME_TABLE,
   today,
+  igUrl,
   type Channel,
   type Lead,
   type Stage,
@@ -134,6 +135,7 @@ export function LeadList({ channel }: { channel: Channel }) {
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -145,6 +147,7 @@ export function LeadList({ channel }: { channel: Channel }) {
 
     if (stage) q = q.eq("stage", stage);
     if (isCall) q = q.or(originFilter(origin));
+    if (category) q = q.eq("category", category);
 
     if (filter === "due") {
       q = q
@@ -172,14 +175,15 @@ export function LeadList({ channel }: { channel: Channel }) {
       setLeads(data as Lead[]);
     }
     setLoading(false);
-  }, [channel, isCall, origin, filter, stage, search, limit]);
+  }, [channel, isCall, origin, category, filter, stage, search, limit]);
 
   const loadCounts = useCallback(async () => {
     const base = () => {
-      const b = supabase
+      let b = supabase
         .from(LEADS_VIEW)
         .select("id", { count: "exact", head: true })
         .contains("channels", [channel]);
+      if (category) b = b.eq("category", category);
       return isCall ? b.or(originFilter(origin)) : b;
     };
 
@@ -198,7 +202,7 @@ export function LeadList({ channel }: { channel: Channel }) {
     setStageCounts(
       Object.fromEntries(STAGES.map((s, i) => [s.key, byStage[i].count ?? 0])),
     );
-  }, [channel, isCall, origin]);
+  }, [channel, isCall, origin, category]);
 
   useEffect(() => {
     const t = setTimeout(load, search ? 300 : 0);
@@ -209,10 +213,13 @@ export function LeadList({ channel }: { channel: Channel }) {
     void loadCounts();
   }, [loadCounts]);
 
+  // The dropdown's own option list, scoped to this queue — India's spa-resort
+  // categories have no business appearing in the US outreach filter.
   useEffect(() => {
     void supabase
       .from(LEADS_VIEW)
       .select("category")
+      .contains("channels", [channel])
       .not("category", "is", null)
       .limit(2000)
       .then(({ data }) =>
@@ -220,7 +227,7 @@ export function LeadList({ channel }: { channel: Channel }) {
           [...new Set((data ?? []).map((r) => r.category as string))].sort(),
         ),
       );
-  }, [leads.length]);
+  }, [channel, leads.length]);
 
   /**
    * Writes go to the base table; the list holds rows from the view, so patch it
@@ -311,6 +318,21 @@ export function LeadList({ channel }: { channel: Channel }) {
           onChange={(e) => setSearch(e.target.value)}
           className={cn(input, "lg:max-w-sm")}
         />
+        <select
+          value={category ?? ""}
+          onChange={(e) => {
+            setCategory(e.target.value || null);
+            setLimit(PAGE);
+          }}
+          className={cn(input, "lg:max-w-[14rem]")}
+        >
+          <option value="">All categories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
           {FILTERS.map((f) => (
             <button
@@ -352,15 +374,17 @@ export function LeadList({ channel }: { channel: Channel }) {
         </div>
       </div>
 
-      {(stage || filter !== "all") && (
+      {(stage || filter !== "all" || category) && (
         <p className="mt-3 text-xs text-text-muted">
           Showing {leads.length}
           {stage && ` in ${STAGES.find((s) => s.key === stage)!.label}`}
           {filter !== "all" && ` · ${filter}`}
+          {category && ` · ${category}`}
           <button
             onClick={() => {
               setStage(null);
               setFilter("all");
+              setCategory(null);
             }}
             className="ml-2 underline underline-offset-2 hover:text-text-primary"
           >
@@ -587,18 +611,45 @@ function LeadRow({
   const overdue = due != null && due < today();
   const dueToday = due === today();
   const handle = isCall ? lead.phone : lead.contact || lead.email;
+  // Only the IG handle is a link -- a phone or email has nothing to jump to here.
+  const ig = !isCall && lead.contact ? igUrl(lead.contact) : null;
 
   return (
     <li className={cn(card, "transition-colors", selected && "border-text-muted")}>
       <div className="flex items-stretch">
-      <button
+      {/* div, not button: it needs to hold a real <a> for the IG link below,
+          and a <button> can't legally contain another interactive element. */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
-        className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4 text-left"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        className="flex min-w-0 flex-1 cursor-pointer flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4 text-left"
       >
         <div className="min-w-0 flex-1 basis-56">
           <p className="truncate font-medium text-text-primary">{lead.name}</p>
           <p className="mt-0.5 truncate text-sm text-text-secondary">
-            {[lead.company, handle].filter(Boolean).join(" · ") || "—"}
+            {lead.company}
+            {lead.company && handle && " · "}
+            {ig ? (
+              <a
+                href={ig}
+                target="_blank"
+                rel="noreferrer noopener"
+                onClick={(e) => e.stopPropagation()}
+                className="text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+              >
+                {handle}
+              </a>
+            ) : (
+              handle
+            )}
+            {!lead.company && !handle && "—"}
           </p>
         </div>
 
@@ -652,7 +703,7 @@ function LeadRow({
         >
           &#9662;
         </span>
-      </button>
+      </div>
         <TimerButton
           running={timerRunning}
           seconds={timerSeconds}
