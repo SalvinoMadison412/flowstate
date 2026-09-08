@@ -11,7 +11,7 @@ export async function existingKeys(channel: Channel): Promise<Set<string>> {
     const { data, error } = await supabase
       .from(LEADS_TABLE)
       .select("contact,phone,email")
-      .eq("channel", channel)
+      .contains("channels", [channel])
       .range(from, from + PAGE - 1);
     if (error) throw new Error(error.message);
     for (const r of data ?? []) {

@@ -140,7 +140,7 @@ export function LeadList({ channel }: { channel: Channel }) {
     let q = supabase
       .from(LEADS_VIEW)
       .select("*")
-      .eq("channel", channel)
+      .contains("channels", [channel])
       .limit(limit);
 
     if (stage) q = q.eq("stage", stage);
@@ -179,7 +179,7 @@ export function LeadList({ channel }: { channel: Channel }) {
       const b = supabase
         .from(LEADS_VIEW)
         .select("id", { count: "exact", head: true })
-        .eq("channel", channel);
+        .contains("channels", [channel]);
       return isCall ? b.or(originFilter(origin)) : b;
     };
 
@@ -405,6 +405,7 @@ export function LeadList({ channel }: { channel: Channel }) {
             <LeadRow
               key={lead.id}
               lead={lead}
+              viewChannel={channel}
               categories={categories}
               selected={openId === lead.id}
               onToggle={() => setOpenId(openId === lead.id ? null : lead.id)}
@@ -554,6 +555,7 @@ function TimerButton({
 
 function LeadRow({
   lead,
+  viewChannel,
   categories,
   selected,
   onToggle,
@@ -566,6 +568,9 @@ function LeadRow({
   onStopTimer,
 }: {
   lead: Lead;
+  /** The list this row is rendered in. A lead can be in both queues, so the
+   *  row must follow the queue you are working, not the lead's primary. */
+  viewChannel: Channel;
   categories: string[];
   selected: boolean;
   onToggle: () => void;
@@ -577,7 +582,7 @@ function LeadRow({
   onStartTimer: () => void;
   onStopTimer: () => void;
 }) {
-  const isCall = lead.channel === "cold_call";
+  const isCall = viewChannel === "cold_call";
   const due = lead.next_followup_at;
   const overdue = due != null && due < today();
   const dueToday = due === today();
@@ -659,6 +664,7 @@ function LeadRow({
         <div className="border-t border-border-subtle">
           <LeadDetail
             lead={lead}
+            viewChannel={viewChannel}
             categories={categories}
             onPatch={onPatch}
             onLogged={onLogged}
@@ -694,6 +700,7 @@ function AddLead({
 
     const { error } = await supabase.from(LEADS_TABLE).insert({
       channel,
+      channels: [channel],
       name: (f.get("name") as string).trim(),
       company: str("company"),
       email: str("email"),
