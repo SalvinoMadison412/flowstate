@@ -135,7 +135,10 @@ export type Lead = {
   /** From the view — count of crm_touches rows. */
   touch_count: number;
   stage: Stage;
+  /** Primary channel — drives the badge and the default detail UI. */
   channel: Channel;
+  /** Every queue this lead appears in. A lead can be called AND DM'd. */
+  channels: Channel[];
   name: string;
   company: string | null;
   email: string | null;

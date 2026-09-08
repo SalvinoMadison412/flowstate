@@ -14,6 +14,7 @@ import {
   igUrl,
   siteUrl,
   prettyUrl,
+  type Channel,
   type Lead,
   type Status,
   type Touch,
@@ -58,6 +59,7 @@ function ExternalLink({
  */
 export function LeadDetail({
   lead,
+  viewChannel,
   categories,
   onPatch,
   onLogged,
@@ -68,6 +70,8 @@ export function LeadDetail({
   onStopTimer,
 }: {
   lead: Lead;
+  /** The queue this panel was opened from — see LeadRow. */
+  viewChannel: Channel;
   categories: string[];
   onPatch: (id: string, fields: Partial<Lead>) => Promise<unknown>;
   onLogged: () => void;
@@ -77,8 +81,8 @@ export function LeadDetail({
   onStartTimer: () => void;
   onStopTimer: () => void;
 }) {
-  const cfg = CHANNELS[lead.channel];
-  const isCall = lead.channel === "cold_call";
+  const cfg = CHANNELS[viewChannel];
+  const isCall = viewChannel === "cold_call";
   const ig = lead.contact ? igUrl(lead.contact) : null;
   const site = lead.website ? siteUrl(lead.website) : null;
 
