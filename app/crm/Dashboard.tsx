@@ -31,6 +31,14 @@ const blank = (): ChannelTotals => ({
   stages: {},
 });
 
+/** A lead can sit in both queues — say so rather than naming only the primary. */
+function channelLabel(channels: Channel[]): string {
+  const call = channels.includes("cold_call");
+  const out = channels.includes("outreach");
+  if (call && out) return "Call + IG / email";
+  return call ? "Call" : "IG / email";
+}
+
 export function Dashboard() {
   const [totals, setTotals] = useState<Record<Channel, ChannelTotals>>({
     cold_call: blank(),
@@ -50,7 +58,7 @@ export function Dashboard() {
         supabase
           .from(LEADS_VIEW)
           .select("id", { count: "exact", head: true })
-          .eq("channel", ch);
+          .contains("channels", [ch]);
 
       const [counts, due] = await Promise.all([
         Promise.all(
@@ -251,7 +259,7 @@ export function Dashboard() {
                       {l.next_followup_at}
                     </p>
                     <p className="mt-0.5 text-[11px] text-text-muted">
-                      {l.channel === "cold_call" ? "Call" : "IG / email"}
+                      {channelLabel(l.channels)}
                     </p>
                   </div>
                 </Link>
