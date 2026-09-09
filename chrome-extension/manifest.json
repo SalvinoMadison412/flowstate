@@ -8,6 +8,7 @@
   "host_permissions": [
     "https://ogzxvbmzyvqcspupxhak.supabase.co/*",
     "https://crm-production-9434.up.railway.app/*",
+    "https://flowstate-production-aa1d.up.railway.app/*",
     "http://localhost:3000/*",
     "https://*.twilio.com/*",
     "wss://*.twilio.com/*"
@@ -34,6 +35,7 @@
     {
       "matches": [
         "https://crm-production-9434.up.railway.app/*",
+        "https://flowstate-production-aa1d.up.railway.app/*",
         "http://localhost:3000/*"
       ],
       "js": ["content.js"],
