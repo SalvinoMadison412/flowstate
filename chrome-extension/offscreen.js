@@ -60,10 +60,16 @@ function wireCall(call, direction, number) {
   call.on("mute", (isMuted) => toBg({ event: "mute", on: isMuted }));
 }
 
+/** Token errors that mean the current Device is dead — recreate, don't patch. */
+const FATAL_TOKEN_CODES = new Set([20101, 20102, 20103, 20104, 20151, 31204]);
+
 async function initDevice(token) {
-  if (device) {
+  if (device && device.state !== "destroyed") {
     try {
       device.updateToken(token);
+      // updateToken alone doesn't re-register a Device that fell out of
+      // registration (e.g. after an expired/invalid token) — kick it.
+      if (device.state !== "registered") await device.register();
       toBg({ event: "ready" });
       return;
     } catch {
@@ -81,9 +87,16 @@ async function initDevice(token) {
   device.on("registered", () => toBg({ event: "ready" }));
   device.on("unregistered", () => toBg({ event: "unregistered" }));
   device.on("tokenWillExpire", () => toBg({ event: "tokenWillExpire" }));
-  device.on("error", (e) =>
-    toBg({ event: "error", message: e?.message || "Device error", code: e?.code }),
-  );
+  device.on("error", (e) => {
+    toBg({ event: "error", message: e?.message || "Device error", code: e?.code });
+    // A bad/expired token can't be salvaged in place — drop the Device so the
+    // next init (from the keepalive alarm or a retry) builds a fresh one.
+    if (FATAL_TOKEN_CODES.has(e?.code) && !activeCall) {
+      try { device.destroy(); } catch {}
+      device = null;
+      toBg({ event: "needs-token" });
+    }
+  });
 
   device.on("incoming", (call) => {
     incoming = call;

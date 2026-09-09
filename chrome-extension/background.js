@@ -165,6 +165,11 @@ async function onDeviceEvent(m) {
       // Try to bring it back unless we deliberately tore down.
       if (state.phase !== "idle") setTimeout(initDevice, 2000);
       break;
+    case "needs-token":
+      // Offscreen threw away a Device over a bad/expired token — rebuild it
+      // with a fresh one.
+      setTimeout(initDevice, 1500);
+      break;
     case "error":
       await setState({
         phase: ["on-call", "dialing"].includes(state.phase) ? state.phase : "device-error",
@@ -353,14 +358,9 @@ chrome.alarms.create("keepalive", { periodInMinutes: 3 });
 chrome.alarms.onAlarm.addListener(async (a) => {
   if (a.name !== "keepalive") return;
   if (state.phase === "signed-out") return;
-  if (!(await hasOffscreen())) {
-    await initDevice();
-    return;
-  }
-  try {
-    const token = await fetchTwilioToken();
-    await toOffscreen({ cmd: "updateToken", token });
-  } catch {}
+  // initDevice() rebuilds the offscreen doc if gone, refreshes the token, and
+  // re-registers a Device that dropped out — covers every stuck state.
+  await initDevice();
 });
 
 // Wake path: a phone number clicked in the CRM (from content.js).
