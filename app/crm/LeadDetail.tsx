@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { IconPencil } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -19,9 +19,22 @@ import {
   type Status,
   type Touch,
 } from "@/lib/supabase";
+import { CrmEmailContext } from "./CrmShell";
 import { originFlag } from "@/lib/origin";
 import { formatDuration, stopwatch } from "@/lib/duration";
+import {
+  guessTimeZone,
+  isValidZone,
+  zonedTimeToUtc,
+  formatInZone,
+} from "@/lib/timezone";
 import { input, label } from "./ui";
+
+const ALL_ZONES =
+  typeof Intl.supportedValuesOf === "function"
+    ? Intl.supportedValuesOf("timeZone")
+    : [];
+const MY_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 function ExternalLink({
   href,
@@ -272,6 +285,8 @@ export function LeadDetail({
               className={cn(input, "mt-1 h-auto py-2")}
             />
           </div>
+
+          <BookMeeting lead={lead} />
         </div>
 
         <div className="rounded-xl border border-border-subtle bg-surface-elevated p-3">
@@ -356,6 +371,266 @@ export function LeadDetail({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** A Date → Google Calendar's compact UTC stamp (20260910T090000Z). */
+const gcalStamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
+
+/** Field with the card's small caption above it — matches the log form. */
+function Field({
+  caption,
+  className,
+  children,
+}: {
+  caption: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className={cn("block text-[11px] text-text-muted", className)}>
+      {caption}
+      <div className="mt-1">{children}</div>
+    </label>
+  );
+}
+
+const isEmail = (s: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+
+/**
+ * One field that holds many client emails. Type an address and hit comma,
+ * Enter, space, or paste a whole list — each one drops into a pill you can
+ * click off. Backspace on an empty box removes the last. Reads as a single
+ * input; behaves like Gmail's "To".
+ */
+function EmailTokens({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const [draft, setDraft] = useState("");
+
+  const commit = (raw: string) => {
+    const next = raw
+      .split(/[,;\s]+/)
+      .map((s) => s.trim())
+      .filter((s) => s && !value.includes(s));
+    if (next.length) onChange([...value, ...next]);
+  };
+
+  return (
+    <div
+      className={cn(
+        input,
+        "flex h-auto min-h-11 flex-wrap items-center gap-1.5 py-1.5",
+      )}
+    >
+      {value.map((e) => (
+        <span
+          key={e}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
+            isEmail(e)
+              ? "border-border-active text-text-primary"
+              : "border-red-400/60 text-red-400",
+          )}
+        >
+          {e}
+          <button
+            type="button"
+            aria-label={`Remove ${e}`}
+            onClick={() => onChange(value.filter((x) => x !== e))}
+            className="text-text-muted transition-colors hover:text-text-primary"
+          >
+            &times;
+          </button>
+        </span>
+      ))}
+      <input
+        type="text"
+        inputMode="email"
+        value={draft}
+        placeholder={value.length ? "" : "name@company.com"}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (/[,;\s]$/.test(v)) {
+            commit(v);
+            setDraft("");
+          } else {
+            setDraft(v);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit(draft);
+            setDraft("");
+          } else if (e.key === "Backspace" && !draft && value.length) {
+            onChange(value.slice(0, -1));
+          }
+        }}
+        onPaste={(e) => {
+          const t = e.clipboardData.getData("text");
+          if (/[,;\s]/.test(t)) {
+            e.preventDefault();
+            commit(t);
+            setDraft("");
+          }
+        }}
+        onBlur={() => {
+          if (draft.trim()) {
+            commit(draft);
+            setDraft("");
+          }
+        }}
+        className="min-w-[7rem] flex-1 bg-transparent text-base text-text-primary placeholder:text-text-muted focus:outline-none"
+      />
+    </div>
+  );
+}
+
+/**
+ * Book a call with the lead. Opens a prefilled Google Calendar event in a new
+ * tab with every client as a guest — saving it there sends the invite from the
+ * Google account you're signed into (passed as `authuser`) to all of them. No
+ * backend, no OAuth.
+ *
+ * You enter the date and time in the *client's* zone (guessed from their
+ * country, editable) — the invite carries the right absolute instant, so it
+ * shows correctly for them and for you whatever the offset.
+ */
+function BookMeeting({ lead }: { lead: Lead }) {
+  // The signed-in CRM account = the Google account the invite goes out from.
+  const organizer = useContext(CrmEmailContext);
+  const [emails, setEmails] = useState<string[]>(
+    lead.email ? [lead.email] : [],
+  );
+  const [zone, setZone] = useState(
+    () => guessTimeZone(lead.country) ?? MY_ZONE,
+  );
+  const [date, setDate] = useState(today(2));
+  const [time, setTime] = useState("10:00");
+  const [mins, setMins] = useState(30);
+
+  const zoneOk = isValidZone(zone);
+  const valid =
+    emails.length > 0 &&
+    emails.every(isEmail) &&
+    date !== "" &&
+    time !== "" &&
+    zoneOk;
+
+  const start = valid ? zonedTimeToUtc(date, time, zone) : null;
+
+  function book() {
+    if (!start) return;
+    const end = new Date(start.getTime() + mins * 60_000);
+    const url = new URL("https://calendar.google.com/calendar/render");
+    url.searchParams.set("action", "TEMPLATE");
+    url.searchParams.set("text", `Flow State × ${lead.company ?? lead.name}`);
+    url.searchParams.set("dates", `${gcalStamp(start)}/${gcalStamp(end)}`);
+    url.searchParams.set("ctz", zone);
+    if (organizer) url.searchParams.set("authuser", organizer);
+    emails.forEach((e) => url.searchParams.append("add", e));
+    if (lead.notes) url.searchParams.set("details", lead.notes);
+    window.open(url.toString(), "_blank", "noopener,noreferrer");
+  }
+
+  return (
+    <div className="rounded-xl border border-border-subtle bg-surface-elevated p-3">
+      <p className={label}>Book a meeting</p>
+
+      <div className="mt-3 flex flex-col gap-3">
+        {organizer && (
+          <p className="text-[11px] text-text-muted">
+            Invite sent from{" "}
+            <span className="text-text-secondary">{organizer}</span>
+          </p>
+        )}
+
+        <Field caption="Clients">
+          <EmailTokens value={emails} onChange={setEmails} />
+        </Field>
+
+        <Field caption="Client time zone">
+          <input
+            list="crm-timezones"
+            value={zone}
+            onChange={(e) => setZone(e.target.value)}
+            className={cn(input, !zoneOk && "border-red-400/70")}
+          />
+          <datalist id="crm-timezones">
+            {ALL_ZONES.map((z) => (
+              <option key={z} value={z} />
+            ))}
+          </datalist>
+        </Field>
+
+        <div className="flex gap-3">
+          <Field caption="Date · client's time" className="flex-1">
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={input}
+            />
+          </Field>
+          <Field caption="Time · client's time" className="flex-1">
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className={input}
+            />
+          </Field>
+        </div>
+
+        {!zoneOk ? (
+          <p className="text-[11px] text-red-400">
+            Unknown time zone — pick one from the list.
+          </p>
+        ) : (
+          start && (
+            <p className="text-[11px] leading-relaxed text-text-muted">
+              Client: {formatInZone(start, zone)}
+              <br />
+              You: {formatInZone(start, MY_ZONE)}
+            </p>
+          )
+        )}
+
+        <Field caption="Length">
+          <div className="flex flex-wrap gap-1.5">
+            {[15, 30, 45, 60].map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMins(m)}
+                className={cn(
+                  "h-8 rounded-full border px-3 text-xs transition-colors",
+                  mins === m
+                    ? "border-white bg-white text-bg"
+                    : "border-border-active text-text-secondary hover:border-white",
+                )}
+              >
+                {m} min
+              </button>
+            ))}
+          </div>
+        </Field>
+      </div>
+
+      <Button
+        onClick={book}
+        disabled={!valid}
+        size="md"
+        className="mt-4 w-full"
+      >
+        Book a meeting
+      </Button>
     </div>
   );
 }
