@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow State Dialer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <span class="brand"><span class="dot" id="statusDot"></span> Flow State Dialer</span>
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
+    </header>
+
+    <!-- Sign in -->
+    <section id="viewAuth" class="view" hidden>
+      <p class="hint">Sign in with your CRM account.</p>
+      <form id="authForm" class="stack">
+        <input type="email" id="authEmail" placeholder="Email" autocomplete="username" required />
+        <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" required />
+        <button type="submit" class="btn primary" id="authSubmit">Sign in</button>
+        <p class="error" id="authError" hidden></p>
+      </form>
+    </section>
+
+    <!-- Settings -->
+    <section id="viewSettings" class="view" hidden>
+      <label class="field">
+        <span>CRM URL</span>
+        <input type="url" id="crmUrl" placeholder="https://your-crm-domain.com" />
+      </label>
+      <button class="btn ghost" id="micBtn">Grant microphone access</button>
+      <p class="hint" id="micHint">Needed once so calls can use your mic.</p>
+      <div class="row between muted small">
+        <span id="settingsEmail"></span>
+        <button class="link" id="signOutBtn">Sign out</button>
+      </div>
+      <button class="btn ghost" id="closeSettingsBtn">Done</button>
+    </section>
+
+    <!-- Dialer -->
+    <section id="viewDialer" class="view" hidden>
+      <div class="search-wrap">
+        <input type="text" id="search" placeholder="Search a contact — name or number" autocomplete="off" />
+        <ul id="results" class="results" hidden></ul>
+      </div>
+
+      <div id="contactCard" class="contact-card" hidden>
+        <div class="contact-main">
+          <strong id="ccName"></strong>
+          <span id="ccCompany" class="muted small"></span>
+        </div>
+        <div class="row between small muted">
+          <span id="ccLastCall">No calls logged</span>
+          <button class="link" id="ccClear">clear</button>
+        </div>
+      </div>
+
+      <div class="number-row">
+        <select id="country" aria-label="Country code"></select>
+        <input type="tel" id="number" placeholder="Phone number" autocomplete="off" />
+      </div>
+      <p class="resolved muted small" id="resolved"></p>
+
+      <div class="keypad" id="keypad">
+        <button data-k="1">1</button><button data-k="2">2<small>ABC</small></button><button data-k="3">3<small>DEF</small></button>
+        <button data-k="4">4<small>GHI</small></button><button data-k="5">5<small>JKL</small></button><button data-k="6">6<small>MNO</small></button>
+        <button data-k="7">7<small>PQRS</small></button><button data-k="8">8<small>TUV</small></button><button data-k="9">9<small>WXYZ</small></button>
+        <button data-k="*">*</button><button data-k="0">0<small>+</small></button><button data-k="#">#</button>
+      </div>
+
+      <!-- Live call panel -->
+      <div id="callPanel" class="call-panel" hidden>
+        <div class="call-status">
+          <span id="callPhase">Calling…</span>
+          <span id="callTimer" class="timer">0:00</span>
+        </div>
+        <div id="callWho" class="muted small"></div>
+        <div class="call-controls">
+          <button class="ctl" id="muteBtn" data-on="false">Mute</button>
+          <button class="ctl" id="holdBtn" data-on="false">Hold</button>
+          <button class="ctl" id="dtmfToggle">Keypad</button>
+        </div>
+      </div>
+
+      <!-- Incoming -->
+      <div id="incomingPanel" class="incoming" hidden>
+        <div><strong id="inWho">Incoming call</strong><div class="muted small" id="inNumber"></div></div>
+        <div class="row">
+          <button class="btn danger" id="rejectBtn">Reject</button>
+          <button class="btn success" id="acceptBtn">Accept</button>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>Call notes</span>
+        <textarea id="notes" rows="3" placeholder="Notes — saved to the CRM when the call ends"></textarea>
+      </label>
+
+      <div id="endedBar" class="ended-bar" hidden>
+        <span id="endedText">Call ended</span>
+        <button class="btn primary" id="saveNotesBtn">Save to CRM</button>
+      </div>
+
+      <div class="primary-action">
+        <button class="btn success big" id="callBtn">Call</button>
+        <button class="btn danger big" id="endBtn" hidden>End call</button>
+      </div>
+
+      <p class="error" id="dialerError" hidden></p>
+    </section>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

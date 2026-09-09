@@ -1,0 +1,139 @@
+/* Flow State Dialer — dark, matches the CRM's palette. */
+:root {
+  --bg: #080808;
+  --surface: #101012;
+  --surface-2: #17171a;
+  --border: #26262b;
+  --border-active: #3a3a42;
+  --text: #f4f4f5;
+  --text-2: #a1a1aa;
+  --muted: #6b6b74;
+  --accent: #00c8f0;
+  --accent-glow: rgba(0, 200, 240, 0.12);
+  --success: #16b364;
+  --danger: #f0435a;
+  --radius: 12px;
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 360px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--font);
+  padding: 0 0 14px;
+  min-height: 480px;
+}
+
+.bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg); z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .01em; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.ok { background: var(--success); }
+.dot.busy { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+.dot.err { background: var(--danger); }
+
+.icon-btn {
+  background: none; border: 1px solid var(--border); color: var(--text-2);
+  width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 15px;
+}
+.icon-btn:hover { border-color: var(--border-active); color: var(--text); }
+
+.view { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row.between { justify-content: space-between; }
+.hint { color: var(--text-2); font-size: 12.5px; }
+.small { font-size: 12px; }
+.muted { color: var(--muted); }
+.error { color: var(--danger); font-size: 12.5px; }
+.link { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 12px; padding: 0; }
+
+input, textarea, select {
+  width: 100%; background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+  font: inherit; outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--border-active); }
+textarea { resize: vertical; min-height: 56px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field > span { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+.btn {
+  border: 1px solid var(--border-active); background: var(--surface-2); color: var(--text);
+  border-radius: 999px; padding: 10px 16px; font: inherit; font-weight: 600; cursor: pointer;
+}
+.btn:hover { border-color: #55555f; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: #fff; color: #000; border-color: #fff; }
+.btn.ghost { background: transparent; }
+.btn.success { background: var(--success); border-color: var(--success); color: #06210f; }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: #2a0910; }
+.btn.big { width: 100%; padding: 13px; font-size: 15px; }
+
+.primary-action { margin-top: 2px; }
+
+/* search */
+.search-wrap { position: relative; }
+.results {
+  position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 10;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  list-style: none; max-height: 210px; overflow: auto; box-shadow: 0 12px 30px rgba(0,0,0,.5);
+}
+.results li { padding: 9px 11px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.results li:last-child { border-bottom: none; }
+.results li:hover, .results li.active { background: var(--surface-2); }
+.results .r-name { font-weight: 600; }
+.results .r-sub { color: var(--muted); font-size: 12px; }
+.results .r-empty { color: var(--muted); cursor: default; }
+
+.contact-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.contact-main { display: flex; flex-direction: column; }
+
+.number-row { display: grid; grid-template-columns: 116px 1fr; gap: 8px; }
+.number-row select { padding: 10px 6px; }
+.resolved { min-height: 14px; margin-top: -4px; }
+.resolved b { color: var(--text-2); }
+
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.keypad button {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 10px; padding: 10px 0; font-size: 18px; font-weight: 600; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+}
+.keypad button small { font-size: 8.5px; letter-spacing: .12em; color: var(--muted); font-weight: 500; }
+.keypad button:active { background: var(--accent-glow); border-color: var(--accent); }
+
+.call-panel {
+  background: var(--surface); border: 1px solid var(--border-active); border-radius: var(--radius);
+  padding: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.call-status { display: flex; justify-content: space-between; align-items: baseline; }
+.timer { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
+.call-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ctl {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2);
+  border-radius: 10px; padding: 9px 0; font: inherit; font-weight: 600; cursor: pointer;
+}
+.ctl[data-on="true"] { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+.incoming {
+  background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius);
+  padding: 12px; display: flex; flex-direction: column; gap: 10px;
+}
+.incoming .btn { flex: 1; }
+
+.ended-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+}
+
+[hidden] { display: none !important; }
