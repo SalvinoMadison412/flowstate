@@ -7,7 +7,7 @@
   "permissions": ["storage", "notifications", "offscreen", "alarms"],
   "host_permissions": [
     "https://ogzxvbmzyvqcspupxhak.supabase.co/*",
-    "https://your-crm-domain.com/*",
+    "https://crm-production-9434.up.railway.app/*",
     "http://localhost:3000/*",
     "https://*.twilio.com/*",
     "wss://*.twilio.com/*"
@@ -33,7 +33,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://your-crm-domain.com/crm/*",
+        "https://crm-production-9434.up.railway.app/crm/*",
         "http://localhost:3000/crm/*"
       ],
       "js": ["content.js"],

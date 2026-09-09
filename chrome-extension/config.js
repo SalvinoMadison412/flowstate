@@ -16,7 +16,7 @@ export const DIALER_CONFIG = {
 
   // No trailing slash. Overridable at runtime in the dialer's settings panel
   // (stored in chrome.storage.local under "crmBaseUrl").
-  CRM_BASE_URL: "https://your-crm-domain.com",
+  CRM_BASE_URL: "https://crm-production-9434.up.railway.app",
 
   // Must match TWILIO_DIALER_IDENTITY on the server.
   TWILIO_IDENTITY: "flowstate-owner",
