@@ -53,6 +53,11 @@ async function init() {
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg?.type === "state") applyState(msg.state);
   if (msg?.type === "log-error") flashError(msg.message);
+  if (msg?.type === "prefill" && msg.number && ui.state.phase !== "on-call") {
+    clearContact();
+    setNumberFromRaw(msg.number);
+    chrome.storage.session.remove("pendingDial");
+  }
 });
 
 // ── views ──────────────────────────────────────────────────────────────────
