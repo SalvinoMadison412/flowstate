@@ -33,8 +33,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://crm-production-9434.up.railway.app/crm/*",
-        "http://localhost:3000/crm/*"
+        "https://crm-production-9434.up.railway.app/*",
+        "http://localhost:3000/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

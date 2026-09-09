@@ -367,6 +367,9 @@ chrome.alarms.onAlarm.addListener(async (a) => {
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg?.type === "dial-from-page" && msg.number) {
     chrome.storage.session.set({ pendingDial: msg.number });
+    // If the dialer is already open, fill it live; otherwise open it (it reads
+    // pendingDial on load).
+    chrome.runtime.sendMessage({ type: "prefill", number: msg.number }).catch(() => {});
     chrome.action.openPopup().catch(() => {
       chrome.windows.create({
         url: "popup.html",
