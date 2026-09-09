@@ -9,11 +9,22 @@ is the Twilio glue: `app/api/twilio/token` and `app/api/twilio/voice`.
 
 ---
 
-## What you have to do (≈15 min)
+## Already done
+
+- **CRM deployed to Railway** — project `FlowState`, new service **`crm`**,
+  auto-deploys from branch `claude/crm-ig-link-and-category-filter`.
+  URL: **`https://crm-production-9434.up.railway.app`**
+  (the existing `flowstate` production service on `main` is untouched).
+- Env vars set on the `crm` service: `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `TWILIO_ACCOUNT_SID`, `TWILIO_PHONE_NUMBER`,
+  `TWILIO_DIALER_IDENTITY`, `TWILIO_PUBLIC_URL`.
+- Extension `config.js` + `manifest.json` point at the Railway URL.
+
+## What's left for you (≈10 min)
 
 1. Apply one database migration
-2. Create a Twilio **API Key/Secret** and a **TwiML App**, point the number at it
-3. Deploy the CRM with the Twilio env vars
+2. Twilio console: create an API Key/Secret + a TwiML App, point the number at it
+3. Add 4 more env vars to the `crm` service
 4. Load the unpacked extension and sign in
 
 ---
@@ -35,32 +46,30 @@ supabase link --project-ref ogzxvbmzyvqcspupxhak
 supabase db push
 ```
 
-It is additive and idempotent — safe to run on the live project.
+Additive and idempotent — safe on the live project.
 
 ---
 
 ## 2. Twilio console
 
-You need the Twilio account that owns the number `+16292818264` (voice-enabled).
-Its Account SID (`AC…`) goes in `TWILIO_ACCOUNT_SID` — copy it from the Twilio
-console dashboard, don't commit it.
+Account that owns `+16292818264` (voice-enabled, not yet attached to a TwiML app).
 
 ### 2a. API Key + Secret
 
 1. <https://console.twilio.com> → **Account → API keys & tokens** → **Create API key**.
-2. Name it `flow-state-dialer`, type **Standard**. Create.
-3. Copy the **SID** (`SK…`) → `TWILIO_API_KEY`, and the **Secret** (shown once)
-   → `TWILIO_API_SECRET`.
+2. Name `flow-state-dialer`, type **Standard**. Create.
+3. Copy the **SID** (`SK…`) and the **Secret** (shown once).
 
 ### 2b. TwiML App
 
 1. **Voice → TwiML → TwiML Apps** → **Create new TwiML App**.
 2. Friendly name: `Flow State Dialer`.
-3. **Voice → Request URL**: `https://YOUR-CRM-DOMAIN/api/twilio/voice` — method **HTTP POST**.
-   Leave the status callback URL blank (calls are logged from the browser).
-4. Save. Copy the **App SID** (`AP…`) → `TWILIO_TWIML_APP_SID`.
+3. **Voice → Request URL**:
+   `https://crm-production-9434.up.railway.app/api/twilio/voice` — **HTTP POST**.
+   Leave the status callback URL blank.
+4. Save. Copy the **App SID** (`AP…`).
 
-### 2c. Point the phone number at the app
+### 2c. Point the number at the app
 
 1. **Phone Numbers → Manage → Active numbers → +16292818264**.
 2. **Voice Configuration → A call comes in**: **TwiML App** → `Flow State Dialer`.
@@ -68,91 +77,77 @@ console dashboard, don't commit it.
 
 ### 2d. Auth token
 
-**Account → API keys & tokens → Auth Token** → copy it → `TWILIO_AUTH_TOKEN`.
-(Used only to verify that webhook requests really come from Twilio.)
+**Account → API keys & tokens → Auth Token** → copy it.
 
 ---
 
-## 3. Deploy the CRM
+## 3. Add the remaining env vars
 
-Set these on the deployment (Vercel/Railway dashboard → Environment):
-
-```
-TWILIO_ACCOUNT_SID=<AC… from the console dashboard>
-TWILIO_AUTH_TOKEN=<from 2d>
-TWILIO_PHONE_NUMBER=+16292818264
-TWILIO_TWIML_APP_SID=<AP… from 2b>
-TWILIO_API_KEY=<SK… from 2a>
-TWILIO_API_SECRET=<secret from 2a>
-TWILIO_PUBLIC_URL=https://YOUR-CRM-DOMAIN        # exact origin registered in 2b
-```
-
-`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` are already set.
-
-Redeploy. Check `GET https://YOUR-CRM-DOMAIN/api/twilio/token` returns
-`{"error":"Missing bearer token."}` (401) — that means the route is live.
-
-### Testing before you deploy
-
-Run the CRM locally and expose it with a tunnel:
+Railway dashboard → project **FlowState** → service **crm** → **Variables**, or:
 
 ```bash
-npm run dev                 # http://localhost:3000
-cloudflared tunnel --url http://localhost:3000   # or: ngrok http 3000
+railway link --project FlowState
+railway service crm
+railway variables --set "TWILIO_AUTH_TOKEN=<from 2d>" \
+  --set "TWILIO_API_KEY=<SK… from 2a>" \
+  --set "TWILIO_API_SECRET=<secret from 2a>" \
+  --set "TWILIO_TWIML_APP_SID=<AP… from 2b>"
 ```
 
-Use the tunnel URL for `TWILIO_PUBLIC_URL` and the TwiML App Request URL, and add
-`TWILIO_SKIP_SIGNATURE_CHECK=true` to `.env.local` while tunnelling (the tunnel
-rewrites headers so signatures won't match). **Remove that flag in production.**
+Railway redeploys automatically. Then check:
+
+```bash
+curl https://crm-production-9434.up.railway.app/api/twilio/token
+# -> {"error":"Missing bearer token."}   (401 = route is live and gated)
+```
 
 ---
 
 ## 4. Load the extension
 
-1. Edit `chrome-extension/manifest.json` — replace **both** `your-crm-domain.com`
-   entries (`host_permissions` and `content_scripts.matches`) with your real CRM
-   host. Keep the `localhost:3000` entries if you want it to work in dev too.
-2. Edit `chrome-extension/config.js` — set `CRM_BASE_URL` to the same host
-   (or leave it and set the URL later in the dialer's ⚙ settings panel).
-3. `chrome://extensions` → toggle **Developer mode** (top right) → **Load
+1. `chrome://extensions` → toggle **Developer mode** (top right) → **Load
    unpacked** → pick the `chrome-extension/` folder.
-4. Pin it (puzzle-piece icon → pin). Click the icon.
-5. **Sign in** with your CRM email + password (`salvinokevin7@gmail.com`).
-6. Open ⚙ → **Grant microphone access** → allow the prompt. Do this once; the
+2. Pin it (puzzle-piece icon → pin). Click the icon.
+3. **Sign in** with your CRM email + password (`salvinokevin7@gmail.com`).
+4. Open ⚙ → **Grant microphone access** → allow the prompt. Do this once; the
    offscreen call engine can't show its own mic prompt.
-7. (Optional) After loading, Chrome shows the extension **ID**. If you want to
-   lock the token endpoint to just this extension, set
-   `DIALER_EXTENSION_ORIGIN=chrome-extension://<that id>` on the server and
-   redeploy. Otherwise the endpoint stays open but useless without your login.
+5. (Optional) Chrome shows the extension **ID** after loading. To lock the token
+   endpoint to just this extension, add
+   `DIALER_EXTENSION_ORIGIN=chrome-extension://<that id>` to the `crm` service.
+   Otherwise the endpoint stays reachable but useless without your login.
+
+### Local dev
+
+`config.js` and `manifest.json` also allow `http://localhost:3000`. Run
+`npm run dev`, open the dialer's ⚙ and set the CRM URL to
+`http://localhost:3000` to test against a local server. For Twilio webhooks
+locally you still need the Railway URL (or a tunnel) in the TwiML App.
 
 ---
 
 ## Using it
 
-- **Dial:** pick a country, type the number (or type `+…` directly), **Call**.
-- **Search:** type a name or number in the search box — matches come from the
-  CRM, with the contact's last call date. Selecting one fills the number.
-- **From a CRM page:** phone numbers on `/crm/*` pages are clickable — clicking
-  one opens the dialer with it prefilled.
+- **Dial:** pick a country, type the number (or `+…` directly), **Call**.
+- **Search:** type a name or number — matches come from the CRM with the
+  contact's last call date. Selecting one fills the number.
+- **From a CRM page:** phone numbers on `/crm/*` pages are clickable.
 - **During a call:** mute, hold, DTMF keypad, live timer.
-- **After a call:** type notes → **Save to CRM**. Writes a `crm_calls` row and a
-  `crm_touches` row (so the call counts toward the lead's follow-up stage). If
-  the popup is closed when the call ends, the call is logged automatically
-  without notes.
+- **After a call:** type notes → **Save to CRM** (writes `crm_calls` + a
+  `crm_touches` row so it counts toward the lead's stage). If the popup is
+  closed when the call ends, it's logged automatically without notes.
 - **Inbound:** a call to `+16292818264` raises a Chrome notification with
-  Accept / Reject and opens the dialer; if the caller's number is on a lead,
-  their name shows.
+  Accept / Reject; if the caller is on a lead, their name shows.
 
 ---
 
-## Deliberately not built (and when to add it)
+## Deliberately not built
 
 | Skipped | Why | Add when |
 |---|---|---|
-| `POST /api/twilio/status` callback | The browser knows the call's duration/outcome and logs it directly. | Calls where Chrome is closed mid-call need reliable logging, or you turn on recording. |
-| Call **recording** | Your outreach market (France/EU) needs both-party consent. `recording_url` exists in the schema but stays null. | You add a consent step + a spoken "this call may be recorded" notice. |
-| True **hold** (hold music to the other party) | Needs a server-side call redirect to a hold-TwiML and back. | "Hold" needs to actually park the other party rather than just mute your mic. |
-| `/api/contacts`, `/api/calls` REST endpoints | The extension uses Supabase directly, like the CRM. | You want other clients (mobile app, Zapier) hitting a stable API. |
+| `POST /api/twilio/status` callback | The browser logs the call's duration/outcome directly. | You need reliable logging when Chrome is closed mid-call, or turn on recording. |
+| Call **recording** | France/EU needs both-party consent. `recording_url` exists in the schema but stays null. | You add a consent step + a spoken "this call may be recorded" notice. |
+| True **hold** | Needs a server-side call redirect to hold-TwiML and back. "Hold" currently just mutes your mic. | You need to actually park the other party. |
+| `/api/contacts`, `/api/calls` REST | The extension uses Supabase directly, like the CRM. | Another client (mobile, Zapier) needs a stable API. |
 | Multi-user / team routing | RLS and the Twilio identity are single-user. | More than one person uses the dialer. |
 
 ---
@@ -162,8 +157,8 @@ rewrites headers so signatures won't match). **Remove that flag in production.**
 | Symptom | Fix |
 |---|---|
 | Dialer says "signed out" after working | Session refresh failed — sign in again in ⚙. |
-| "Token request failed (500) Twilio not configured" | A `TWILIO_*` env var is missing on the deployment. The message lists which. |
-| Inbound webhook returns 403 / "could not be verified" | `TWILIO_PUBLIC_URL` doesn't exactly match the TwiML App Request URL, or you're tunnelling without `TWILIO_SKIP_SIGNATURE_CHECK=true`. |
-| "Microphone blocked" on call | ⚙ → Grant microphone access; if still blocked, `chrome://settings/content/microphone` → allow for the extension. |
-| Numbers on CRM pages aren't clickable | The `content_scripts.matches` host in `manifest.json` doesn't match your CRM URL; reload the extension after fixing. |
-| Extension ID changed after reload | Only happens if you move/rename the folder. Re-set `DIALER_EXTENSION_ORIGIN` if you pinned it. |
+| "Twilio not configured — missing: …" (500) | Set the listed var on the `crm` Railway service. |
+| Inbound webhook 403 / "could not be verified" | `TWILIO_PUBLIC_URL` must exactly equal the TwiML App Request URL origin. It's set to the Railway URL; if you add a custom domain, update it. |
+| "Microphone blocked" on call | ⚙ → Grant microphone access; else `chrome://settings/content/microphone` → allow for the extension. |
+| Numbers on CRM pages aren't clickable | You're on a URL not in `content_scripts.matches`. Add it and reload the extension. |
+| Want auto-deploy from a different branch | Railway dashboard → `crm` service → Settings → Source. |
