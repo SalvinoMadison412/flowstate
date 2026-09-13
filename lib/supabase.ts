@@ -130,6 +130,26 @@ export const CHANNELS = {
 
 export const CHANNEL_KEYS = Object.keys(CHANNELS) as Channel[];
 
+/**
+ * What Flow State should pitch this lead, derived by outreach/enrich_offerings.py from the
+ * state of their website and how they handle their Google Maps reviews. Not a CHECK constraint
+ * in the database — the list is expected to grow — so treat an unknown value as valid and just
+ * show it.
+ */
+export const OFFERINGS = ["Website", "Voice Agent", "GEO", "Ads"] as const;
+export type Offering = (typeof OFFERINGS)[number];
+
+/** Evidence behind an offering. Every field optional: a Maps read can partially fail. */
+export type OfferingSignals = {
+  site_status?: string;
+  rating?: number | null;
+  review_count?: number | null;
+  reviews_checked?: number | null;
+  reviews_without_reply?: number | null;
+  handle_ok?: boolean | null;
+  scored_on?: string;
+};
+
 export type Lead = {
   id: string;
   /** From the view — count of crm_touches rows. */
@@ -153,6 +173,16 @@ export type Lead = {
   next_followup_at: string | null;
   notes: string | null;
   created_at: string;
+  /** Primary pitch. Null until the lead has been scored. */
+  offering: string | null;
+  /** One line naming the observed problem — written to be pasted into a DM. */
+  offering_reason: string | null;
+  /** Secondary pitches, most-relevant first. */
+  offering_alt: string[];
+  offering_signals: OfferingSignals | null;
+  offering_updated_at: string | null;
+  /** Set when a human picks the offering by hand; re-scoring runs skip these rows. */
+  offering_locked: boolean;
 };
 
 export type Touch = {
