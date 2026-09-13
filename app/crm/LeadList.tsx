@@ -11,6 +11,7 @@ import {
   LEADS_VIEW,
   LEADS_TABLE,
   TIME_TABLE,
+  OFFERINGS,
   today,
   igUrl,
   type Channel,
@@ -21,13 +22,17 @@ import {
 import { originFilter, originFlag, type Origin } from "@/lib/origin";
 import { stopwatch } from "@/lib/duration";
 import { input, label, card } from "./ui";
-import { LeadDetail } from "./LeadDetail";
+import { LeadDetail, OfferingPill } from "./LeadDetail";
 import { ImportDialog } from "./ImportDialog";
 
 const PAGE = 200;
 
 type Filter = "due" | "all" | Status;
 const FILTERS: Filter[] = ["due", "all", ...STATUSES];
+
+/** Sentinel for the offering dropdown — an empty value already means "any". */
+const UNSCORED = "__unscored";
+
 
 /** One channel's pipeline: stage counts, filters, list, and the detail panel. */
 export function LeadList({ channel }: { channel: Channel }) {
@@ -136,6 +141,7 @@ export function LeadList({ channel }: { channel: Channel }) {
   const [importing, setImporting] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [category, setCategory] = useState<string | null>(null);
+  const [offering, setOffering] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -148,6 +154,10 @@ export function LeadList({ channel }: { channel: Channel }) {
     if (stage) q = q.eq("stage", stage);
     if (isCall) q = q.or(originFilter(origin));
     if (category) q = q.eq("category", category);
+    // "unscored" is its own choice: the leads with no offering yet are exactly the ones a
+    // re-scoring run needs to pick up, so they have to be findable.
+    if (offering === UNSCORED) q = q.is("offering", null);
+    else if (offering) q = q.eq("offering", offering);
 
     if (filter === "due") {
       q = q
@@ -175,7 +185,7 @@ export function LeadList({ channel }: { channel: Channel }) {
       setLeads(data as Lead[]);
     }
     setLoading(false);
-  }, [channel, isCall, origin, category, filter, stage, search, limit]);
+  }, [channel, isCall, origin, category, offering, filter, stage, search, limit]);
 
   const loadCounts = useCallback(async () => {
     const base = () => {
@@ -333,6 +343,22 @@ export function LeadList({ channel }: { channel: Channel }) {
             </option>
           ))}
         </select>
+        <select
+          value={offering ?? ""}
+          onChange={(e) => {
+            setOffering(e.target.value || null);
+            setLimit(PAGE);
+          }}
+          className={cn(input, "lg:max-w-[13rem]")}
+        >
+          <option value="">Any offering</option>
+          {OFFERINGS.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+          <option value={UNSCORED}>Not scored yet</option>
+        </select>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
           {FILTERS.map((f) => (
             <button
@@ -374,17 +400,19 @@ export function LeadList({ channel }: { channel: Channel }) {
         </div>
       </div>
 
-      {(stage || filter !== "all" || category) && (
+      {(stage || filter !== "all" || category || offering) && (
         <p className="mt-3 text-xs text-text-muted">
           Showing {leads.length}
           {stage && ` in ${STAGES.find((s) => s.key === stage)!.label}`}
           {filter !== "all" && ` · ${filter}`}
           {category && ` · ${category}`}
+          {offering && ` · ${offering === UNSCORED ? "not scored" : offering}`}
           <button
             onClick={() => {
               setStage(null);
               setFilter("all");
               setCategory(null);
+              setOffering(null);
             }}
             className="ml-2 underline underline-offset-2 hover:text-text-primary"
           >
@@ -665,6 +693,13 @@ function LeadRow({
             <span className="hidden shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-text-secondary sm:inline">
               {lead.category}
             </span>
+          )}
+          {lead.offering && (
+            <OfferingPill
+              offering={lead.offering}
+              title={lead.offering_reason ?? undefined}
+              className={cn("hidden sm:inline", lead.offering_locked && "italic")}
+            />
           )}
           <StagePill stage={lead.stage} />
           <span className="shrink-0 rounded-full border border-border-active px-2.5 py-1 text-[11px] capitalize text-text-secondary">
