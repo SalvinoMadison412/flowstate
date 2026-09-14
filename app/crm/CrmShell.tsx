@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
@@ -15,6 +15,9 @@ const TABS = [
   { label: "Cold calls", href: CHANNELS.cold_call.href },
   { label: "Instagram & email", href: CHANNELS.outreach.href },
 ];
+
+/** Signed-in account email — the address meeting invites go out from. */
+export const CrmEmailContext = createContext<string | null>(null);
 
 /**
  * Wraps every CRM page: session gate, then the header and tab bar. Signed out,
@@ -104,7 +107,9 @@ export function CrmShell({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
 
-      {children}
+      <CrmEmailContext.Provider value={session.user.email ?? null}>
+        {children}
+      </CrmEmailContext.Provider>
     </div>
   );
 }

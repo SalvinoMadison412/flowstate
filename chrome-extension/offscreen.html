@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Flow State Dialer — audio</title>
+  </head>
+  <body>
+    <!-- Invisible. Hosts the Twilio Voice Device: it needs a DOM, WebRTC, an
+         AudioContext and the microphone, none of which exist in an MV3 service
+         worker. The service worker drives it over runtime messaging. -->
+    <script src="lib/twilio.min.js"></script>
+    <script type="module" src="offscreen.js"></script>
+  </body>
+</html>
