@@ -227,6 +227,20 @@ export function LeadDetail({
                 {!ig && !site && (
                   <p className="text-sm text-text-muted">No links on file.</p>
                 )}
+                {lead.maps_rank != null && (
+                  <p className="text-sm">
+                    <span className="text-text-muted">Search rank </span>
+                    <span className={rankTone(lead.maps_rank)}>
+                      #{lead.maps_rank}
+                    </span>
+                    {lead.maps_rank_query && (
+                      <span className="text-text-muted">
+                        {" "}
+                        for &ldquo;{lead.maps_rank_query}&rdquo;
+                      </span>
+                    )}
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -382,6 +396,16 @@ export function LeadDetail({
 const gcalStamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, "");
 
 /** Field with the card's small caption above it — matches the log form. */
+/**
+ * Rank is only a sales angle when it is bad. Top 3 means they already win that
+ * search, so leading with rank on that call would be an own goal.
+ */
+function rankTone(rank: number): string {
+  if (rank <= 3) return "text-text-secondary";
+  if (rank <= 9) return "text-amber-300";
+  return "text-red-300";
+}
+
 function Field({
   caption,
   className,
