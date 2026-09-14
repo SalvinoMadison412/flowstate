@@ -183,6 +183,14 @@ export type Lead = {
   offering_updated_at: string | null;
   /** Set when a human picks the offering by hand; re-scoring runs skip these rows. */
   offering_locked: boolean;
+  /**
+   * Where this business sat in the Google Maps results for `maps_rank_query`
+   * when it was sourced. 1 = top. This is the LOCAL-PACK rank, not an organic
+   * web-search position — say that on calls, it is the number we measured.
+   */
+  maps_rank: number | null;
+  /** The exact search that produced `maps_rank`, e.g. "cafe in Phoenix AZ". */
+  maps_rank_query: string | null;
 };
 
 export type Touch = {
