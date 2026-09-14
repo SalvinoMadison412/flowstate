@@ -10,6 +10,7 @@ import {
   CHANNELS,
   TOUCH_COLS,
   TIME_TABLE,
+  OFFERINGS,
   today,
   igUrl,
   siteUrl,
@@ -179,6 +180,8 @@ export function LeadDetail({
           )}
         </div>
       )}
+
+      <OfferingCard lead={lead} onPatch={onPatch} />
 
       <LeadTimer
         leadId={lead.id}
@@ -393,6 +396,145 @@ function Field({
       {caption}
       <div className="mt-1">{children}</div>
     </label>
+  );
+}
+
+/**
+ * Colour carries the meaning: Website is a broken-site problem (red), Voice Agent is demand
+ * going unanswered (amber), GEO and Ads are growth plays (blue/neutral). An unrecognised
+ * offering still renders in the neutral style — the service list is expected to grow, which is
+ * also why the column has no CHECK constraint.
+ */
+const OFFERING_STYLE: Record<string, string> = {
+  Website: "bg-red-500/15 text-red-300 border-red-500/30",
+  "Voice Agent": "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  GEO: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+  Ads: "bg-white/5 text-text-secondary border-border-active",
+};
+
+export function OfferingPill({
+  offering,
+  title,
+  className,
+}: {
+  offering: string;
+  title?: string;
+  className?: string;
+}) {
+  return (
+    <span
+      title={title}
+      className={cn(
+        "shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium",
+        OFFERING_STYLE[offering] ??
+          "bg-white/5 text-text-secondary border-border-active",
+        className,
+      )}
+    >
+      {offering}
+    </span>
+  );
+}
+
+const SITE_STATUS_LABEL: Record<string, string> = {
+  none: "no website",
+  dead: "site does not load",
+  parked: "domain parked",
+  platform: "booking-platform page only",
+  thin: "placeholder site",
+  ok: "site works",
+};
+
+/**
+ * What to pitch, and the evidence for it. Sits at the top of the panel because it is the first
+ * thing you want when you open a lead to write a DM.
+ *
+ * Picking an offering by hand sets `offering_locked`, which the enrichment script honours — a
+ * human decision must survive the next automated re-score.
+ */
+function OfferingCard({
+  lead,
+  onPatch,
+}: {
+  lead: Lead;
+  onPatch: (id: string, fields: Partial<Lead>) => Promise<unknown>;
+}) {
+  const s = lead.offering_signals;
+  const unanswered =
+    s?.reviews_without_reply != null && s?.reviews_checked != null
+      ? `${s.reviews_without_reply}/${s.reviews_checked} reviews unanswered`
+      : null;
+
+  const facts = [
+    s?.site_status ? SITE_STATUS_LABEL[s.site_status] ?? s.site_status : null,
+    s?.rating != null ? `${s.rating}★` : null,
+    s?.review_count != null ? `${s.review_count.toLocaleString()} reviews` : null,
+    unanswered,
+  ].filter(Boolean) as string[];
+
+  return (
+    <div className="rounded-xl border border-border-subtle bg-white/[0.02] p-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="text-[11px] uppercase tracking-wide text-text-muted">
+          Pitch
+        </span>
+        {lead.offering ? (
+          <OfferingPill offering={lead.offering} />
+        ) : (
+          <span className="text-sm text-text-muted">Not scored yet</span>
+        )}
+        {lead.offering_alt?.map((o) => (
+          <OfferingPill key={o} offering={o} className="opacity-60" />
+        ))}
+        {lead.offering_locked && (
+          <span className="text-[11px] text-text-muted" title="Automated re-scoring skips this lead">
+            set by hand
+          </span>
+        )}
+        <select
+          value={lead.offering ?? ""}
+          onChange={(e) => {
+            const v = e.target.value;
+            void onPatch(lead.id, {
+              offering: v || null,
+              // Clearing the pick hands the lead back to the scoring script; choosing one
+              // takes it away from the script for good.
+              offering_locked: Boolean(v),
+              offering_updated_at: new Date().toISOString(),
+            });
+          }}
+          className={cn(input, "ml-auto h-8 w-auto py-0 text-xs")}
+          aria-label="Override the offering"
+        >
+          <option value="">Auto / clear</option>
+          {OFFERINGS.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {lead.offering_reason && (
+        <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+          {lead.offering_reason}
+        </p>
+      )}
+
+      {facts.length > 0 && (
+        <p className="mt-2 font-mono text-[11px] text-text-muted">
+          {facts.join(" · ")}
+          {s?.scored_on && ` · scored ${s.scored_on}`}
+        </p>
+      )}
+
+      {s?.handle_ok === false && (
+        <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+          This Instagram handle may belong to someone else (an artist or staff member), not the
+          business. Check it before sending.
+        </p>
+      )}
+    </div>
   );
 }
 
