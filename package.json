@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test:parse": "tsx lib/parseSheet.test.ts",
     "test:origin": "tsx lib/origin.test.ts",
-    "test:duration": "tsx lib/duration.test.ts"
+    "test:duration": "tsx lib/duration.test.ts",
+    "test:timezone": "tsx lib/timezone.test.ts"
   },
   "engines": {
     "node": ">=20"

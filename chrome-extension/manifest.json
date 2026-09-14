@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Flow State Dialer",
+  "version": "1.0.0",
+  "description": "CRM-integrated Twilio softphone for Flow State agency.",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "notifications", "offscreen", "alarms"],
+  "host_permissions": [
+    "https://ogzxvbmzyvqcspupxhak.supabase.co/*",
+    "https://crm-production-9434.up.railway.app/*",
+    "https://flowstate-production-aa1d.up.railway.app/*",
+    "http://localhost:3000/*",
+    "https://*.twilio.com/*",
+    "wss://*.twilio.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Flow State Dialer",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://crm-production-9434.up.railway.app/*",
+        "https://flowstate-production-aa1d.up.railway.app/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
