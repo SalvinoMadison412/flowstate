@@ -23,7 +23,7 @@ import { CrmEmailContext } from "./CrmShell";
 import { originFlag } from "@/lib/origin";
 import { formatDuration, stopwatch } from "@/lib/duration";
 import {
-  guessTimeZone,
+  zoneForLead,
   isValidZone,
   zonedTimeToUtc,
   formatInZone,
@@ -498,9 +498,14 @@ function EmailTokens({
  * Google account you're signed into (passed as `authuser`) to all of them. No
  * backend, no OAuth.
  *
- * You enter the date and time in the *client's* zone (guessed from their
- * country, editable) — the invite carries the right absolute instant, so it
- * shows correctly for them and for you whatever the offset.
+ * You enter the date and time in the *client's* zone — the invite carries the
+ * right absolute instant, so it shows correctly for them and for you whatever
+ * the offset, and the panel shows both side by side before you book.
+ *
+ * The zone is guessed from where the lead was sourced (city/state in `notes`),
+ * falling back to their country. Country alone is not enough for the markets
+ * we sell into: it would put an Arizona client on New York time and a Perth
+ * client on Sydney time. Always editable.
  */
 function BookMeeting({ lead }: { lead: Lead }) {
   // The signed-in CRM account = the Google account the invite goes out from.
@@ -509,7 +514,7 @@ function BookMeeting({ lead }: { lead: Lead }) {
     lead.email ? [lead.email] : [],
   );
   const [zone, setZone] = useState(
-    () => guessTimeZone(lead.country) ?? MY_ZONE,
+    () => zoneForLead(lead) ?? MY_ZONE,
   );
   const [date, setDate] = useState(today(2));
   const [time, setTime] = useState("10:00");
