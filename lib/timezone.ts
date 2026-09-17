@@ -210,3 +210,35 @@ export function zoneForLead(lead: {
   }
   return guessTimeZone(lead.country);
 }
+
+/** Plain 9am-6pm local check, weekday or not — pulled out so it's testable
+ *  without controlling the wall clock. */
+export function inCallWindow(hour: number): boolean {
+  return hour >= 9 && hour < 18;
+}
+
+/**
+ * What time it is right now for a lead, and whether that's a sane hour to
+ * call/message — the thing the CRM couldn't answer at a glance before this.
+ */
+export function localTimeNow(lead: {
+  country?: string | null;
+  notes?: string | null;
+}): { zone: string; clock: string; hour: number; inWindow: boolean } | null {
+  const zone = zoneForLead(lead);
+  if (!zone) return null;
+  const now = new Date();
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      hour: "numeric",
+      hourCycle: "h23",
+    }).format(now),
+  );
+  const clock = new Intl.DateTimeFormat("en-US", {
+    timeZone: zone,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(now);
+  return { zone, clock, hour, inWindow: inCallWindow(hour) };
+}

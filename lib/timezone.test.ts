@@ -6,6 +6,8 @@ import {
   zoneForLead,
   sourcedPlace,
   formatInZone,
+  inCallWindow,
+  localTimeNow,
 } from "./timezone";
 
 const iso = (d: string, t: string, tz: string) =>
@@ -67,5 +69,20 @@ assert.equal(zoneForLead(lead("Sourced Lisbon · cafe · x", "Portugal")), "Euro
 const az = zoneForLead(lead("Sourced Phoenix AZ · cafe · x"))!;
 assert.equal(zonedTimeToUtc("2026-09-15", "11:00", az).toISOString(), "2026-09-15T18:00:00.000Z");
 assert.ok(formatInZone(zonedTimeToUtc("2026-09-15", "11:00", az), "Asia/Kolkata").includes("11:30 PM"));
+
+// "Is it a sane hour to reach out" — boundaries only, wall clock stays out of it.
+assert.equal(inCallWindow(9), true);
+assert.equal(inCallWindow(17), true);
+assert.equal(inCallWindow(8), false);
+assert.equal(inCallWindow(18), false);
+assert.equal(inCallWindow(0), false);
+
+// No sourced place, no country → no zone → no local-time answer at all.
+assert.equal(localTimeNow(lead(null, null)), null);
+
+// Where we do know the zone, hour/inWindow agree with each other right now.
+const now = localTimeNow(lead("Sourced Phoenix AZ · cafe · x"))!;
+assert.equal(now.zone, "America/Phoenix");
+assert.equal(now.inWindow, inCallWindow(now.hour));
 
 console.log("timezone.test.ts ok");

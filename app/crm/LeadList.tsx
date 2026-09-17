@@ -22,7 +22,7 @@ import {
 import { originFilter, originFlag, type Origin } from "@/lib/origin";
 import { stopwatch } from "@/lib/duration";
 import { input, label, card } from "./ui";
-import { LeadDetail, OfferingPill } from "./LeadDetail";
+import { LeadDetail, OfferingPill, LocalTimeBadge } from "./LeadDetail";
 import { ImportDialog } from "./ImportDialog";
 
 const PAGE = 200;
@@ -689,6 +689,7 @@ function LeadRow({
           >
             {lead.country ? originFlag(lead.country) : "🌐"}
           </span>
+          <LocalTimeBadge lead={lead} compact className="hidden sm:inline-flex" />
           {lead.category && (
             <span className="hidden shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-text-secondary sm:inline">
               {lead.category}

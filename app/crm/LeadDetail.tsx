@@ -28,6 +28,7 @@ import {
   isValidZone,
   zonedTimeToUtc,
   formatInZone,
+  localTimeNow,
 } from "@/lib/timezone";
 import { input, label } from "./ui";
 
@@ -173,6 +174,7 @@ export function LeadDetail({
             </span>
           )}
           <OriginBadge country={lead.country} onEdit={() => setEditing(true)} />
+          <LocalTimeBadge lead={lead} />
           {lead.description && (
             <p className="w-full text-sm leading-relaxed text-text-secondary">
               {lead.description}
@@ -908,6 +910,40 @@ function OriginBadge({
       <span aria-hidden>{originFlag(country)}</span>
       <span className="uppercase tracking-wide text-text-muted">Origin</span>
       {country}
+    </span>
+  );
+}
+
+/**
+ * "What time is it there right now, and is this a sane hour to call" — the
+ * zone was already being guessed for Book Meeting, just never shown up front.
+ */
+export function LocalTimeBadge({
+  lead,
+  compact = false,
+  className,
+}: {
+  lead: { country?: string | null; notes?: string | null };
+  /** Icon + time only, no "their time" suffix — for dense list rows. */
+  compact?: boolean;
+  className?: string;
+}) {
+  const info = localTimeNow(lead);
+  if (!info) return null;
+  return (
+    <span
+      title={`${info.zone} · ${info.inWindow ? "reasonable hour to reach out" : "outside 9am-6pm local"}`}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium",
+        info.inWindow
+          ? "border-border-active bg-surface-elevated text-text-primary"
+          : "border-red-500/30 bg-red-500/10 text-red-300",
+        className,
+      )}
+    >
+      <span aria-hidden>{info.inWindow ? "🕐" : "🌙"}</span>
+      {info.clock}
+      {!compact && " their time"}
     </span>
   );
 }
