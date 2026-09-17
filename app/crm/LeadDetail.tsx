@@ -928,6 +928,14 @@ export function LocalTimeBadge({
   compact?: boolean;
   className?: string;
 }) {
+  // Minute precision is all the badge promises, so a plain 60s tick keeps it
+  // honest without the churn of a per-second re-render.
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   const info = localTimeNow(lead);
   if (!info) return null;
   return (
