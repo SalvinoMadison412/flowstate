@@ -222,10 +222,11 @@ wss.on("connection", (twilioWs) => {
   });
   gemini.on("close", () => log("gemini closed"));
 
+  // realtimeInput.mediaChunks is deprecated; the current field is realtimeInput.audio.
   const sendAudioToGemini = (pcm) =>
     gemini.send(
       JSON.stringify({
-        realtimeInput: { mediaChunks: [{ mimeType: "audio/pcm;rate=16000", data: pcm.toString("base64") }] },
+        realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: pcm.toString("base64") } },
       }),
     );
 
