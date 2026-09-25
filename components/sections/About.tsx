@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { IconLinkedIn } from "@/components/ui/icons";
@@ -8,7 +9,7 @@ const FOUNDERS = [
   {
     name: "Salvino Kevin Madison",
     role: "Founder",
-    initials: "SKM",
+    photo: "/founders/salvino.jpg",
     linkedin: "https://www.linkedin.com/in/salvino-madison",
     bio: "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's full marketing operation on the side — proving he could turn strategy into execution, not just slides. At Flow State, he brings both disciplines together: the rigor to read what Meta, Google, and AI-answer data are actually saying, and the creative judgment to act on it.",
   },
@@ -33,11 +34,13 @@ export function About() {
             key={founder.name}
             className="rounded-2xl border border-border-active bg-surface-elevated p-7 sm:p-8"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border-active bg-bg">
-              <span className="font-display text-sm font-bold tracking-display text-accent">
-                {founder.initials}
-              </span>
-            </div>
+            <Image
+              src={founder.photo}
+              alt={founder.name}
+              width={112}
+              height={112}
+              className="h-28 w-28 rounded-full border border-border-active object-cover"
+            />
             <h3 className="mt-6 font-display text-xl font-bold tracking-display">
               <a
                 href={founder.linkedin}
