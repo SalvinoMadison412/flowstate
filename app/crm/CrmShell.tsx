@@ -67,7 +67,7 @@ export function CrmShell({ children }: { children: React.ReactNode }) {
           <Link
             href="/"
             aria-label="Back to the Flow State site"
-            title="Back to flowstate.agency"
+            title="Back to the Flow State site"
             className="text-text-muted transition-colors hover:text-text-primary"
           >
             <Logo variant="icon" className="h-6 w-6" />
