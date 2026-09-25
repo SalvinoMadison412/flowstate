@@ -40,6 +40,12 @@ const ORG_JSON_LD = {
     name: "Salvino Kevin Madison",
     sameAs: "https://www.linkedin.com/in/salvino-madison",
   },
+  member: {
+    "@type": "Person",
+    name: "Sherwin Judas Madison",
+    jobTitle: "Compliance & Finance",
+    sameAs: "https://www.linkedin.com/in/sherwin-judas-madison-b7b649338/",
+  },
   knowsAbout: ["AI voice agents", "Business automation", "AI workflows", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
 };
 
