@@ -6,7 +6,7 @@ import { PageCTA } from "@/components/sections/PageCTA";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Flow State is founded and run by Salvino Madison. No account managers, no hand-offs.",
+    "Flow State is founded and run by Salvino Madison, with Sherwin Madison on compliance and finance. No account managers, no hand-offs.",
   alternates: { canonical: "/about" },
 };
 
