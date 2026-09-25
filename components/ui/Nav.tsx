@@ -11,6 +11,7 @@ const LINKS = [
   { label: "Google Ads", href: "#google-ads" },
   { label: "GEO", href: "#geo" },
   { label: "How It Works", href: "#how-it-works" },
+  { label: "Live Demo", href: "#voice-demo" },
   { label: "Case Study", href: "#case-study" },
   { label: "About", href: "#about" },
 ];
