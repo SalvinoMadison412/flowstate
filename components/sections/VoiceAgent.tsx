@@ -4,6 +4,7 @@ import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import { VoiceWaveform } from "@/components/ui/VoiceWaveform";
+import { EndCallButton } from "@/components/ui/EndCallButton";
 import { useVoiceCall } from "@/lib/useVoiceCall";
 import { cn } from "@/lib/utils";
 
@@ -79,9 +80,13 @@ export function VoiceAgent() {
           </Reveal>
 
           <Reveal className="flex flex-wrap items-center gap-4 rounded-2xl border border-border-active bg-surface-elevated p-5 sm:p-6">
-            <Button variant="filled" size="md" onClick={toggle} disabled={status === "connecting"}>
-              {status === "live" ? "End call" : status === "connecting" ? "Connecting…" : "Talk to Maoshi"}
-            </Button>
+            {status === "live" || status === "connecting" ? (
+              <EndCallButton />
+            ) : (
+              <Button variant="filled" size="lg" onClick={toggle}>
+                Talk to Maoshi
+              </Button>
+            )}
             <VoiceWaveform className="w-[96px]" />
             <span role="status" aria-live="polite" className="font-mono text-xs text-text-secondary">
               {status === "live" && "Live. Say hello."}

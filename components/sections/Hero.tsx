@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { VoiceWaveform } from "@/components/ui/VoiceWaveform";
+import { EndCallButton } from "@/components/ui/EndCallButton";
 import { useVoiceCall } from "@/lib/useVoiceCall";
 import { usePrefersReducedMotion } from "@/lib/useReveal";
 
@@ -199,9 +200,13 @@ export function Hero() {
             className="reveal-up mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start"
             style={{ animationDelay: "0.2s" }}
           >
-            <Button variant="filled" size="lg" onClick={toggle} disabled={status === "connecting"}>
-              {status === "live" ? "End call" : status === "connecting" ? "Connecting…" : "Talk to Maoshi, live"}
-            </Button>
+            {status === "live" || status === "connecting" ? (
+              <EndCallButton />
+            ) : (
+              <Button variant="filled" size="lg" onClick={toggle}>
+                Talk to Maoshi, live
+              </Button>
+            )}
             <Button href="#audit" variant="ghost" size="lg">
               Book a strategy call
             </Button>

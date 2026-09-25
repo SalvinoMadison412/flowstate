@@ -85,14 +85,23 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
     setError("");
     setStatus("connecting");
     const cleanups: (() => void)[] = [];
-    teardown.current = () => cleanups.forEach((c) => c());
+    const mine = () => cleanups.forEach((c) => c());
+    teardown.current = mine;
+    // True once End call was pressed mid-connect; anything created after that is released.
+    const cancelled = () => {
+      if (teardown.current === mine) return false;
+      mine();
+      return true;
+    };
     try {
       const res = await fetch("/api/voice/session", { method: "POST", cache: "no-store" });
       const data = await res.json();
+      if (cancelled()) return;
       if (!res.ok) return fail(data.error || "Could not start the demo.");
 
       const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
       cleanups.push(() => mic.getTracks().forEach((t) => t.stop()));
+      if (cancelled()) return;
       const conn = new RTCPeerConnection();
       cleanups.push(() => conn.close());
       const audioCtx = new AudioContext();
@@ -125,9 +134,11 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
         headers: { Authorization: `Bearer ${data.secret}`, "content-type": "application/sdp" },
         body: conn.localDescription!.sdp,
       });
+      if (cancelled()) return;
       if (!answer.ok) return fail("Could not connect. Please try again.");
       await conn.setRemoteDescription({ type: "answer", sdp: await answer.text() });
     } catch (e) {
+      if (cancelled()) return;
       fail(
         (e as Error).name === "NotAllowedError"
           ? "Microphone access was blocked. Allow it and try again."
