@@ -6,6 +6,7 @@ import { useReveal } from "@/lib/useReveal";
 import { submitLead, type LeadType, type ServiceInterest } from "@/lib/leads";
 
 const SERVICE_OPTIONS: { value: ServiceInterest; label: string }[] = [
+  { value: "voice_agent", label: "AI Voice Agent" },
   { value: "meta_ads", label: "Meta Ads" },
   { value: "google_ads", label: "Google Ads" },
   { value: "geo", label: "GEO" },
@@ -76,8 +77,8 @@ export function FinalCTA() {
           Book a free strategy call.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-lg text-text-secondary">
-          Tell us where you want to grow. We&rsquo;ll show you which channels
-          &mdash; Meta, Google, GEO &mdash; get you there fastest. 30 minutes, no
+          Tell us where you want to grow. We&rsquo;ll show you what gets you there
+          fastest &mdash; a voice agent, Meta, Google or GEO. 30 minutes, no
           pitch.
         </p>
 
