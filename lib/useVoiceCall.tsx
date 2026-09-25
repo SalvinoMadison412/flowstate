@@ -122,7 +122,15 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       // Make the agent speak first, once the event channel is open.
       const events = conn.createDataChannel("oai-events");
       events.onopen = () => {
-        events.send(JSON.stringify({ type: "response.create", response: { instructions: data.greeting } }));
+        // A user-role message, not `response.instructions`: per-response instructions
+        // REPLACE the session persona for that turn, which lost Maoshi's script.
+        events.send(
+          JSON.stringify({
+            type: "conversation.item.create",
+            item: { type: "message", role: "user", content: [{ type: "input_text", text: data.greeting }] },
+          }),
+        );
+        events.send(JSON.stringify({ type: "response.create" }));
         setStatus("live");
         const t = setTimeout(stop, MAX_CALL_MS);
         cleanups.push(() => clearTimeout(t));
