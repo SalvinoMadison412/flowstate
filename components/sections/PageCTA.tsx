@@ -8,7 +8,7 @@ export function PageCTA({ heading = "Ready to stop missing calls?" }: { heading?
         <div>
           <h2 className="font-display text-2xl font-bold tracking-display sm:text-3xl">{heading}</h2>
           <p className="mt-2 text-sm text-text-secondary sm:text-base">
-            Book a free 30-minute strategy call with the founders.
+            Book a free 30-minute strategy call with the founder.
           </p>
         </div>
         <Button href="/contact" variant="filled" size="lg">
