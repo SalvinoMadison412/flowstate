@@ -212,3 +212,23 @@ h3,
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Voice-agent motion graphics */
+@keyframes orb-ripple {
+  from { transform: scale(0.9); opacity: 0.7; }
+  to { transform: scale(1.5); opacity: 0; }
+}
+.orb-ripple { animation: orb-ripple 2.7s ease-out infinite; }
+
+/* Example-call transcript: each line fades in on a shared 14s loop. */
+@keyframes tx-in {
+  0% { opacity: 0; transform: translateY(10px); }
+  4%, 90% { opacity: 1; transform: none; }
+  96%, 100% { opacity: 0; transform: translateY(-4px); }
+}
+.tx-line { opacity: 0; animation: tx-in 14s ease-out infinite; animation-delay: var(--d, 0s); }
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-ripple { animation: none; opacity: 0; }
+  .tx-line { animation: none; opacity: 1; }
+}
