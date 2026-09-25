@@ -5,7 +5,7 @@ import { IconArrowRight } from "@/components/ui/icons";
 const PAGES = [
   { href: "/voice-agent", kicker: "Voice agents", title: "Meet Maoshi", body: "See how an AI receptionist answers every call, and talk to one live." },
   { href: "/services", kicker: "Marketing", title: "Meta Ads, Google Ads, GEO", body: "The campaigns and AI-search work that make the phone ring in the first place." },
-  { href: "/about", kicker: "Who we are", title: "Two founders, no hand-offs", body: "The people who build your strategy are the people who answer when you call." },
+  { href: "/about", kicker: "Who we are", title: "One founder, no hand-offs", body: "The people who build your strategy are the people who answer when you call." },
 ];
 
 export function Explore() {
