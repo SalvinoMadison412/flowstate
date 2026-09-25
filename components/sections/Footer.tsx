@@ -74,6 +74,10 @@ export function Footer() {
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-[#1E1E1E] pt-6 sm:flex-row sm:items-center">
           <p className="font-mono text-xs text-text-muted">
             © {new Date().getFullYear()} Flow State. All rights reserved.
+            <span aria-hidden className="mx-2 text-border-active">&middot;</span>
+            <Link href="/crm" className="transition-colors hover:text-text-primary">
+              Admin login
+            </Link>
           </p>
           <div className="flex gap-3">
             {SOCIALS.map(({ label, href, Icon }) => (
