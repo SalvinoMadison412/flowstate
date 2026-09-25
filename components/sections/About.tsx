@@ -2,12 +2,14 @@
 
 import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
+import { IconLinkedIn } from "@/components/ui/icons";
 
 const FOUNDERS = [
   {
     name: "Salvino Kevin Madison",
     role: "Founder",
     initials: "SKM",
+    linkedin: "https://www.linkedin.com/in/salvino-madison",
     bio: "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's full marketing operation on the side — proving he could turn strategy into execution, not just slides. At Flow State, he brings both disciplines together: the rigor to read what Meta, Google, and AI-answer data are actually saying, and the creative judgment to act on it.",
   },
 ];
@@ -37,7 +39,14 @@ export function About() {
               </span>
             </div>
             <h3 className="mt-6 font-display text-xl font-bold tracking-display">
-              {founder.name}
+              <a
+                href={founder.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-4 transition-colors hover:text-accent hover:underline"
+              >
+                {founder.name}
+              </a>
             </h3>
             <div className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-text-secondary">
               {founder.role}
@@ -45,6 +54,15 @@ export function About() {
             <p className="mt-4 text-sm leading-relaxed text-text-secondary">
               {founder.bio}
             </p>
+            <a
+              href={founder.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-2 text-sm text-text-primary underline-offset-4 hover:text-accent hover:underline"
+            >
+              <IconLinkedIn className="h-4 w-4" />
+              {founder.name} on LinkedIn
+            </a>
           </div>
         ))}
       </Reveal>
