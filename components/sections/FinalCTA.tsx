@@ -198,7 +198,7 @@ export function FinalCTA() {
 
             {status === "error" && (
               <p className="text-sm text-text-secondary">
-                Something went wrong. Email us at hello@flowstate.agency and
+                Something went wrong. Email us at flowstate.agents@gmail.com and
                 we&rsquo;ll sort it out.
               </p>
             )}

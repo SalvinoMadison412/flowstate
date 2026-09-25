@@ -5,6 +5,7 @@ import { Problem } from "@/components/sections/Problem";
 import { Services } from "@/components/sections/Services";
 import { Industries } from "@/components/sections/Industries";
 import { CaseStudy } from "@/components/sections/CaseStudy";
+import { About } from "@/components/sections/About";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/sections/Footer";
 
@@ -31,6 +32,7 @@ export default function HomePage() {
         <AgenticWorkflow />
         <Industries />
         <CaseStudy />
+        <About />
         <FinalCTA />
       </main>
       <Footer />

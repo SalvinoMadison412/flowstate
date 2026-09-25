@@ -4,34 +4,32 @@ import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 
 const INDUSTRIES = [
-  { name: "SaaS", stat: "Buyers check ChatGPT before they book a demo" },
-  { name: "eCommerce", stat: "Meta drives most first-touch product discovery" },
-  { name: "Finance", stat: "Google intent is expensive — and worth capturing" },
-  { name: "Healthcare", stat: "Patients ask AI before they call a provider" },
-  { name: "Legal", stat: "High-intent search converts at a premium" },
-  { name: "Real Estate", stat: "Social feeds build the shortlist before the call" },
-  { name: "B2B Services", stat: "RFP shortlists get seeded by AI answers" },
-  { name: "Consumer Apps", stat: "Reels and AI recommendations compound together" },
+  { name: "Salons & Nail Bars", stat: "New clients pick from the top 3 on Google Maps and Instagram" },
+  { name: "Spas & Med Spas", stat: "People ask ChatGPT for the best spa near them before they book" },
+  { name: "Clinics & Dental", stat: "Patients compare reviews and AI answers before they call" },
+  { name: "Cafés & Restaurants", stat: "Reels and Maps decide where people eat tonight" },
+  { name: "Boutique Hotels & Resorts", stat: "Travellers shortlist stays from AI answers and Instagram" },
+  { name: "Fitness & Yoga Studios", stat: "Local search and Reels fill trial classes" },
 ];
 
 export function Industries() {
   return (
-    <Section id="industries" className="overflow-x-clip">
-      <SectionLabel>Industries</SectionLabel>
+    <Section id="industries">
+      <SectionLabel>Who we work with</SectionLabel>
       <SectionHeading className="mt-4 max-w-2xl">
-        Built for every vertical, across every channel.
+        Built for local businesses that live on bookings.
       </SectionHeading>
 
-      <Reveal className="mt-12 flex flex-wrap gap-3">
+      <Reveal className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {INDUSTRIES.map((item) => (
-          <div key={item.name} className="group relative">
-            <span className="block cursor-default rounded-full border border-white/70 bg-surface px-5 py-2.5 text-sm text-text-primary transition-colors duration-200 group-hover:bg-white group-hover:text-bg">
+          <div
+            key={item.name}
+            className="rounded-2xl border border-border-subtle bg-surface p-5"
+          >
+            <span className="block text-sm font-medium text-text-primary">
               {item.name}
             </span>
-            <span
-              role="tooltip"
-              className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg border border-border-active bg-surface-elevated px-3 py-2 text-center font-mono text-[11px] leading-relaxed text-text-secondary opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            >
+            <span className="mt-2 block font-mono text-[11px] leading-relaxed text-text-secondary">
               {item.stat}
             </span>
           </div>

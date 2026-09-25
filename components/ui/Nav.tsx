@@ -12,6 +12,7 @@ const LINKS = [
   { label: "GEO", href: "#geo" },
   { label: "How It Works", href: "#how-it-works" },
   { label: "Case Study", href: "#case-study" },
+  { label: "About", href: "#about" },
 ];
 
 export function Nav() {
