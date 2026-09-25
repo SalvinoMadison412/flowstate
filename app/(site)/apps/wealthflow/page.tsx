@@ -28,9 +28,23 @@ const FEATURES = [
   "Delete your account and all your data from Profile",
 ];
 
+const APP_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "WealthFlow",
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Android",
+  description:
+    "A privacy-first personal finance app. Import a bank statement PDF and see spending, income and budgets. Everything is processed on your phone.",
+  url: "https://www.flowsstateagents.com/apps/wealthflow",
+  image: "https://www.flowsstateagents.com/apps/wealthflow.png",
+  author: { "@type": "Person", name: "Salvino Madison" },
+};
+
 export default function WealthFlowPage() {
   return (
     <div className="pt-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_JSON_LD) }} />
       <Section>
         <SectionLabel>Apps</SectionLabel>
         <div className="mt-6 flex items-center gap-5">
