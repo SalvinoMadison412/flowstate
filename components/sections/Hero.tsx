@@ -207,7 +207,7 @@ export function Hero() {
                 Talk to Maoshi, live
               </Button>
             )}
-            <Button href="#audit" variant="ghost" size="lg">
+            <Button href="/contact" variant="ghost" size="lg">
               Book a strategy call
             </Button>
           </div>

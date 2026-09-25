@@ -64,6 +64,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Flow State" }],
   creator: "Flow State",
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: SITE_URL,
