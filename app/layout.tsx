@@ -33,24 +33,26 @@ const ORG_JSON_LD = {
   url: SITE_URL,
   email: "flowstate.agents@gmail.com",
   description:
-    "Marketing agency running Meta Ads, Google Ads, and GEO (Generative Engine Optimization) for local businesses.",
+    "Builds AI voice agents that answer business phones, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization) for local businesses.",
   founder: [
     { "@type": "Person", name: "Salvino Kevin Madison" },
     { "@type": "Person", name: "Sherwin Judas Madison" },
   ],
-  knowsAbout: ["Meta Ads", "Google Ads", "Generative Engine Optimization"],
+  knowsAbout: ["AI voice agents", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
+      "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     template: "%s — Flow State",
   },
   description:
-    "Flow State is a marketing agency running Meta Ads, Google Ads, and GEO (Generative Engine Optimization). Get found by AI, get clicked on Google, get discovered on Meta.",
+    "Flow State builds AI voice agents that answer your phone, and runs the Meta Ads, Google Ads, and GEO (Generative Engine Optimization) that make it ring. Talk to a live one in your browser.",
   keywords: [
+    "AI voice agent",
+    "AI receptionist",
     "Meta Ads agency",
     "Google Ads agency",
     "generative engine optimization",
@@ -65,14 +67,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: SITE_URL,
-    title: "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
+    title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     description:
-      "Get found by AI. Get clicked on Google. Get discovered on Meta. One agency across all three channels.",
+      "Meet the AI that answers your phone. Talk to a live voice agent, then see how we fill your calendar with Meta Ads, Google Ads, and GEO.",
     siteName: "Flow State",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
+    title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     description:
       "Get found by AI. Get clicked on Google. Get discovered on Meta.",
   },

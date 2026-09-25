@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
+  { label: "Voice Agent", href: "#voice-agent" },
   { label: "Meta Ads", href: "#meta-ads" },
   { label: "Google Ads", href: "#google-ads" },
   { label: "GEO", href: "#geo" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Live Demo", href: "#voice-demo" },
   { label: "Case Study", href: "#case-study" },
   { label: "About", href: "#about" },
 ];

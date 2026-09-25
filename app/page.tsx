@@ -5,7 +5,8 @@ import { Problem } from "@/components/sections/Problem";
 import { Services } from "@/components/sections/Services";
 import { Industries } from "@/components/sections/Industries";
 import { CaseStudy } from "@/components/sections/CaseStudy";
-import { VoiceDemo } from "@/components/sections/VoiceDemo";
+import { VoiceAgent } from "@/components/sections/VoiceAgent";
+import { VoiceCallProvider } from "@/lib/useVoiceCall";
 import { About } from "@/components/sections/About";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/sections/Footer";
@@ -23,21 +24,21 @@ const AgenticWorkflow = dynamic(() =>
 
 export default function HomePage() {
   return (
-    <>
+    <VoiceCallProvider>
       <Nav />
       <main>
         <Hero />
+        <VoiceAgent />
         <Problem />
         <Services />
         <GEOMockup />
         <AgenticWorkflow />
-        <VoiceDemo />
         <Industries />
         <CaseStudy />
         <About />
         <FinalCTA />
       </main>
       <Footer />
-    </>
+    </VoiceCallProvider>
   );
 }
