@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { label: "Voice Agent", href: "#voice-agent" },
-  { label: "Meta Ads", href: "#meta-ads" },
-  { label: "Google Ads", href: "#google-ads" },
-  { label: "GEO", href: "#geo" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Case Study", href: "#case-study" },
-  { label: "About", href: "#about" },
+  { label: "Voice Agent", href: "/voice-agent" },
+  { label: "Services", href: "/services" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Nav() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   // The CRM link is private: it only appears once signed in, so visitors
@@ -62,25 +62,29 @@ export function Nav() {
       )}
     >
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-        <a href="#top" aria-label="Flow State home" className="shrink-0">
+        <Link href="/" aria-label="Flow State home" className="shrink-0">
           <Logo />
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-7 lg:flex">
           {links.map((link) => (
             <li key={link.href}>
-              <a
+              <Link
                 href={link.href}
-                className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+                aria-current={pathname === link.href ? "page" : undefined}
+                className={cn(
+                  "text-sm transition-colors hover:text-text-primary",
+                  pathname === link.href ? "text-text-primary" : "text-text-secondary",
+                )}
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
 
         <div className="hidden lg:block">
-          <Button href="#audit" variant="outline" size="md">
+          <Button href="/contact" variant="outline" size="md">
             Book a strategy call
           </Button>
         </div>
@@ -127,18 +131,22 @@ export function Nav() {
           <ul className="flex flex-col gap-1 px-5 py-4">
               {links.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-3 text-base text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+                    aria-current={pathname === link.href ? "page" : undefined}
+                    className={cn(
+                      "block rounded-lg px-3 py-3 text-base transition-colors hover:bg-white/5 hover:text-text-primary",
+                      pathname === link.href ? "text-text-primary" : "text-text-secondary",
+                    )}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
               <li className="mt-2 px-1">
                 <Button
-                  href="#audit"
+                  href="/contact"
                   variant="outline"
                   size="lg"
                   className="w-full"

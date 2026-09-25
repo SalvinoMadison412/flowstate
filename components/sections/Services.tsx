@@ -39,7 +39,7 @@ const SERVICES: Service[] = [
     ],
     differentiator:
       "Creative-led, not just targeting-led. Most agencies run the same ads for months. We test and iterate constantly so the algorithm always has fresh signal.",
-    cta: { label: "Start a Meta campaign", href: "#audit" },
+    cta: { label: "Start a Meta campaign", href: "/contact" },
     Icon: IconBroadcast,
   },
   {
@@ -58,7 +58,7 @@ const SERVICES: Service[] = [
     ],
     differentiator:
       "AI-assisted copy testing and bidding. More variants, faster learning, and a lower cost per lead than agencies running campaigns by hand.",
-    cta: { label: "Get a free ad audit", href: "#audit" },
+    cta: { label: "Get a free ad audit", href: "/contact" },
     Icon: IconSearch,
   },
   {
@@ -77,7 +77,7 @@ const SERVICES: Service[] = [
     ],
     differentiator:
       "Community-driven, not keyword-driven. Most agencies optimize for Google. We optimize for what is replacing it — the training and retrieval data AI actually reads.",
-    cta: { label: "Get your GEO audit", href: "#audit" },
+    cta: { label: "Get your GEO audit", href: "/contact" },
     Icon: IconQuote,
   },
 ];

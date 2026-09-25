@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { IconLinkedIn, IconX } from "@/components/ui/icons";
 
@@ -7,17 +8,18 @@ const COLUMNS = [
   {
     heading: "Services",
     links: [
-      { label: "Meta Ads", href: "#meta-ads" },
-      { label: "Google Ads", href: "#google-ads" },
-      { label: "GEO — Generative Engine Optimization", href: "#geo" },
+      { label: "AI Voice Agents", href: "/voice-agent" },
+      { label: "Meta Ads", href: "/services#meta-ads" },
+      { label: "Google Ads", href: "/services#google-ads" },
+      { label: "GEO — Generative Engine Optimization", href: "/services#geo" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "About", href: "#about" },
-      { label: "How it works", href: "#how-it-works" },
-      { label: "Contact", href: "#audit" },
+      { label: "About", href: "/about" },
+      { label: "How it works", href: "/services#how-it-works" },
+      { label: "Contact", href: "/contact" },
     ],
   },
 ];
@@ -54,12 +56,12 @@ export function Footer() {
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-sm text-text-secondary transition-colors hover:text-text-primary"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
