@@ -25,7 +25,7 @@ export function VoiceAgent() {
     <Section id="voice-agent">
       <SectionLabel>Voice agents</SectionLabel>
       <SectionHeading className="mt-4 max-w-3xl">
-        Every missed call is a missed booking. Maoshi never misses one.
+        Every ring answered. Every question handled. Not one coffee break.
       </SectionHeading>
       <p className="mt-6 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
         A Flow State voice agent works your phone line around the clock. It is
