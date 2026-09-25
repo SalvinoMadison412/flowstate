@@ -23,6 +23,14 @@ const COLUMNS = [
       { label: "Contact", href: "/contact" },
     ],
   },
+  {
+    heading: "Apps",
+    links: [
+      { label: "WealthFlow", href: "/apps/wealthflow" },
+      { label: "WealthFlow privacy policy", href: "/apps/wealthflow/privacy" },
+      { label: "Delete your account", href: "/apps/wealthflow/delete-account" },
+    ],
+  },
 ];
 
 // Add { label, href, Icon } entries only for profiles that exist.
@@ -36,7 +44,7 @@ export function Footer() {
   return (
     <footer className="border-t border-[#1E1E1E] px-5 py-16 sm:px-8">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(2,1fr)]">
+        <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(3,1fr)]">
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary">
