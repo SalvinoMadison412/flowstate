@@ -7,7 +7,7 @@
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export type ServiceInterest = "voice_agent" | "meta_ads" | "google_ads" | "geo" | "not_sure";
+export type ServiceInterest = "voice_agent" | "automation" | "meta_ads" | "google_ads" | "geo" | "not_sure";
 export type LeadType = "book_call" | "strategy_demo";
 
 export type LeadPayload = {

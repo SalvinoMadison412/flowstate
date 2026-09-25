@@ -34,13 +34,13 @@ const ORG_JSON_LD = {
   email: "flowstate.agents@gmail.com",
   sameAs: ["https://www.instagram.com/flowstate.agents"],
   description:
-    "Builds AI voice agents that answer business phones, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization) for local businesses.",
+    "Builds AI voice agents, automations and AI workflows for local businesses, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization).",
   founder: {
     "@type": "Person",
     name: "Salvino Kevin Madison",
     sameAs: "https://www.linkedin.com/in/salvino-madison",
   },
-  knowsAbout: ["AI voice agents", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
+  knowsAbout: ["AI voice agents", "Business automation", "AI workflows", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
 };
 
 export const metadata: Metadata = {
@@ -51,10 +51,12 @@ export const metadata: Metadata = {
     template: "%s — Flow State",
   },
   description:
-    "Flow State builds AI voice agents that answer your phone, and runs the Meta Ads, Google Ads, and GEO (Generative Engine Optimization) that make it ring. Talk to a live one in your browser.",
+    "Flow State builds AI voice agents, automations and AI workflows, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization). Talk to a live voice agent in your browser.",
   keywords: [
     "AI voice agent",
     "AI receptionist",
+    "business automation",
+    "AI workflows",
     "Meta Ads agency",
     "Google Ads agency",
     "generative engine optimization",
@@ -72,7 +74,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     description:
-      "Meet the AI that answers your phone. Talk to a live voice agent, then see how we fill your calendar with Meta Ads, Google Ads, and GEO.",
+      "Meet the AI that answers your phone. Talk to a live voice agent, then see the automations and ads that fill your calendar.",
     siteName: "Flow State",
   },
   twitter: {
