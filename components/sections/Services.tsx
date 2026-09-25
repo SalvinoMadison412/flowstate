@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import {
   IconBroadcast,
+  IconLoop,
   IconSearch,
   IconQuote,
   IconCheck,
@@ -23,6 +24,25 @@ type Service = {
 };
 
 const SERVICES: Service[] = [
+  {
+    id: "ai-automation",
+    kicker: "Automation",
+    title: "AI Automations & Workflows",
+    positioning:
+      "Stop doing the same task twice. We build the automations and AI workflows that connect your tools and handle the repetitive work, so your time goes to customers.",
+    covers: [
+      "Lead capture and follow-up: from a form or DM to a reply and a CRM entry, automatically",
+      "Booking workflows, reminders and confirmations",
+      "AI assistants that draft replies, summarise calls and sort inbound requests",
+      "Connecting the tools you already use, with no copy-pasting between them",
+      "Reporting that assembles itself from your ad, CRM and booking data",
+      "Custom workflows built around how your business actually runs",
+    ],
+    differentiator:
+      "Built by the same person who runs your marketing, so the automations are wired to the numbers you actually track instead of bolted on as a separate project.",
+    cta: { label: "Automate a workflow", href: "/contact" },
+    Icon: IconLoop,
+  },
   {
     id: "meta-ads",
     kicker: "Paid social",
@@ -87,11 +107,11 @@ export function Services() {
     <Section id="services">
       <SectionLabel>What we do</SectionLabel>
       <SectionHeading className="mt-4 max-w-3xl">
-        Three services. Each one stands on its own.
+        Four services. Each one stands on its own.
       </SectionHeading>
       <p className="mt-5 max-w-2xl text-lg text-text-secondary">
-        Meta Ads, Google Ads, and GEO. Different channels, different playbooks.
-        Hire us for the one you need &mdash; or all three.
+        AI automation, Meta Ads, Google Ads, and GEO. Different jobs, different
+        playbooks. Hire us for the one you need &mdash; or all of them.
       </p>
 
       <div className="mt-14 flex flex-col gap-4">

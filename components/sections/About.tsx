@@ -14,18 +14,20 @@ const FOUNDER = {
   bio: [
     "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's full marketing operation on the side — proving he could turn strategy into execution, not just slides.",
     "At Flow State, he brings both disciplines together: the rigor to read what Meta, Google, and AI-answer data are actually saying, and the creative judgment to act on it.",
+    "Beyond ads, Salvino builds the automations and AI workflows that sit behind a business: lead follow-up, booking, reporting and the repetitive work that eats a team's day.",
   ],
 };
 
 const PRINCIPLES = [
   { n: "01", title: "Data over instinct", body: "Every recommendation starts from what Meta, Google and AI-answer data are actually saying, not from what sounds good in a pitch." },
   { n: "02", title: "One point of contact", body: "No account managers and no hand-offs. The person who builds your strategy is the person who answers when you call." },
-  { n: "03", title: "Test, don't set and forget", body: "We iterate on creative, copy and bidding constantly, so the algorithms always have fresh signal to learn from." },
+  { n: "03", title: "Test, don't set and forget", body: "We iterate on creative, copy, bidding and workflows constantly, so nothing we build goes stale." },
   { n: "04", title: "Reported in plain numbers", body: "Monthly reporting on the numbers that matter for the channel: ROAS, CPA, conversions and audience growth." },
 ];
 
 const OFFERS = [
   { href: "/voice-agent", title: "AI Voice Agents", body: "An AI receptionist that answers every call and takes booking requests." },
+  { href: "/services#ai-automation", title: "AI Automations", body: "Workflows that connect your tools and handle the repetitive work." },
   { href: "/services#meta-ads", title: "Meta Ads", body: "Instagram and Facebook campaigns built on creative testing." },
   { href: "/services#google-ads", title: "Google Ads", body: "Search and Performance Max, tracked to conversions." },
   { href: "/services#geo", title: "GEO", body: "Getting recommended by ChatGPT, Perplexity, Gemini and Claude." },
@@ -54,7 +56,7 @@ export function About() {
 
           <div>
             <SectionHeading className="max-w-2xl">
-              Run by a founder who treats ad spend like it&apos;s their own money.
+              Run by a founder who builds the systems, not just the ads.
             </SectionHeading>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-text-secondary">
               Flow State is founded and run by Salvino Madison. No account
@@ -116,9 +118,9 @@ export function About() {
       <Section id="what-we-do">
         <SectionLabel>What we do</SectionLabel>
         <SectionHeading className="mt-4 max-w-2xl">
-          A voice agent for your phone. Marketing to make it ring.
+          Automation for the busywork. Marketing to bring customers in.
         </SectionHeading>
-        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {OFFERS.map((o) => (
             <Link
               key={o.title}

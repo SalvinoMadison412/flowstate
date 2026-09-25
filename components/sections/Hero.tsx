@@ -177,7 +177,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <p className="reveal-up font-mono text-xs uppercase tracking-[0.24em] text-text-secondary">
-            AI voice agents &nbsp;&middot;&nbsp; Ads &nbsp;&middot;&nbsp; GEO
+            AI voice agents &nbsp;&middot;&nbsp; Automation &nbsp;&middot;&nbsp; Ads &nbsp;&middot;&nbsp; GEO
           </p>
 
           <h1
@@ -191,9 +191,9 @@ export function Hero() {
             className="reveal-up mx-auto mt-6 max-w-xl text-lg text-text-secondary sm:text-xl lg:mx-0"
             style={{ animationDelay: "0.13s" }}
           >
-            Flow State builds voice agents that pick up every call, answer
-            questions and take booking requests, then runs the ads and AI search
-            that make the phone ring.
+            Flow State builds voice agents and AI workflows that handle your
+            calls, follow-ups and busywork, then runs the ads and AI search that
+            bring customers in.
           </p>
 
           <div

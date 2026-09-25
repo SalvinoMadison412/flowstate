@@ -9,6 +9,7 @@ const COLUMNS = [
     heading: "Services",
     links: [
       { label: "AI Voice Agents", href: "/voice-agent" },
+      { label: "AI Automations", href: "/services#ai-automation" },
       { label: "Meta Ads", href: "/services#meta-ads" },
       { label: "Google Ads", href: "/services#google-ads" },
       { label: "GEO — Generative Engine Optimization", href: "/services#geo" },
