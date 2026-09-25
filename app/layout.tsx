@@ -34,7 +34,11 @@ const ORG_JSON_LD = {
   email: "flowstate.agents@gmail.com",
   description:
     "Builds AI voice agents that answer business phones, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization) for local businesses.",
-  founder: { "@type": "Person", name: "Salvino Kevin Madison" },
+  founder: {
+    "@type": "Person",
+    name: "Salvino Kevin Madison",
+    sameAs: "https://www.linkedin.com/in/salvino-madison",
+  },
   knowsAbout: ["AI voice agents", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
 };
 
