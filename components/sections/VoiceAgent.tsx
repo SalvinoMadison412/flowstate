@@ -2,10 +2,7 @@
 
 import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
-import { Button } from "@/components/ui/Button";
-import { VoiceWaveform } from "@/components/ui/VoiceWaveform";
-import { EndCallButton } from "@/components/ui/EndCallButton";
-import { useVoiceCall } from "@/lib/useVoiceCall";
+import { CallStage } from "@/components/sections/CallStage";
 import { cn } from "@/lib/utils";
 
 const CALL = [
@@ -24,8 +21,6 @@ const POINTS = [
 ];
 
 export function VoiceAgent() {
-  const { status, error, toggle } = useVoiceCall();
-
   return (
     <Section id="voice-agent">
       <SectionLabel>Voice agents</SectionLabel>
@@ -38,7 +33,11 @@ export function VoiceAgent() {
         you can talk to a live one right now.
       </p>
 
-      <div className="mt-12 grid gap-6 lg:grid-cols-2">
+      <div className="mt-12">
+        <CallStage />
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Reveal className="rounded-2xl border border-border-active bg-surface-elevated p-6 sm:p-8">
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-text-secondary">
@@ -79,20 +78,6 @@ export function VoiceAgent() {
             ))}
           </Reveal>
 
-          <Reveal className="flex flex-wrap items-center gap-4 rounded-2xl border border-border-active bg-surface-elevated p-5 sm:p-6">
-            {status === "live" || status === "connecting" ? (
-              <EndCallButton />
-            ) : (
-              <Button variant="filled" size="lg" onClick={toggle}>
-                Talk to Maoshi
-              </Button>
-            )}
-            <VoiceWaveform className="w-[96px]" />
-            <span role="status" aria-live="polite" className="font-mono text-xs text-text-secondary">
-              {status === "live" && "Live. Say hello."}
-              {status === "error" && <span className="text-red-400">{error}</span>}
-            </span>
-          </Reveal>
         </div>
       </div>
 
