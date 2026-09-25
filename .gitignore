@@ -16,3 +16,12 @@ next-env.d.ts
 # unrelated local data files (not part of the site)
 /*.csv
 /*.xlsx
+
+# outreach tooling (local data pipeline, not part of the site)
+/outreach/
+
+# nested app deps
+node_modules/
+
+# strategy docs — never publish
+council/
