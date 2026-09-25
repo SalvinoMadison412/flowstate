@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import Link from "next/link";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
@@ -48,8 +49,16 @@ export const Button = forwardRef<HTMLButtonElement & HTMLAnchorElement, ButtonPr
     const classes = cn(base, variants[variant], sizes[size], className);
 
     if ("href" in props && props.href !== undefined) {
+      const { href, ...rest } = props;
+      // Client-side nav keeps the shared layout, and any live call, mounted.
+      if (href.startsWith("/"))
+        return (
+          <Link ref={ref} href={href} className={classes} {...rest}>
+            {children}
+          </Link>
+        );
       return (
-        <a ref={ref} className={classes} {...props}>
+        <a ref={ref} href={href} className={classes} {...rest}>
           {children}
         </a>
       );

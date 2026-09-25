@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
+import { VoiceWaveform } from "@/components/ui/VoiceWaveform";
+import { EndCallButton } from "@/components/ui/EndCallButton";
+import { useVoiceCall } from "@/lib/useVoiceCall";
 import { usePrefersReducedMotion } from "@/lib/useReveal";
 
 /* -------------------------------------------------------------------------- */
@@ -143,124 +147,100 @@ function ParticleField() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Floating "AI Visibility Score" card                                        */
-/* -------------------------------------------------------------------------- */
 
-function ScoreCard() {
-  // arc: 34/100 of a 260deg sweep
-  const radius = 34;
-  const circumference = 2 * Math.PI * radius;
-  const progress = 0.34;
+// three.js is loaded on the client only, after first paint.
+const VoiceOrb = dynamic(() => import("@/components/ui/VoiceOrb").then((m) => m.VoiceOrb), {
+  ssr: false,
+  loading: () => null,
+});
 
-  return (
-    <div
-      className="reveal-up pointer-events-none absolute bottom-8 right-4 hidden w-[230px] lg:block lg:right-10"
-      style={{ animationDelay: "0.4s" }}
-    >
-      <div className="float-y rounded-xl border border-border-subtle bg-surface/90 p-4 backdrop-blur-sm shadow-card-lift">
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary">
-            Visibility Index
-          </span>
-          <span className="font-mono text-[10px] text-accent">trending up</span>
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <div className="relative h-16 w-16">
-            <svg viewBox="0 0 80 80" className="h-full w-full -rotate-[130deg]">
-              <circle
-                cx="40"
-                cy="40"
-                r={radius}
-                fill="none"
-                stroke="#222222"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray={`${circumference * 0.72} ${circumference}`}
-              />
-              <circle
-                cx="40"
-                cy="40"
-                r={radius}
-                fill="none"
-                stroke="#FFFFFF"
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray={`${circumference * 0.72 * progress} ${circumference}`}
-              />
-            </svg>
-          </div>
-          <div className="leading-none">
-            <div className="flex items-end gap-1">
-              <span className="font-display text-3xl font-bold text-text-primary">
-                34
-              </span>
-              <span className="mb-1 font-mono text-xs text-text-secondary">
-                → 41
-              </span>
-            </div>
-            <span className="font-mono text-[10px] text-text-muted">
-              +7 this week
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
+const STATUS_COPY = {
+  idle: "Tap the orb or press the button. Allow your mic and say hello.",
+  connecting: "Connecting to Maoshi…",
+  live: "Live. Maoshi is listening. Say hello.",
+  error: "",
+} as const;
 
 export function Hero() {
+  const { status, error, toggle } = useVoiceCall();
+
   return (
     <section
       id="top"
-      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden px-5 pt-16"
+      className="relative flex min-h-[100svh] items-center overflow-hidden px-5 pb-12 pt-24 sm:px-8"
     >
       <ParticleField />
-      {/* vignette so the headline stays readable over the field */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(8,8,8,0.2)_0%,rgba(8,8,8,0.75)_70%,#080808_100%)]" />
 
       {/* Entrance is CSS-driven (see .reveal-up) so the LCP headline is never
           left mid-fade by a throttled tab. */}
-      <div className="relative z-10 mx-auto max-w-3xl text-center">
-        <p className="reveal-up font-mono text-xs uppercase tracking-[0.24em] text-text-secondary">
-          Meta Ads &nbsp;&middot;&nbsp; Google Ads &nbsp;&middot;&nbsp; GEO
-        </p>
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="order-2 text-center lg:order-1 lg:text-left">
+          <p className="reveal-up font-mono text-xs uppercase tracking-[0.24em] text-text-secondary">
+            AI voice agents &nbsp;&middot;&nbsp; Automation &nbsp;&middot;&nbsp; Ads &nbsp;&middot;&nbsp; GEO
+          </p>
 
-        <h1
-          className="reveal-up mt-5 font-display text-[1.9rem] font-bold leading-[1.08] tracking-display sm:text-5xl sm:leading-[1.05] md:text-6xl lg:text-7xl"
-          style={{ animationDelay: "0.06s" }}
-        >
-          <span className="block">Get found by AI.</span>
-          <span className="block">Get clicked on Google.</span>
-          <span className="block text-text-secondary">
-            Get discovered on Meta.
-          </span>
-        </h1>
+          <h1
+            className="reveal-up mt-5 font-display text-[2.1rem] font-bold leading-[1.06] tracking-display sm:text-5xl md:text-6xl"
+            style={{ animationDelay: "0.06s" }}
+          >
+            Meet the AI that <span className="text-accent">answers your phone.</span>
+          </h1>
 
-        <p
-          className="reveal-up mx-auto mt-6 max-w-xl text-lg text-text-secondary sm:text-xl"
-          style={{ animationDelay: "0.13s" }}
-        >
-          Flow State runs GEO, Google Ads, and Meta Ads for brands that want to
-          be visible everywhere their customers look &mdash; AI answers, search
-          results, and social feeds.
-        </p>
+          <p
+            className="reveal-up mx-auto mt-6 max-w-xl text-lg text-text-secondary sm:text-xl lg:mx-0"
+            style={{ animationDelay: "0.13s" }}
+          >
+            Flow State builds voice agents and AI workflows that handle your
+            calls, follow-ups and busywork, then runs the ads and AI search that
+            bring customers in.
+          </p>
 
-        <div
-          className="reveal-up mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <Button href="#audit" variant="filled" size="lg">
-            Book a free strategy call
-          </Button>
-          <Button href="#how-it-works" variant="ghost" size="lg">
-            See how it works
-          </Button>
+          <div
+            className="reveal-up mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start"
+            style={{ animationDelay: "0.2s" }}
+          >
+            {status === "live" || status === "connecting" ? (
+              <EndCallButton />
+            ) : (
+              <Button variant="filled" size="lg" onClick={toggle}>
+                Talk to Maoshi, live
+              </Button>
+            )}
+            <Button href="/contact" variant="ghost" size="lg">
+              Book a strategy call
+            </Button>
+          </div>
+
+          <div
+            className="reveal-up mt-7 flex flex-col items-center gap-3 sm:flex-row lg:justify-start"
+            style={{ animationDelay: "0.26s" }}
+          >
+            <VoiceWaveform className="w-[120px]" />
+            <p role="status" aria-live="polite" className="font-mono text-xs text-text-secondary">
+              {status === "error" ? <span className="text-red-400">{error}</span> : STATUS_COPY[status]}
+            </p>
+          </div>
+        </div>
+
+        <div className="relative order-1 mx-auto aspect-square w-full max-w-[280px] sm:max-w-[380px] lg:order-2 lg:max-w-[520px]">
+          {/* ripples while the call is live */}
+          {status === "live" &&
+            [0, 1, 2].map((i) => (
+              <span
+                key={i}
+                aria-hidden
+                className="orb-ripple pointer-events-none absolute inset-[12%] rounded-full border border-accent/40"
+                style={{ animationDelay: `${i * 0.9}s` }}
+              />
+            ))}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-[8%] rounded-full bg-accent/10 blur-3xl"
+          />
+          <VoiceOrb className="absolute inset-0" />
         </div>
       </div>
-
-      <ScoreCard />
     </section>
   );
 }

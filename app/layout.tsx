@@ -25,18 +25,38 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://flowstate.agency";
+const SITE_URL = "https://www.flowsstateagents.com";
+const ORG_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Flow State",
+  url: SITE_URL,
+  email: "flowstate.agents@gmail.com",
+  sameAs: ["https://www.instagram.com/flowstate.agents"],
+  description:
+    "Builds AI voice agents, automations and AI workflows for local businesses, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization).",
+  founder: {
+    "@type": "Person",
+    name: "Salvino Kevin Madison",
+    sameAs: "https://www.linkedin.com/in/salvino-madison",
+  },
+  knowsAbout: ["AI voice agents", "Business automation", "AI workflows", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
+      "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     template: "%s — Flow State",
   },
   description:
-    "Flow State is a marketing agency running Meta Ads, Google Ads, and GEO (Generative Engine Optimization). Get found by AI, get clicked on Google, get discovered on Meta.",
+    "Flow State builds AI voice agents, automations and AI workflows, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization). Talk to a live voice agent in your browser.",
   keywords: [
+    "AI voice agent",
+    "AI receptionist",
+    "business automation",
+    "AI workflows",
     "Meta Ads agency",
     "Google Ads agency",
     "generative engine optimization",
@@ -48,17 +68,18 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Flow State" }],
   creator: "Flow State",
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: SITE_URL,
-    title: "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
+    title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     description:
-      "Get found by AI. Get clicked on Google. Get discovered on Meta. One agency across all three channels.",
+      "Meet the AI that answers your phone. Talk to a live voice agent, then see the automations and ads that fill your calendar.",
     siteName: "Flow State",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flow State — Meta Ads, Google Ads, and GEO for the AI era",
+    title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
     description:
       "Get found by AI. Get clicked on Google. Get discovered on Meta.",
   },
@@ -88,6 +109,10 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-bg font-sans text-text-primary antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }}
+        />
         {/* Without JS the reveal classes never get `.is-visible` — force
             everything visible so content stays fully rendered and crawlable. */}
         <noscript>

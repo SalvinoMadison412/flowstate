@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useReveal } from "@/lib/useReveal";
+import { IconInstagram } from "@/components/ui/icons";
 import { submitLead, type LeadType, type ServiceInterest } from "@/lib/leads";
 
 const SERVICE_OPTIONS: { value: ServiceInterest; label: string }[] = [
+  { value: "voice_agent", label: "AI Voice Agent" },
+  { value: "automation", label: "AI Automation / Workflows" },
   { value: "meta_ads", label: "Meta Ads" },
   { value: "google_ads", label: "Google Ads" },
   { value: "geo", label: "GEO" },
@@ -76,8 +79,8 @@ export function FinalCTA() {
           Book a free strategy call.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-lg text-text-secondary">
-          Tell us where you want to grow. We&rsquo;ll show you which channels
-          &mdash; Meta, Google, GEO &mdash; get you there fastest. 30 minutes, no
+          Tell us where you want to grow. We&rsquo;ll show you what gets you there
+          fastest &mdash; a voice agent, an automation, Meta, Google or GEO. 30 minutes, no
           pitch.
         </p>
 
@@ -198,12 +201,22 @@ export function FinalCTA() {
 
             {status === "error" && (
               <p className="text-sm text-text-secondary">
-                Something went wrong. Email us at hello@flowstate.agency and
+                Something went wrong. Email us at flowstate.agents@gmail.com and
                 we&rsquo;ll sort it out.
               </p>
             )}
           </form>
         )}
+
+        <a
+          href="https://www.instagram.com/flowstate.agents"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-flex items-center gap-2 text-sm text-text-secondary transition-colors hover:text-text-primary"
+        >
+          <IconInstagram className="h-4 w-4" />
+          Follow @flowstate.agents on Instagram
+        </a>
       </div>
     </section>
   );
