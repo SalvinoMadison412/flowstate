@@ -1,0 +1,19 @@
+# Flow State
+
+> Flow State builds AI voice agents, automations and AI workflows and runs marketing, run by founder Salvino Madison. We help local businesses (salons, spas, med spas, clinics, cafés, boutique hotels, fitness studios) get more bookings through Meta Ads, Google Ads, and GEO (Generative Engine Optimization: getting recommended by ChatGPT, Perplexity, Gemini and Claude).
+
+## Services
+- AI automations and workflows: lead follow-up, booking workflows, reporting and connecting the tools a business already uses.
+- AI voice agents: answer business phones around the clock, take booking requests, hand off to your team. Built for multi-location and high-call-volume businesses. A live demo (Maoshi) is on the homepage.
+- Meta Ads: Instagram and Facebook campaigns, creative testing, retargeting.
+- Google Ads: Search and Performance Max campaigns, conversion tracking.
+- GEO: schema and entity markup, citation building, AI visibility monitoring.
+
+## Contact
+- Website: https://www.flowsstateagents.com
+- Talk to Maoshi, our live voice agent: https://www.flowsstateagents.com/voice-agent
+- Services: https://www.flowsstateagents.com/services
+- About the founder: https://www.flowsstateagents.com/about
+- Email: flowstate.agents@gmail.com
+- Instagram: https://www.instagram.com/flowstate.agents
+- Book a free 30-minute strategy call: https://www.flowsstateagents.com/contact
