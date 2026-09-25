@@ -16,10 +16,6 @@ export const OWNER_EMAIL =
 export const DIALER_IDENTITY =
   process.env.TWILIO_DIALER_IDENTITY || "flowstate-owner";
 
-/** Identity prefix for anonymous website-demo callers. The voice webhook routes
- *  these to the voice agent ONLY, never to a dialled number. */
-export const DEMO_PREFIX = "client:demo-";
-
 type TwilioEnv = {
   accountSid: string;
   authToken: string;
@@ -141,13 +137,6 @@ export function inboundTwiml(identity: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?><Response><Dial answerOnBridge="true"><Client>${xmlEscape(
     identity,
   )}</Client></Dial></Response>`;
-}
-
-/** TwiML for a website-demo call: hand the leg to the voice agent's own webhook. */
-export function demoTwiml(agentUrl: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?><Response><Redirect method="POST">${xmlEscape(
-    agentUrl,
-  )}</Redirect></Response>`;
 }
 
 /** TwiML fallback when a caller can't be connected. */
