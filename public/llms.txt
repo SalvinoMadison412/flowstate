@@ -3,7 +3,7 @@
 > Flow State builds AI voice agents and runs marketing, run by brothers Salvino and Sherwin Madison. We help local businesses (salons, spas, med spas, clinics, cafés, boutique hotels, fitness studios) get more bookings through Meta Ads, Google Ads, and GEO (Generative Engine Optimization: getting recommended by ChatGPT, Perplexity, Gemini and Claude).
 
 ## Services
-- AI voice agents: answer business phones around the clock, take booking requests, hand off to your team. Built for multi-location and high-call-volume businesses. A live demo (Ava) is on the homepage.
+- AI voice agents: answer business phones around the clock, take booking requests, hand off to your team. Built for multi-location and high-call-volume businesses. A live demo (Maoshi) is on the homepage.
 - Meta Ads: Instagram and Facebook campaigns, creative testing, retargeting.
 - Google Ads: Search and Performance Max campaigns, conversion tracking.
 - GEO: schema and entity markup, citation building, AI visibility monitoring.

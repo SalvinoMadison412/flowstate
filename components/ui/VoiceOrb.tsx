@@ -241,7 +241,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       ref={host}
       className={className}
       role="button"
-      aria-label={status === "live" ? "End call with Ava" : "Talk to Ava, our AI voice agent"}
+      aria-label={status === "live" ? "End call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
     >
       {noGL && (
         <div className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(0,200,240,0.5),rgba(0,200,240,0.05)_60%,transparent_70%)]" />

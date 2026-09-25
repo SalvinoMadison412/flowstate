@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 
 const CALL = [
   { who: "Caller", text: "Hi, do you have anything Saturday afternoon for a gel pedicure?" },
-  { who: "Ava", text: "I can take that request. What's your name and best number?" },
+  { who: "Maoshi", text: "I can take that request. What's your name and best number?" },
   { who: "Caller", text: "It's Priya, 555 0134." },
-  { who: "Ava", text: "Thanks Priya. I've noted Saturday afternoon, gel pedicure. The salon will text you to confirm the slot." },
+  { who: "Maoshi", text: "Thanks Priya. I've noted Saturday afternoon, gel pedicure. The salon will text you to confirm the slot." },
   { who: "Caller", text: "Can I talk to someone?" },
-  { who: "Ava", text: "Of course. Putting you through to the team now." },
+  { who: "Maoshi", text: "Of course. Putting you through to the team now." },
 ];
 
 const POINTS = [
@@ -29,7 +29,7 @@ export function VoiceAgent() {
     <Section id="voice-agent">
       <SectionLabel>Voice agents</SectionLabel>
       <SectionHeading className="mt-4 max-w-3xl">
-        Every missed call is a missed booking. Ava never misses one.
+        Every missed call is a missed booking. Maoshi never misses one.
       </SectionHeading>
       <p className="mt-6 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
         A Flow State voice agent works your phone line around the clock. It is
@@ -53,7 +53,7 @@ export function VoiceAgent() {
                 key={i}
                 className={cn(
                   "tx-line max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                  line.who === "Ava"
+                  line.who === "Maoshi"
                     ? "ml-auto rounded-br-sm border border-accent/30 bg-accent/10 text-text-primary"
                     : "rounded-bl-sm border border-border-active bg-surface text-text-secondary",
                 )}
@@ -80,7 +80,7 @@ export function VoiceAgent() {
 
           <Reveal className="flex flex-wrap items-center gap-4 rounded-2xl border border-border-active bg-surface-elevated p-5 sm:p-6">
             <Button variant="filled" size="md" onClick={toggle} disabled={status === "connecting"}>
-              {status === "live" ? "End call" : status === "connecting" ? "Connecting…" : "Talk to Ava"}
+              {status === "live" ? "End call" : status === "connecting" ? "Connecting…" : "Talk to Maoshi"}
             </Button>
             <VoiceWaveform className="w-[96px]" />
             <span role="status" aria-live="polite" className="font-mono text-xs text-text-secondary">

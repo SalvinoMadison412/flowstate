@@ -155,8 +155,8 @@ const VoiceOrb = dynamic(() => import("@/components/ui/VoiceOrb").then((m) => m.
 
 const STATUS_COPY = {
   idle: "Tap the orb or press the button. Allow your mic and say hello.",
-  connecting: "Connecting to Ava…",
-  live: "Live. Ava is listening. Say hello.",
+  connecting: "Connecting to Maoshi…",
+  live: "Live. Maoshi is listening. Say hello.",
   error: "",
 } as const;
 
@@ -200,7 +200,7 @@ export function Hero() {
             style={{ animationDelay: "0.2s" }}
           >
             <Button variant="filled" size="lg" onClick={toggle} disabled={status === "connecting"}>
-              {status === "live" ? "End call" : status === "connecting" ? "Connecting…" : "Talk to Ava, live"}
+              {status === "live" ? "End call" : status === "connecting" ? "Connecting…" : "Talk to Maoshi, live"}
             </Button>
             <Button href="#audit" variant="ghost" size="lg">
               Book a strategy call
