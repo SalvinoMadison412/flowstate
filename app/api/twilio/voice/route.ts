@@ -14,7 +14,9 @@
  * setup you can set TWILIO_SKIP_SIGNATURE_CHECK=true.
  */
 import {
+  DEMO_PREFIX,
   DIALER_IDENTITY,
+  demoTwiml,
   inboundTwiml,
   outboundTwiml,
   rejectTwiml,
@@ -61,6 +63,15 @@ export async function POST(req: Request) {
 
   const from = params.From || "";
   const to = (params.To || "").trim();
+
+  // Website demo: anonymous visitors reach the voice agent and nothing else.
+  // Must run before the outbound branch, which dials whatever `To` says.
+  if (from.startsWith(DEMO_PREFIX)) {
+    const agentUrl = process.env.DEMO_VOICE_AGENT_URL;
+    return agentUrl
+      ? xml(demoTwiml(agentUrl))
+      : xml(rejectTwiml("The demo agent is not available right now."));
+  }
 
   // Outbound: the leg originates from our registered client.
   if (from.startsWith("client:")) {
