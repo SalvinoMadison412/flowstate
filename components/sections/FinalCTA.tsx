@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useReveal } from "@/lib/useReveal";
+import { IconInstagram } from "@/components/ui/icons";
 import { submitLead, type LeadType, type ServiceInterest } from "@/lib/leads";
 
 const SERVICE_OPTIONS: { value: ServiceInterest; label: string }[] = [
@@ -205,6 +206,16 @@ export function FinalCTA() {
             )}
           </form>
         )}
+
+        <a
+          href="https://www.instagram.com/flowstate.agents"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-flex items-center gap-2 text-sm text-text-secondary transition-colors hover:text-text-primary"
+        >
+          <IconInstagram className="h-4 w-4" />
+          Follow @flowstate.agents on Instagram
+        </a>
       </div>
     </section>
   );

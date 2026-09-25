@@ -32,6 +32,7 @@ const ORG_JSON_LD = {
   name: "Flow State",
   url: SITE_URL,
   email: "flowstate.agents@gmail.com",
+  sameAs: ["https://www.instagram.com/flowstate.agents"],
   description:
     "Builds AI voice agents that answer business phones, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization) for local businesses.",
   founder: {
