@@ -25,7 +25,21 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://flowstate.agency";
+const SITE_URL = "https://www.flowsstateagents.com";
+const ORG_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Flow State",
+  url: SITE_URL,
+  email: "flowstate.agents@gmail.com",
+  description:
+    "Marketing agency running Meta Ads, Google Ads, and GEO (Generative Engine Optimization) for local businesses.",
+  founder: [
+    { "@type": "Person", name: "Salvino Kevin Madison" },
+    { "@type": "Person", name: "Sherwin Judas Madison" },
+  ],
+  knowsAbout: ["Meta Ads", "Google Ads", "Generative Engine Optimization"],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -88,6 +102,10 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-bg font-sans text-text-primary antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }}
+        />
         {/* Without JS the reveal classes never get `.is-visible` — force
             everything visible so content stays fully rendered and crawlable. */}
         <noscript>

@@ -29,7 +29,9 @@ export function CountUp({
 }: CountUpProps) {
   const { ref, shown } = useReveal<HTMLSpanElement>();
   const reduceMotion = usePrefersReducedMotion();
-  const [value, setValue] = useState(from);
+  // Start at the final value so server HTML, link previews and crawlers see
+  // the real number; the effect below restarts from `from` when revealed.
+  const [value, setValue] = useState(to);
 
   useEffect(() => {
     if (!shown) return;
@@ -38,6 +40,7 @@ export function CountUp({
       return;
     }
 
+    setValue(from);
     let frame = 0;
     const start = performance.now();
     const tick = (now: number) => {

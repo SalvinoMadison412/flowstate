@@ -1,10 +1,8 @@
 "use client";
 
 import { Section, SectionLabel } from "@/components/ui/Section";
-import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { CountUp } from "@/components/ui/CountUp";
-import { IconArrowRight } from "@/components/ui/icons";
 
 const RESULTS = [
   {
@@ -88,12 +86,6 @@ export function CaseStudy() {
           </div>
         </div>
 
-        <div className="mt-8">
-          <Button href="#audit" variant="ghost" size="md">
-            Read the full breakdown
-            <IconArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </Section>
   );
