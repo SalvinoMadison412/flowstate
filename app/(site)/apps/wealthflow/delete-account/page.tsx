@@ -12,6 +12,11 @@ const EMAIL = "salvinokevin7@gmail.com";
 export default function WealthFlowDelete() {
   return (
     <DocPage label="WealthFlow" title="Delete your WealthFlow account">
+      <p>
+        WealthFlow, by Salvino Madison. This page is the &ldquo;Delete account URL&rdquo; in the
+        Play listing; the same steps are in the <a href="/apps/wealthflow/privacy">privacy policy</a>.
+      </p>
+
       <h2>In the app (fastest)</h2>
       <ol>
         <li>Open WealthFlow and go to <strong>Menu &gt; Profile</strong>.</li>

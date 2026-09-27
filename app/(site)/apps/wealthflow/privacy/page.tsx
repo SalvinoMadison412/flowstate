@@ -11,7 +11,7 @@ const EMAIL = "salvinokevin7@gmail.com";
 
 export default function WealthFlowPrivacy() {
   return (
-    <DocPage label="WealthFlow" title="WealthFlow Privacy Policy" updated="26 September 2026">
+    <DocPage label="WealthFlow" title="WealthFlow Privacy Policy" updated="27 September 2026">
       <p>
         WealthFlow (&ldquo;the app&rdquo;, &ldquo;we&rdquo;) is a personal finance app for Android,
         operated by Salvino Madison, an individual developer. Contact:{" "}
@@ -93,7 +93,12 @@ export default function WealthFlowPrivacy() {
       </p>
 
       <h2>Children</h2>
-      <p>WealthFlow is for adults (18+). We do not knowingly collect data from children.</p>
+      <p>
+        WealthFlow can be used by people of any age. Children and teenagers should use it with the
+        permission and help of a parent or guardian. A parent or guardian can delete a child&apos;s
+        account and data at any time with Delete account in the app, or by emailing{" "}
+        <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+      </p>
 
       <h2>Changes</h2>
       <p>We will post changes on this page and update the date above.</p>
