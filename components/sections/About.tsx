@@ -12,6 +12,7 @@ const FOUNDERS = [
     role: "Founder",
     photo: "/founders/salvino.jpg",
     linkedin: "https://www.linkedin.com/in/salvino-madison",
+    email: "salvino@flowstateaiagents.com",
     bio: [
       "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's full marketing operation on the side, proving he could turn strategy into execution, not just slides.",
       "At Flow State, he brings both disciplines together: the rigor to read what Meta, Google, and AI-answer data are actually saying, and the creative judgment to act on it. He also builds the automations and AI workflows behind a business: lead follow-up, booking, reporting and the repetitive work that eats a team's day.",
@@ -82,15 +83,22 @@ export function About() {
                   {p}
                 </p>
               ))}
-              <a
-                href={f.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-auto inline-flex items-center gap-2 pt-6 text-sm text-text-primary underline-offset-4 hover:text-accent hover:underline"
-              >
-                <IconLinkedIn className="h-4 w-4" />
-                LinkedIn
-              </a>
+              <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-2 pt-6 text-sm text-text-primary">
+                <a
+                  href={f.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 underline-offset-4 hover:text-accent hover:underline"
+                >
+                  <IconLinkedIn className="h-4 w-4" />
+                  LinkedIn
+                </a>
+                {"email" in f && (
+                  <a href={`mailto:${f.email}`} className="underline-offset-4 hover:text-accent hover:underline">
+                    {f.email}
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </Reveal>
