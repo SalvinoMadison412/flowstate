@@ -1,5 +1,5 @@
 /** Persona + model for the website's "talk to our AI" demo (OpenAI Realtime). */
-export const REALTIME_MODEL = "gpt-realtime";
+export const REALTIME_MODEL = "gpt-realtime-2.1-mini";
 export const VOICE = "marin";
 
 export const GREETING_TRIGGER =
