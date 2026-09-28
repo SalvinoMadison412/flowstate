@@ -3,6 +3,7 @@ import { Logo } from "@/components/ui/Logo";
 import { IconInstagram, IconLinkedIn, IconX } from "@/components/ui/icons";
 
 const CONTACT_EMAIL = "flowstate.agents@gmail.com";
+const CONTACT_PHONE = "+1 (629) 281-8264";
 
 const COLUMNS = [
   {
@@ -55,6 +56,12 @@ export function Footer() {
               className="mt-4 inline-block text-sm text-text-primary underline-offset-4 hover:underline"
             >
               {CONTACT_EMAIL}
+            </a>
+            <a
+              href="tel:+16292818264"
+              className="mt-2 block text-sm text-text-primary underline-offset-4 hover:underline"
+            >
+              {CONTACT_PHONE}
             </a>
           </div>
 
