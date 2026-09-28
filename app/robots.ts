@@ -2,7 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/crm", "/api"] },
+    rules: [
+      { userAgent: "*", allow: "/", disallow: ["/crm", "/api"] },
+      { userAgent: "Google-Extended", allow: "/", disallow: ["/crm", "/api"] },
+    ],
     sitemap: "https://www.flowsstateagents.com/sitemap.xml",
   };
 }
