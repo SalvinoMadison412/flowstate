@@ -201,7 +201,8 @@ export function FinalCTA() {
 
             {status === "error" && (
               <p className="text-sm text-text-secondary">
-                Something went wrong. Email us at flowstate.agents@gmail.com and
+                Something went wrong. Call +1 (629) 281-8264 or email
+                flowstate.agents@gmail.com and
                 we&rsquo;ll sort it out.
               </p>
             )}
@@ -216,6 +217,12 @@ export function FinalCTA() {
         >
           <IconInstagram className="h-4 w-4" />
           Follow @flowstate.agents on Instagram
+        </a>
+        <a
+          href="tel:+16292818264"
+          className="mt-3 block text-sm text-text-secondary transition-colors hover:text-text-primary"
+        >
+          Or call us: +1 (629) 281-8264
         </a>
       </div>
     </section>
