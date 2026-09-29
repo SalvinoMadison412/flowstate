@@ -29,7 +29,28 @@ type Agency = {
   phone: string | null;
   inbox_enabled: string;
   emailed_at: string | null;
+  is_new: boolean;
 };
+
+type View = "new" | "call" | "inbox" | "contacted" | "all";
+
+/** Which list an agency belongs in. Contacted always wins; the rest are worked-but-not-emailed buckets. */
+const IN: Record<View, (r: Agency) => boolean> = {
+  all: () => true,
+  contacted: (r) => !!r.emailed_at,
+  call: (r) => !r.emailed_at && !!r.phone && !r.email,
+  inbox: (r) => !r.emailed_at && r.inbox_enabled === "linkedin",
+  // Freshly scraped and not yet touched or triaged into another bucket.
+  new: (r) => r.is_new && !r.emailed_at && !IN.call(r) && !IN.inbox(r),
+};
+
+const VIEWS: [View, string][] = [
+  ["new", "New leads"],
+  ["call", "Call only"],
+  ["inbox", "Inbox only"],
+  ["contacted", "Contacted"],
+  ["all", "All"],
+];
 
 const link = "text-accent underline underline-offset-4 hover:opacity-80";
 
@@ -42,25 +63,47 @@ function Ext({ href, children }: { href: string | null; children: React.ReactNod
   );
 }
 
-/** Text field that saves on blur, and only when the value changed. */
-function Field({ title, value, onSave, type = "text" }: {
-  title: string;
-  value: string | null;
-  onSave: (v: string | null) => void;
-  type?: string;
-}) {
-  const [v, setV] = useState(value ?? "");
+/** The three hand-typed fields. Edits stay in a draft until Save is clicked. */
+function Details({ r, onSave }: { r: Agency; onSave: (p: Partial<Agency>) => Promise<boolean> }) {
+  const [email, setEmail] = useState(r.email ?? "");
+  const [phone, setPhone] = useState(r.phone ?? "");
+  const [inbox, setInbox] = useState(r.inbox_enabled);
+  const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
+  const dirty = email.trim() !== (r.email ?? "") || phone.trim() !== (r.phone ?? "") || inbox !== r.inbox_enabled;
+
+  async function submit() {
+    setState("saving");
+    const ok = await onSave({ email: email.trim() || null, phone: phone.trim() || null, inbox_enabled: inbox });
+    setState(ok ? "saved" : "idle");
+  }
+
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className={label}>{title}</span>
-      <input
-        type={type}
-        value={v}
-        onChange={(e) => setV(e.target.value)}
-        onBlur={() => v.trim() !== (value ?? "") && onSave(v.trim() || null)}
-        className={input}
-      />
-    </label>
+    <>
+      <label className="flex flex-col gap-1.5">
+        <span className={label}>Email address</span>
+        <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setState("idle"); }} className={input} />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className={label}>Phone number</span>
+        <input type="tel" value={phone} onChange={(e) => { setPhone(e.target.value); setState("idle"); }} className={input} />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className={label}>LinkedIn inbox / email enabled</span>
+        <select value={inbox} onChange={(e) => { setInbox(e.target.value); setState("idle"); }} className={input}>
+          {INBOX.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+      </label>
+      <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-3">
+        <button
+          onClick={() => void submit()}
+          disabled={!dirty || state === "saving"}
+          className="h-9 rounded-full bg-white px-5 text-sm font-medium text-bg disabled:opacity-40"
+        >
+          {state === "saving" ? "Saving…" : "Save"}
+        </button>
+        {state === "saved" && !dirty && <span className="text-sm text-accent">Saved</span>}
+      </div>
+    </>
   );
 }
 
@@ -77,7 +120,7 @@ function Info({ title, children }: { title: string; children: React.ReactNode })
 export function AgencyList() {
   const [rows, setRows] = useState<Agency[]>([]);
   const [q, setQ] = useState("");
-  const [view, setView] = useState<"all" | "new" | "contacted">("all");
+  const [view, setView] = useState<View>("new");
   const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,16 +134,17 @@ export function AgencyList() {
       .then(({ data, error }) => (error ? setError(error.message) : setRows(data as Agency[])));
   }, []);
 
-  async function save(id: string, patch: Partial<Agency>) {
+  async function save(id: string, patch: Partial<Agency>): Promise<boolean> {
     setError(null);
     const { error } = await supabase.from(TABLE).update(patch).eq("id", id);
-    if (error) return setError(error.message); // e.g. email already on another agency
+    if (error) return setError(error.message), false; // e.g. email already on another agency
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    return true;
   }
 
   const needle = q.toLowerCase();
-  const count = { all: rows.length, contacted: rows.filter((r) => r.emailed_at).length, new: rows.filter((r) => !r.emailed_at).length };
-  const shown = rows.filter((r) => view === "all" || (view === "contacted") === !!r.emailed_at).filter((r) =>
+  const count = Object.fromEntries(VIEWS.map(([v]) => [v, rows.filter(IN[v]).length])) as Record<View, number>;
+  const shown = rows.filter(IN[view]).filter((r) =>
     [r.agency_name, r.target_niche, r.founder_name, r.country, r.email]
       .some((f) => f?.toLowerCase().includes(needle)),
   );
@@ -118,8 +162,8 @@ export function AgencyList() {
           className={`${input} h-9 max-w-sm text-sm`}
         />
       </div>
-      <div className="mt-4 flex gap-2">
-        {([["all", "All"], ["new", "New leads"], ["contacted", "Contacted"]] as const).map(([v, l]) => (
+      <div className="mt-4 flex flex-wrap gap-2">
+        {VIEWS.map(([v, l]) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -203,18 +247,7 @@ export function AgencyList() {
                   <Info title="Agency LinkedIn">
                     {r.agency_linkedin && <a href={r.agency_linkedin} target="_blank" rel="noreferrer noopener" className={link}>Open company page</a>}
                   </Info>
-                  <Field title="Email address" type="email" value={r.email} onSave={(v) => save(r.id, { email: v })} />
-                  <Field title="Phone number" type="tel" value={r.phone} onSave={(v) => save(r.id, { phone: v })} />
-                  <label className="flex flex-col gap-1.5">
-                    <span className={label}>LinkedIn inbox / email enabled</span>
-                    <select
-                      value={r.inbox_enabled}
-                      onChange={(e) => save(r.id, { inbox_enabled: e.target.value })}
-                      className={input}
-                    >
-                      {INBOX.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
-                  </label>
+                  <Details r={r} onSave={(p) => save(r.id, p)} />
                   <div className="sm:col-span-2 lg:col-span-3">
                     <button
                       onClick={() => save(r.id, { emailed_at: r.emailed_at ? null : new Date().toISOString() })}
