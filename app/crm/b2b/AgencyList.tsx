@@ -32,7 +32,7 @@ type Agency = {
   is_new: boolean;
 };
 
-type View = "new" | "email" | "inbox" | "call" | "contacted" | "all";
+type View = "new" | "email" | "inbox" | "call" | "none" | "contacted" | "all";
 
 const hasInbox = (r: Agency) => r.inbox_enabled === "linkedin" || r.inbox_enabled === "both";
 
@@ -46,8 +46,10 @@ const IN: Record<View, (r: Agency) => boolean> = {
   email: (r) => !r.emailed_at && !!r.email,
   inbox: (r) => !r.emailed_at && !r.email && hasInbox(r),
   call: (r) => !r.emailed_at && !r.email && !hasInbox(r) && !!r.phone,
+  // Marked "Neither" with nothing to reach them on: a dead end, parked here.
+  none: (r) => !r.emailed_at && !r.email && !r.phone && r.inbox_enabled === "neither",
   // Freshly scraped and not yet triaged into a channel.
-  new: (r) => r.is_new && !r.emailed_at && !IN.email(r) && !IN.inbox(r) && !IN.call(r),
+  new: (r) => r.is_new && !r.emailed_at && !IN.email(r) && !IN.inbox(r) && !IN.call(r) && !IN.none(r),
 };
 
 const VIEWS: [View, string][] = [
@@ -55,6 +57,7 @@ const VIEWS: [View, string][] = [
   ["email", "Email"],
   ["inbox", "Inbox only"],
   ["call", "Call only"],
+  ["none", "No contact"],
   ["contacted", "Contacted"],
   ["all", "All"],
 ];
