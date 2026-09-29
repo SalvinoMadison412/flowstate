@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { input, card } from "../ui";
+import { cn } from "@/lib/utils";
+import { input, label, card } from "../ui";
 
 const TABLE = "crm_agencies";
 
@@ -42,22 +43,33 @@ function Ext({ href, children }: { href: string | null; children: React.ReactNod
 }
 
 /** Text field that saves on blur, and only when the value changed. */
-function Cell({ value, onSave, type = "text", placeholder }: {
+function Field({ title, value, onSave, type = "text" }: {
+  title: string;
   value: string | null;
   onSave: (v: string | null) => void;
   type?: string;
-  placeholder: string;
 }) {
   const [v, setV] = useState(value ?? "");
   return (
-    <input
-      type={type}
-      value={v}
-      placeholder={placeholder}
-      onChange={(e) => setV(e.target.value)}
-      onBlur={() => v.trim() !== (value ?? "") && onSave(v.trim() || null)}
-      className={`${input} h-9 min-w-[11rem] text-sm`}
-    />
+    <label className="flex flex-col gap-1.5">
+      <span className={label}>{title}</span>
+      <input
+        type={type}
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        onBlur={() => v.trim() !== (value ?? "") && onSave(v.trim() || null)}
+        className={input}
+      />
+    </label>
+  );
+}
+
+function Info({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className={label}>{title}</span>
+      <span className="text-sm text-text-primary">{children || <span className="text-text-muted">—</span>}</span>
+    </div>
   );
 }
 
@@ -65,6 +77,7 @@ function Cell({ value, onSave, type = "text", placeholder }: {
 export function AgencyList() {
   const [rows, setRows] = useState<Agency[]>([]);
   const [q, setQ] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -103,54 +116,103 @@ export function AgencyList() {
           className={`${input} h-9 max-w-sm text-sm`}
         />
       </div>
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+      {error && (
+        <p className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>
+      )}
 
-      <div className={`${card} mt-4 overflow-x-auto`}>
-        <table className="w-full min-w-[1300px] text-left text-sm">
-          <thead className="text-xs uppercase tracking-wide text-text-muted">
-            <tr>
-              {["Agency", "Niche", "Website", "Founder", "Founder LinkedIn", "Agency LinkedIn", "Country", "Added", "Email", "Phone", "LinkedIn inbox / email", "Emailed"].map((h) => (
-                <th key={h} className="whitespace-nowrap px-3 py-3 font-normal">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((r) => (
-              <tr key={r.id} className="border-t border-border-subtle align-middle">
-                <td className="px-3 py-2 font-medium">{r.agency_name}</td>
-                <td className="px-3 py-2">{r.target_niche}</td>
-                <td className="px-3 py-2"><Ext href={r.website}>{r.website?.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}</Ext></td>
-                <td className="px-3 py-2">{r.founder_name}</td>
-                <td className="px-3 py-2"><Ext href={r.founder_linkedin}>Profile</Ext></td>
-                <td className="px-3 py-2"><Ext href={r.agency_linkedin}>Company</Ext></td>
-                <td className="px-3 py-2">{r.country}</td>
-                <td className="whitespace-nowrap px-3 py-2">{r.date_added}</td>
-                <td className="px-3 py-2"><Cell type="email" placeholder="Email" value={r.email} onSave={(v) => save(r.id, { email: v })} /></td>
-                <td className="px-3 py-2"><Cell type="tel" placeholder="Phone" value={r.phone} onSave={(v) => save(r.id, { phone: v })} /></td>
-                <td className="px-3 py-2">
-                  <select
-                    value={r.inbox_enabled}
-                    onChange={(e) => save(r.id, { inbox_enabled: e.target.value })}
-                    className={`${input} h-9 text-sm`}
-                  >
-                    {INBOX.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                  </select>
-                </td>
-                <td className="whitespace-nowrap px-3 py-2">
-                  {r.emailed_at ? r.emailed_at.slice(0, 10) : (
-                    <button
-                      onClick={() => save(r.id, { emailed_at: new Date().toISOString() })}
-                      className="text-text-secondary underline underline-offset-4 hover:text-text-primary"
-                    >
-                      Mark emailed
-                    </button>
+      <ul className="mt-4 flex flex-col gap-2">
+        {shown.map((r) => {
+          const open = openId === r.id;
+          return (
+            <li key={r.id} className={cn(card, "transition-colors", open && "border-text-muted")}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setOpenId(open ? null : r.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setOpenId(open ? null : r.id);
+                  }
+                }}
+                className="flex cursor-pointer flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4"
+              >
+                <div className="min-w-0 flex-1 basis-56">
+                  <p className="truncate font-medium text-text-primary">{r.agency_name}</p>
+                  <p className="mt-0.5 truncate text-sm text-text-secondary">
+                    {r.founder_name}
+                    {r.founder_name && r.website && " · "}
+                    {r.website && (
+                      <a
+                        href={r.website}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
+                      >
+                        {r.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                      </a>
+                    )}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {r.country && (
+                    <span className="hidden rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-text-secondary sm:inline">
+                      {r.country}
+                    </span>
                   )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  {r.target_niche && (
+                    <span className="hidden max-w-[16rem] truncate rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-text-secondary sm:inline">
+                      {r.target_niche}
+                    </span>
+                  )}
+                  <span className="shrink-0 rounded-full border border-border-active px-2.5 py-1 text-[11px] text-text-secondary">
+                    {r.emailed_at ? `emailed ${r.emailed_at.slice(0, 10)}` : "not emailed"}
+                  </span>
+                </div>
+                <span aria-hidden className={cn("shrink-0 text-text-muted transition-transform duration-200", open && "rotate-180")}>
+                  &#9662;
+                </span>
+              </div>
+
+              {open && (
+                <div className="grid gap-5 border-t border-border-subtle p-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <Info title="Niche">{r.target_niche}</Info>
+                  <Info title="Country">{r.country}</Info>
+                  <Info title="Added">{r.date_added}</Info>
+                  <Info title="Founder / CEO">{r.founder_name}</Info>
+                  <Info title="Founder LinkedIn">
+                    {r.founder_linkedin && <a href={r.founder_linkedin} target="_blank" rel="noreferrer noopener" className={link}>Open profile</a>}
+                  </Info>
+                  <Info title="Agency LinkedIn">
+                    {r.agency_linkedin && <a href={r.agency_linkedin} target="_blank" rel="noreferrer noopener" className={link}>Open company page</a>}
+                  </Info>
+                  <Field title="Email address" type="email" value={r.email} onSave={(v) => save(r.id, { email: v })} />
+                  <Field title="Phone number" type="tel" value={r.phone} onSave={(v) => save(r.id, { phone: v })} />
+                  <label className="flex flex-col gap-1.5">
+                    <span className={label}>LinkedIn inbox / email enabled</span>
+                    <select
+                      value={r.inbox_enabled}
+                      onChange={(e) => save(r.id, { inbox_enabled: e.target.value })}
+                      className={input}
+                    >
+                      {INBOX.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                    </select>
+                  </label>
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <button
+                      onClick={() => save(r.id, { emailed_at: r.emailed_at ? null : new Date().toISOString() })}
+                      className="h-9 rounded-full border border-dashed border-border-active px-4 text-sm text-text-secondary hover:border-white hover:text-text-primary"
+                    >
+                      {r.emailed_at ? "Clear emailed" : "Mark emailed"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
