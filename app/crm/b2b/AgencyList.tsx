@@ -32,22 +32,29 @@ type Agency = {
   is_new: boolean;
 };
 
-type View = "new" | "call" | "inbox" | "contacted" | "all";
+type View = "new" | "email" | "inbox" | "call" | "contacted" | "all";
 
-/** Which list an agency belongs in. Contacted always wins; the rest are worked-but-not-emailed buckets. */
+const hasInbox = (r: Agency) => r.inbox_enabled === "linkedin" || r.inbox_enabled === "both";
+
+/**
+ * Outreach priority: email, then LinkedIn inbox, then phone. Each un-emailed
+ * lead sits in exactly one of email / inbox / call, by its best channel.
+ */
 const IN: Record<View, (r: Agency) => boolean> = {
   all: () => true,
   contacted: (r) => !!r.emailed_at,
-  call: (r) => !r.emailed_at && !!r.phone && !r.email,
-  inbox: (r) => !r.emailed_at && r.inbox_enabled === "linkedin",
-  // Freshly scraped and not yet touched or triaged into another bucket.
-  new: (r) => r.is_new && !r.emailed_at && !IN.call(r) && !IN.inbox(r),
+  email: (r) => !r.emailed_at && !!r.email,
+  inbox: (r) => !r.emailed_at && !r.email && hasInbox(r),
+  call: (r) => !r.emailed_at && !r.email && !hasInbox(r) && !!r.phone,
+  // Freshly scraped and not yet triaged into a channel.
+  new: (r) => r.is_new && !r.emailed_at && !IN.email(r) && !IN.inbox(r) && !IN.call(r),
 };
 
 const VIEWS: [View, string][] = [
   ["new", "New leads"],
-  ["call", "Call only"],
+  ["email", "Email"],
   ["inbox", "Inbox only"],
+  ["call", "Call only"],
   ["contacted", "Contacted"],
   ["all", "All"],
 ];
