@@ -77,6 +77,7 @@ function Info({ title, children }: { title: string; children: React.ReactNode })
 export function AgencyList() {
   const [rows, setRows] = useState<Agency[]>([]);
   const [q, setQ] = useState("");
+  const [view, setView] = useState<"all" | "new" | "contacted">("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,7 +99,8 @@ export function AgencyList() {
   }
 
   const needle = q.toLowerCase();
-  const shown = rows.filter((r) =>
+  const count = { all: rows.length, contacted: rows.filter((r) => r.emailed_at).length, new: rows.filter((r) => !r.emailed_at).length };
+  const shown = rows.filter((r) => view === "all" || (view === "contacted") === !!r.emailed_at).filter((r) =>
     [r.agency_name, r.target_niche, r.founder_name, r.country, r.email]
       .some((f) => f?.toLowerCase().includes(needle)),
   );
@@ -115,6 +117,20 @@ export function AgencyList() {
           placeholder="Search name, niche, founder, country, email"
           className={`${input} h-9 max-w-sm text-sm`}
         />
+      </div>
+      <div className="mt-4 flex gap-2">
+        {([["all", "All"], ["new", "New leads"], ["contacted", "Contacted"]] as const).map(([v, l]) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={cn(
+              "h-9 rounded-full border px-4 text-sm transition-colors",
+              view === v ? "border-white bg-white text-bg" : "border-border-subtle text-text-secondary hover:border-border-active",
+            )}
+          >
+            {l} <span className="opacity-60">{count[v]}</span>
+          </button>
+        ))}
       </div>
       {error && (
         <p className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>
