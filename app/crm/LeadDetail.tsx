@@ -13,6 +13,7 @@ import {
   OFFERINGS,
   today,
   igUrl,
+  linkedinUrls,
   siteUrl,
   prettyUrl,
   type Channel,
@@ -100,6 +101,7 @@ export function LeadDetail({
   const isCall = viewChannel === "cold_call";
   const ig = lead.contact ? igUrl(lead.contact) : null;
   const site = lead.website ? siteUrl(lead.website) : null;
+  const li = linkedinUrls(lead.notes);
 
   const [touches, setTouches] = useState<Touch[] | null>(null);
   const [notes, setNotes] = useState(lead.notes ?? "");
@@ -226,7 +228,17 @@ export function LeadDetail({
                     {prettyUrl(site)}
                   </ExternalLink>
                 )}
-                {!ig && !site && (
+                {li.person && (
+                  <ExternalLink href={li.person} label="LinkedIn">
+                    {prettyUrl(li.person)}
+                  </ExternalLink>
+                )}
+                {li.company && (
+                  <ExternalLink href={li.company} label="Company LinkedIn">
+                    {prettyUrl(li.company)}
+                  </ExternalLink>
+                )}
+                {!ig && !site && !li.person && !li.company && (
                   <p className="text-sm text-text-muted">No links on file.</p>
                 )}
                 {lead.maps_rank != null && (
