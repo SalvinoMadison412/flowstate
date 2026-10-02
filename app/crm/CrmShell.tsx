@@ -14,6 +14,7 @@ const TABS = [
   { label: "Dashboard", href: "/crm" },
   { label: "Cold calls", href: CHANNELS.cold_call.href },
   { label: "Instagram & email", href: CHANNELS.outreach.href },
+  { label: "Niche", href: CHANNELS.niche.href },
   { label: "B2B", href: "/crm/b2b" },
 ];
 

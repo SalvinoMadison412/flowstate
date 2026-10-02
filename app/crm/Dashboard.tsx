@@ -35,6 +35,7 @@ const blank = (): ChannelTotals => ({
 function channelLabel(channels: Channel[]): string {
   const call = channels.includes("cold_call");
   const out = channels.includes("outreach");
+  if (channels.includes("niche") && !call && !out) return "Niche";
   if (call && out) return "Call + IG / email";
   return call ? "Call" : "IG / email";
 }
@@ -43,6 +44,7 @@ export function Dashboard() {
   const [totals, setTotals] = useState<Record<Channel, ChannelTotals>>({
     cold_call: blank(),
     outreach: blank(),
+    niche: blank(),
   });
   const [dueList, setDueList] = useState<Lead[]>([]);
   const [time, setTime] = useState<{
@@ -131,7 +133,7 @@ export function Dashboard() {
 
   return (
     <>
-      <div className="mt-6 grid gap-4 xl:grid-cols-2">
+      <div className="mt-6 grid gap-4 xl:grid-cols-3">
         {CHANNEL_KEYS.map((ch) => {
           const cfg = CHANNELS[ch];
           const t = totals[ch];
