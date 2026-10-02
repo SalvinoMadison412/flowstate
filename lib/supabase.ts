@@ -82,7 +82,7 @@ export const STAGES: { key: Stage; label: string; short: string }[] = [
 export const LEADS_VIEW = "crm_leads_staged";
 export const LEADS_TABLE = "crm_leads";
 
-export type Channel = "cold_call" | "outreach";
+export type Channel = "cold_call" | "outreach" | "niche";
 
 /**
  * The two channels differ in three ways only: what identifies a lead (phone vs
@@ -116,6 +116,14 @@ export const CHANNELS = {
       "No reply",
       "DMs restricted",
     ],
+  },
+  // Direct (non-agency) clients from the niche sourcing routine: owner + LinkedIn + email.
+  niche: {
+    label: "Niche",
+    market: "Direct clients by niche",
+    href: "/crm/niche",
+    gap: 5,
+    outcomes: ["Email sent", "DM sent", "Replied", "No reply", "Meeting booked"],
   },
 } as const satisfies Record<
   Channel,
