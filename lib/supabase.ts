@@ -234,6 +234,19 @@ export function igUrl(contact: string): string | null {
     : null;
 }
 
+/**
+ * LinkedIn profile / company URLs live inside `notes` ("Founder LinkedIn: <url> · Company
+ * LinkedIn: <url>") because crm_leads has no LinkedIn columns. Pull them back out.
+ */
+export function linkedinUrls(notes: string | null): { person: string | null; company: string | null } {
+  const urls = notes?.match(/https?:\/\/(?:[a-z]{2,3}\.)?linkedin\.com\/(?:in|company)\/[^\s·,;)]+/gi) ?? [];
+  const clean = (u: string) => u.replace(/[.\/]+$/, "");
+  return {
+    person: urls.map(clean).find((u) => /\/in\//i.test(u)) ?? null,
+    company: urls.map(clean).find((u) => /\/company\//i.test(u)) ?? null,
+  };
+}
+
 /** Add the scheme a pasted domain is usually missing. */
 export function siteUrl(website: string): string | null {
   const v = website.trim();
