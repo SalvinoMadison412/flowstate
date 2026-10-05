@@ -28,7 +28,7 @@ export function Section({
       ref={ref}
       id={id}
       className={cn(
-        "reveal relative px-5 py-20 sm:px-8 sm:py-28",
+        "reveal relative px-5 py-14 sm:px-8 sm:py-20",
         shown && "is-visible",
         className,
       )}
