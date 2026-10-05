@@ -14,7 +14,7 @@ const VoiceOrb = dynamic(() => import("@/components/ui/VoiceOrb").then((m) => m.
   loading: () => null,
 });
 
-type Who = "idle" | "maoshi" | "you";
+type Who = "idle" | "agent" | "you";
 
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
@@ -29,6 +29,15 @@ export function CallStage() {
   const [who, setWho] = useState<Who>("idle");
   const [secs, setSecs] = useState(0);
   const live = status === "live";
+  const [inApp, setInApp] = useState(false);
+  useEffect(() => setInApp(/Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent)), []);
+  const prev = useRef(status);
+  const [ended, setEnded] = useState(false);
+  useEffect(() => {
+    if (prev.current === "live" && status === "idle") setEnded(true);
+    if (status === "connecting") setEnded(false);
+    prev.current = status;
+  }, [status]);
 
   // Rings + speaker label follow the audio levels at frame rate; state only
   // updates when the speaker actually changes, so React barely re-renders.
@@ -44,7 +53,7 @@ export function CallStage() {
     const tick = (now: number) => {
       const { agent, mic } = levels.current;
       const level = Math.max(agent, mic * 0.7);
-      const next: Who = agent > 0.06 && agent >= mic ? "maoshi" : mic > 0.08 ? "you" : "idle";
+      const next: Who = agent > 0.06 && agent >= mic ? "agent" : mic > 0.08 ? "you" : "idle";
       if (next !== "idle") quietSince = now;
       // hold the last speaker for a moment so the label doesn't flicker between words
       const shown = next === "idle" && now - quietSince < 500 ? current : next;
@@ -73,8 +82,8 @@ export function CallStage() {
     status === "connecting"
       ? "Connecting…"
       : live
-        ? who === "maoshi"
-          ? "Maoshi is speaking"
+        ? who === "agent"
+          ? "Intake assistant is speaking"
           : who === "you"
             ? "Listening to you"
             : "Say hello"
@@ -98,7 +107,7 @@ export function CallStage() {
       />
 
       <div className="relative grid items-center gap-8 md:grid-cols-[1fr_1fr]">
-        <div className="relative mx-auto aspect-square w-full max-w-[300px] sm:max-w-[400px]">
+        <div className="relative mx-auto aspect-square w-full max-w-[18.75rem] sm:max-w-[25rem]">
           {[0, 1, 2].map((i) => (
             <span
               key={i}
@@ -128,25 +137,42 @@ export function CallStage() {
           </div>
 
           <h3 className="mt-5 font-display text-2xl font-bold tracking-display sm:text-3xl">
-            {live ? "You're talking to Maoshi." : "Talk to Maoshi, live."}
+            {live ? "You're on the line with Hartley & Moore." : "Call a law firm's intake line, live."}
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-text-secondary">
             {live
-              ? "Ask about Flow State, or say you'd like to book a strategy call. Calls end automatically after 5 minutes."
-              : "Allow your microphone and say hello. Drag or click the orb, or use the button."}
+              ? "Use made-up details. Calls end automatically after 5 minutes."
+              : "Hartley & Moore is a made-up firm. Play a caller who was just in an accident. Allow your microphone and say hello."}
           </p>
 
-          <VoiceWaveform className="mx-auto mt-6 h-14 w-[220px] md:mx-0" />
+          <VoiceWaveform className="mx-auto mt-6 h-14 w-[13.75rem] md:mx-0" />
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:justify-start">
             {live || status === "connecting" ? (
               <EndCallButton />
             ) : (
               <Button variant="filled" size="lg" onClick={toggle}>
-                Talk to Maoshi
+                Start the demo call
+              </Button>
+            )}
+            {ended && !live && status !== "connecting" && (
+              <Button href="/contact" variant="outline" size="lg" data-track="post_call">
+                Get one trained on your firm
               </Button>
             )}
           </div>
+          {ended && !live && status !== "connecting" && (
+            <p className="mt-3 text-sm text-text-secondary">Want this answering your firm&apos;s phones? Tell us how your intake works.</p>
+          )}
+          <p className="mt-5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">Try saying</p>
+          <ul className="mt-2 flex flex-wrap justify-center gap-2 md:justify-start">
+            {["“I was rear-ended last night.”", "“Do I have a case?”", "“Can I talk to a lawyer?”"].map((t) => (
+              <li key={t} className="rounded-full border border-border-active px-3 py-1 text-xs text-text-secondary">{t}</li>
+            ))}
+          </ul>
+          {inApp && !live && (
+            <p className="mt-4 text-xs text-text-secondary">Opened from Instagram or Facebook? Tap ••• and choose “Open in browser” so the demo can use your microphone.</p>
+          )}
           {status === "error" && <p className="mt-4 font-mono text-xs text-red-400">{error}</p>}
         </div>
       </div>
