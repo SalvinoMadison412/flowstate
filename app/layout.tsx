@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import MaoshiStage from "@/components/maoshi/MaoshiStage";
 
 // Fallback display face — used until/unless Cal Sans (CDN, see <head> below)
 // loads. Both are wide, heavy grotesques.
@@ -114,6 +115,12 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/index.css"
         />
+        <link
+          rel="preload"
+          href="/maoshi/maoshi.glb"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="bg-bg font-sans text-text-primary antialiased">
         <script
@@ -126,6 +133,7 @@ export default function RootLayout({
           <style>{`.reveal,.reveal-stagger>*{opacity:1!important;transform:none!important}`}</style>
         </noscript>
         {children}
+        <MaoshiStage />
       </body>
     </html>
   );
