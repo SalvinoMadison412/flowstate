@@ -15,6 +15,9 @@ export type Placement = { x: number; footY: number; h: number; flip?: boolean };
 export type FrameInfo = { x: number; y: number; w: number; h: number }; // screen box around the model, for the hit-target button
 
 /** Cursor tracking pauses while scrolling and resumes this long after the last scroll event. */
+// skin = what Blender's viewport shows: neutral soft white-grey (not cream). Tune SKIN (hex) for tone, SKIN_GLOW (0-1) for flatness/brightness.
+const SKIN = 0xd9d8d6, SKIN_GLOW = 0.3;
+const BLINK_MIN = 0.14, EYE_FWD = 0.006;       // eye closes to 14% height; eyes sit 6 mm proud of the head
 const TRACK_RESUME_MS = 1000;
 
 /** Played when he goes from the nav back to the hero (scroll up): the simple Hop, travelling in an arc. */
@@ -94,7 +97,7 @@ export class MaoshiEngine {
         m.frustumCulled = false;
         const mat = m.material as THREE.MeshStandardMaterial;
         if (o.name.startsWith('Eye')) mat.envMapIntensity = 1.4;
-        else { mat.envMapIntensity = 0.05; mat.roughness = 0.95; mat.metalness = 0; mat.emissive.copy(mat.color).multiplyScalar(0.45); }   // flat, matte Baymax vinyl: no dark shading
+        else { mat.envMapIntensity = 0.05; mat.roughness = 0.95; mat.metalness = 0; mat.color.set(SKIN); mat.emissive.copy(mat.color).multiplyScalar(SKIN_GLOW); }   // flat, matte Baymax vinyl: no dark shading
       }
       if (/^Eye_[LR]$/.test(o.name)) this.eyes.push({ o, s: o.scale.clone(), p: o.position.clone() });
     });
@@ -237,8 +240,10 @@ export class MaoshiEngine {
     else if (this.blinkTwice && this.blinkT > 0.2 && this.blinkT < 0.36) open = Math.abs(Math.cos(((this.blinkT - 0.2) / 0.16) * Math.PI));
     const widen = 1 + (this.voice === 'listening' ? 0.06 : 0) + this.agentSm * 0.05;
     for (const e of this.eyes) {
-      e.o.scale.set(e.s.x * widen, e.s.y * Math.max(0.06, open) * widen, e.s.z * widen);
-      e.o.position.set(e.p.x + this.look.ex * 0.012 * m, e.p.y - this.look.ey * 0.01, e.p.z);
+      // blink: squash to a soft slit (never a hairline, which reads as a chopped eye), widen a touch to keep volume, pop forward so the head never clips it
+      const o = Math.max(BLINK_MIN, open), shut = 1 - o;
+      e.o.scale.set(e.s.x * widen * (1 + shut * 0.12), e.s.y * o * widen, e.s.z * widen * (1 + shut * 0.5));
+      e.o.position.set(e.p.x + this.look.ex * 0.012 * m, e.p.y - this.look.ey * 0.01, e.p.z + EYE_FWD + shut * 0.012);
     }
 
     this.renderer.render(this.scene, this.cam);
