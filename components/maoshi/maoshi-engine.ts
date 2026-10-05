@@ -11,14 +11,14 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 export type VoiceState = 'off' | 'connecting' | 'listening' | 'thinking' | 'speaking';
 export type Mode = 'hero' | 'lean' | 'immersive';
 /** Where Maoshi should stand, in viewport CSS px: x = centre, footY = feet baseline (from top), h = model height. */
-export type Placement = { x: number; footY: number; h: number };
+export type Placement = { x: number; footY: number; h: number; flip?: boolean };
 export type FrameInfo = { x: number; y: number; w: number; h: number }; // screen box around the model, for the hit-target button
 
 /** Cursor tracking pauses while scrolling and resumes this long after the last scroll event. */
 const TRACK_RESUME_MS = 1000;
 
 const LOOPING = new Set(['Idle', 'Listen', 'Think', 'Talk', 'BoxReady', 'LeanIdle']);
-const HOLD_LAST_FRAME = new Set(['Point', 'LeanPoint']);
+const HOLD_LAST_FRAME = new Set(['Point', 'LeanPoint', 'LeanPointNear']);
 
 export class MaoshiEngine {
   private renderer: THREE.WebGLRenderer;
@@ -48,10 +48,11 @@ export class MaoshiEngine {
 
   private target: Placement = { x: -999, footY: -999, h: 1 };
   private pos = { x: -999, y: -999, h: 1, vx: 0, vy: 0, vh: 0 };
-  private snapNext = true;
+  private snapNext = true; private springT = 0;   // spring only for a moment after a mode change, otherwise follow the anchor exactly (no jiggle while scrolling)
+  private mir = 1;                                 // 1 = normal, -1 = mirrored (leaning on a logo that is to his right)
   private mouse = { x: 0, y: 0 };
   private look = { yaw: 0, pitch: 0, ex: 0, ey: 0, body: 0 };
-  private scrollV = 0; private lastScroll = 0; private lastScrollAt = -1e9;
+  private lastScrollAt = -1e9;
   private blinkIn = 1.5; private blinkT = 9; private blinkTwice = false;
   private agentSm = 0;
 
@@ -67,8 +68,7 @@ export class MaoshiEngine {
     this.cam.position.z = 2000;
     this.pivot.add(this.body); this.scene.add(this.pivot);
     this.body.add(this.rim); this.rim.position.set(0, 0.9, -0.8);
-    this.lastScroll = window.scrollY;
-    window.addEventListener('pointermove', this.onPointer, { passive: true });
+        window.addEventListener('pointermove', this.onPointer, { passive: true });
     window.addEventListener('scroll', this.onScroll, { passive: true });
     window.addEventListener('resize', this.resize);
     this.resize();
@@ -109,15 +109,16 @@ export class MaoshiEngine {
   play(...names: string[]) { this.queue = names.filter((n) => this.actions[n]); this.next(0.2); }
   setMode(m: Mode) {
     if (m === this.mode) return;
-    const from = this.mode; this.mode = m;
+    const from = this.mode; this.mode = m; this.springT = 1;
     if (from === 'hero' && m === 'lean') this.play('LeanEnter');
-    else if (from === 'lean' && m === 'hero') this.play('DropLand');
-    else if (m === 'immersive') this.play('Hop', 'Wave');
+    else if (from === 'lean' && m === 'hero') this.play('Roll');
+    else if (m === 'immersive') this.play('BoxOpen');
     else if (from === 'immersive') this.play(m === 'lean' ? 'LeanWave' : 'Wave');
     else this.toBase();
   }
   setVoice(v: VoiceState) { if (v === this.voice) return; const was = this.voice; this.voice = v; if (v === 'off' && was !== 'off') this.play(this.mode === 'lean' ? 'LeanWave' : 'Wave'); else this.toBase(); }
-  /** Release a held pose (Point / LeanPoint). */
+  get flipped() { return this.mir < 0; }
+  /** Release a held pose (Point / LeanPoint / LeanPointNear). */
   release() { if (this.current && HOLD_LAST_FRAME.has(this.current.getClip().name)) this.toBase(); }
   destroy() {
     this.alive = false; cancelAnimationFrame(this.raf);
@@ -146,7 +147,7 @@ export class MaoshiEngine {
 
   /* ---------------- input ---------------- */
   private onPointer = (e: PointerEvent) => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; };
-  private onScroll = () => { const y = window.scrollY; this.scrollV += y - this.lastScroll; this.lastScroll = y; this.lastScrollAt = performance.now(); };
+  private onScroll = () => { this.lastScrollAt = performance.now(); };
   private resize = () => {
     const w = window.innerWidth, h = window.innerHeight;
     this.renderer.setSize(w, h, false);
@@ -165,16 +166,17 @@ export class MaoshiEngine {
 
     // 1) placement spring (slight overshoot = "jump" feel). Snap on first frame / when asked.
     const T = this.target, P = this.pos;
-    if (this.snapNext || rm) { P.x = T.x; P.y = T.footY; P.h = T.h; P.vx = P.vy = P.vh = 0; this.snapNext = false; }
+    this.springT -= dt;
+    if (this.snapNext || rm || this.springT <= 0) { P.x = T.x; P.y = T.footY; P.h = T.h; P.vx = P.vy = P.vh = 0; this.snapNext = false; }
     const k = 90, d = 14;
     P.vx += ((T.x - P.x) * k - P.vx * d) * dt; P.x += P.vx * dt;
     P.vy += ((T.footY - P.y) * k - P.vy * d) * dt; P.y += P.vy * dt;
     P.vh += ((T.h - P.h) * k - P.vh * d) * dt; P.h += P.vh * dt;
 
-    // 2) scroll speed (only used for the standing lean)
-    const sv = THREE.MathUtils.clamp(this.scrollV, -120, 120); this.scrollV *= 0.6;
     this.pivot.position.set(P.x, -P.y, 0);
-    this.body.scale.setScalar(Math.max(P.h, 1));
+    this.mir += ((T.flip ? -1 : 1) - this.mir) * Math.min(1, dt * (rm ? 60 : 10));   // turns around through a thin squash
+    const m = this.mir < 0 ? -1 : 1, sx = Math.abs(this.mir) < 0.06 ? 0.06 * m : this.mir, H = Math.max(P.h, 1);
+    this.body.scale.set(H * sx, H, H);
 
     // 3) animation, then additive layers on a restored clean pose
     this.clean.forEach((v, o) => { o.quaternion.copy(v.q); o.scale.copy(v.s); });
@@ -196,9 +198,8 @@ export class MaoshiEngine {
     this.look.yaw += (wantYaw - this.look.yaw) * a; this.look.pitch += (wantPitch - this.look.pitch) * a;
     this.look.body += (wantYaw * 0.35 - this.look.body) * Math.min(1, dt * 2);
     const listenNod = this.voice === 'listening' ? this.userLevel * 0.15 : 0;
-    this.addRot(B.Spine2, 0, this.look.body, 0);
-    if (this.mode === 'hero') { const lean = rm ? 0 : THREE.MathUtils.clamp(sv / 400, -0.12, 0.12); this.addRot(B.Spine, -lean, 0, 0); }
-    this.addRot(B.Head, this.look.pitch * 0.9 + listenNod, this.look.yaw, Math.sin(t * 0.7) * 0.02);
+    this.addRot(B.Spine2, 0, this.look.body * m, 0);
+    this.addRot(B.Head, this.look.pitch * 0.9 + listenNod, this.look.yaw * m, Math.sin(t * 0.7) * 0.02 * m);   // yaw/roll flip sign under the mirror
 
     // speaking: squash/stretch bounce + cyan rim light
     const s = 1 + this.agentSm * 0.035;
@@ -214,7 +215,7 @@ export class MaoshiEngine {
     const widen = 1 + (this.voice === 'listening' ? 0.06 : 0) + this.agentSm * 0.05;
     for (const e of this.eyes) {
       e.o.scale.set(e.s.x * widen, e.s.y * Math.max(0.06, open) * widen, e.s.z * widen);
-      e.o.position.set(e.p.x + this.look.ex * 0.012, e.p.y - this.look.ey * 0.01, e.p.z);
+      e.o.position.set(e.p.x + this.look.ex * 0.012 * m, e.p.y - this.look.ey * 0.01, e.p.z);
     }
 
     this.renderer.render(this.scene, this.cam);
