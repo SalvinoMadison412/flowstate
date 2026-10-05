@@ -58,10 +58,14 @@ def make(name, keys):
     rig.animation_data_create(); rig.animation_data.action = act
     for pb in rig.pose.bones:
         pb.rotation_mode = 'QUATERNION'
+    prev = {}
     for f, p, z, s, *xo in keys:
         for b in ALL:
             pb = rig.pose.bones[P + b]
-            pb.rotation_quaternion = local_q(b, R(*p.get(b, [])))
+            q = local_q(b, R(*p.get(b, [])))
+            if b in prev and prev[b].dot(q) < 0: q = -q          # keep the shortest, continuous path (needed for 360 deg rolls)
+            prev[b] = q
+            pb.rotation_quaternion = q
             pb.keyframe_insert('rotation_quaternion', frame=f, group=pb.name)
         hb = rig.pose.bones[P + 'Hips']
         hb.location = HIPR.inverted() @ V((xo[0] if xo else 0, 0, z)); hb.keyframe_insert('location', frame=f, group=hb.name)
@@ -123,6 +127,13 @@ make('BoxingIntro', [
     (88, pose(cheer(35), {'Head': [('X', -4), ('Y', 6)]}), 0, sq(0.04)), (96, pose(GUARD), 0, S1)])
 make('BoxReady', [(0, pose(GUARD), 0, S1), (6, pose(GUARD), 0.014, sq(-0.03)), (12, pose(GUARD), 0, sq(0.03)),
     (18, pose(GUARD), 0.014, sq(-0.03)), (24, pose(GUARD), 0, S1)])
+# Talk-button opening: short boxing combo (guard, jab, jab, cross, uppercut, cheer) while the screen zooms in
+make('BoxOpen', [(0, pose(), 0, S1), (5, pose(legs(10), ARMS_BACK), -0.02, sq(0.07)), (10, pose(GUARD), 0.01, sq(-0.04)),
+    (14, pose(JAB), 0.004, S1), (17, pose(GUARD), 0, sq(0.03)), (21, pose(JAB), 0.004, S1), (24, pose(GUARD), 0.008, S1),
+    (29, pose(CROSS), 0.004, sq(-0.03)), (33, pose(GUARD), 0, sq(0.04)),
+    (37, pose(legs(8), GUARD), -0.015, sq(0.06)), (42, pose(UPPER), 0.035, sq(-0.08)), (47, pose(GUARD), 0, sq(0.05)),
+    (54, pose(cheer(30), {'Head': [('X', -6)]}), 0.03, sq(-0.04)), (60, pose(), 0, S1)])
+
 # ---------- leaning on the nav logo, arms crossed (character leans toward viewer's LEFT = the logo) ----------
 HL = rig.data.bones[P + 'Hips'].head_local.z
 def lean(r=10, arms=True, legs_=True, **extra):
@@ -150,8 +161,17 @@ make('LeanWave', [(0,) + L(10), (8, wv(40), 0.003, S1, lx(10)), (14, wv(22), 0, 
     (26, wv(22), 0, S1, lx(10)), (32, wv(48), 0.003, S1, lx(10)), (40, wv(35), 0, S1, lx(10)), (48,) + L(10)])
 lp = lambda a: pose(lean(10, LeftArm=[('Y', a), ('Z', -14)], Head=[('Z', 22), ('X', 6)]))
 make('LeanPoint', [(0,) + L(10), (8, lp(10), 0, sq(-0.02), lx(10)), (14, lp(-14), 0, S1, lx(10)), (18, lp(-10), 0, S1, lx(10)), (36, lp(-12), 0, S1, lx(10))])
-make('DropLand', [(0,) + L(10), (5, pose(lean(4, arms=False), cheer(20)), 0.03, sq(-0.06), lx(4)),
-    (11, pose(cheer(30)), 0, (0.95, 1.08), 0), (15, pose(legs(12), ARMS_BACK), -0.022, sq(0.1), 0), (20, pose(), 0.004, sq(-0.02), 0), (24, pose(), 0, S1, 0)])
+lpn = lambda a: pose(lean(10, RightArm=[('Y', -a), ('Z', 14)], Head=[('Z', -22), ('X', 6)]))   # pointing with the arm nearest the logo
+make('LeanPointNear', [(0,) + L(10), (8, lpn(10), 0, sq(-0.02), lx(10)), (14, lpn(-14), 0, S1, lx(10)), (18, lpn(-10), 0, S1, lx(10)), (36, lpn(-12), 0, S1, lx(10))])
+# Roll: tucked forward somersault back down to the hero when scrolling up
+TUCK = {'Spine1': [('X', 22)], 'Head': [('X', 14)], 'LeftArm': [('Y', 50), ('Z', -60)], 'RightArm': [('Y', -50), ('Z', 60)],
+        'LeftUpLeg': [('X', -40)], 'RightUpLeg': [('X', -40)], 'LeftLeg': [('X', 80)], 'RightLeg': [('X', 80)]}
+zs = [0.02, 0.1, 0.2, 0.28, 0.3, 0.28, 0.2, 0.1, 0.02]
+keys = [(0,) + L(10), (5, pose(legs(14), ARMS_BACK), -0.02, sq(0.08), 0)]
+for i in range(9):
+    keys.append((9 + 2 * i, pose(TUCK, {'Hips': [('X', 45 * i)]}), zs[i], S1, 0))
+keys += [(28, pose(legs(12), ARMS_BACK), -0.022, sq(0.1), 0), (32, pose(), 0.004, sq(-0.02), 0), (36, pose(), 0, S1, 0)]
+make('Roll', keys)
 
 # ---------- export: one NLA track per clip ----------
 ad = rig.animation_data

@@ -62,8 +62,8 @@ export function Nav() {
       )}
     >
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link href="/" aria-label="Flow State home" className="shrink-0" data-maoshi-anchor="grip">
-          <Logo />
+        <Link href="/" aria-label="Flow State home" className="shrink-0">
+          <Logo maoshiAnchor />
         </Link>
 
         <ul className="hidden items-center gap-7 lg:flex">

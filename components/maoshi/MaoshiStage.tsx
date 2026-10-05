@@ -2,7 +2,8 @@
 /* MaoshiStage — mount ONCE in app/layout.tsx (inside <body>, after the page content).
  * Reads two kinds of anchors from the DOM:
  *   data-maoshi-anchor="hero"  → the box Maoshi stands in on pages that have one (replaces the old orb)
- *   data-maoshi-anchor="grip"  → the nav logo; when scrolled he stands beside it, leaning on it with arms crossed
+ *   data-maoshi-anchor="grip"  → the nav's FAVICON/icon mark only (not the wordmark). When scrolled he stands on the nav's
+ *                                bottom edge to the LEFT of it, leaning on it with arms crossed (mirrored). If there is no room on the left he uses the right.
  * Buttons with data-maoshi-point make him point when hovered.
  */
 import { useEffect, useRef, useState } from 'react';
@@ -15,7 +16,8 @@ const LEAN_MAX_H = 76;                            // px, tallest he gets while l
 const LEAN_GAP = 0.3;                             // × his height: how far right of the logo's edge he stands (lower = closer)
 const IDLE_MS = 25000;                            // no input for this long → "need a hand?" bubble
 const BUBBLE_MS = 14000;                          // bubble auto-hides after this
-const SCROLL_TO_LEAN = 0.35;                      // fraction of the hero height scrolled before he jumps up
+const SCROLL_TO_LEAN = 0.35;                      // fraction of the hero height scrolled before he goes to the icon
+const SCROLL_BACK = 0.12;                         // he only returns to the hero below this (hysteresis: no flip-flopping while scrolling)
 const VOICE_PATH = '/voice-agent';
 
 export default function MaoshiStage() {
@@ -27,6 +29,7 @@ export default function MaoshiStage() {
   const [help, setHelp] = useState(false);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const tailRef = useRef<HTMLSpanElement>(null);
+  const leanRef = useRef(false);
   const helpShown = useRef(new Set<string>());
 
   // boot the engine lazily after first paint
@@ -64,9 +67,10 @@ export default function MaoshiStage() {
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const e = engineRef.current; if (!e) return;
-            const hero = document.querySelector<HTMLElement>('[data-maoshi-anchor="hero"]');
+      const hero = document.querySelector<HTMLElement>('[data-maoshi-anchor="hero"]');
       const grip = document.querySelector<HTMLElement>('[data-maoshi-anchor="grip"]');
       let mode: 'hero' | 'lean' | 'immersive';
+      let flip = false;
       let place: Placement;
       if (maoshi.isTalkOpen()) {
         mode = 'immersive';
@@ -74,8 +78,9 @@ export default function MaoshiStage() {
         place = { x: window.innerWidth / 2, footY: window.innerHeight / 2 + h * 0.45, h };
       } else {
         const hr = hero?.getBoundingClientRect();
-        const scrolledPast = !hr || hr.top < -hr.height * SCROLL_TO_LEAN || hr.bottom < 80 || hr.top > window.innerHeight;
-        if (hr && !scrolledPast) {
+        const lim = hr ? hr.height * (leanRef.current ? SCROLL_BACK : SCROLL_TO_LEAN) : 0;
+        leanRef.current = !hr || window.scrollY > lim || hr.bottom < 80;
+        if (hr && !leanRef.current) {
           mode = 'hero';
           const h = Math.min(hr.height * 0.9, hr.width * 1.15);
           place = { x: hr.left + hr.width / 2, footY: hr.bottom - hr.height * 0.04, h };
@@ -84,9 +89,10 @@ export default function MaoshiStage() {
           const g = grip?.getBoundingClientRect();
           const nav = grip?.closest('header, nav')?.getBoundingClientRect();
           const h = Math.max(44, Math.min(LEAN_MAX_H, (nav ? nav.height : 64) - 8));
-          const gx = g ? g.right + h * LEAN_GAP : window.innerWidth - 60;
-          const gy = nav ? nav.bottom - 3 : g ? g.bottom + 8 : 60;   // feet rest on the nav's bottom edge
-          place = { x: gx, footY: gy, h };
+          flip = !!g && g.left > h * 0.75;                              // room on the icon's left → stand there, lean right onto it
+          const gx = !g ? window.innerWidth - 60 : flip ? g.left - h * LEAN_GAP : g.right + h * LEAN_GAP;
+          const gy = nav ? nav.bottom - 3 : g ? g.bottom + 8 : 60;      // feet rest on the nav's bottom edge
+          place = { x: gx, footY: gy, h, flip };
         }
       }
       e.setMode(mode);
@@ -101,8 +107,8 @@ export default function MaoshiStage() {
     const e = engineRef.current; if (!e) return;
     if (pathname === VOICE_PATH) {
       e.heroClip = 'BoxReady';
-      e.play('BoxingIntro');
-      const t = setTimeout(() => { e.heroClip = 'Idle'; e.play('Happy'); }, 9000); // settle after the show
+      if (e.mode === 'hero') e.play('BoxingIntro');
+      const t = setTimeout(() => { e.heroClip = 'Idle'; if (e.mode === 'hero') e.play('Happy'); }, 9000); // settle after the show
       return () => clearTimeout(t);
     }
     e.heroClip = 'Idle';
@@ -114,7 +120,7 @@ export default function MaoshiStage() {
     const over = (ev: Event) => {
       const el = (ev.target as HTMLElement).closest?.('[data-maoshi-point]'); const e = engineRef.current;
       if (!el || !e || e.voice !== 'off') return;
-      e.play(e.mode === 'lean' ? 'LeanPoint' : 'Point');
+      e.play(e.mode === 'lean' ? (e.flipped ? 'LeanPointNear' : 'LeanPoint') : 'Point');
     };
     const out = (ev: Event) => { if ((ev.target as HTMLElement).closest?.('[data-maoshi-point]')) engineRef.current?.release(); };
     document.addEventListener('pointerover', over); document.addEventListener('pointerout', out);
