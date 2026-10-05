@@ -6,7 +6,7 @@ import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { IconArrowRight, IconInstagram, IconLinkedIn } from "@/components/ui/icons";
 
-const FOUNDERS = [
+export const FOUNDERS = [
   {
     name: "Salvino Kevin Madison",
     role: "Founder",

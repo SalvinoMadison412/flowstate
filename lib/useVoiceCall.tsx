@@ -18,6 +18,8 @@ import {
   type MutableRefObject,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
+import { track } from "@/lib/track";
 
 export type CallStatus = "idle" | "connecting" | "live" | "error";
 export type Levels = { agent: number; mic: number };
@@ -59,8 +61,23 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const levels = useRef<Levels>({ agent: 0, mic: 0 });
   const teardown = useRef<(() => void) | null>(null);
+  const startedAt = useRef(0);
+  const persona = usePathname() === "/voice-agent" ? "legal" : "maoshi";
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>("[data-track]");
+      if (el) track("cta_click", el.dataset.track);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   const stop = useCallback(() => {
+    if (startedAt.current) {
+      track("demo_end", String(Math.round((Date.now() - startedAt.current) / 1000)));
+      startedAt.current = 0;
+    }
     teardown.current?.();
     teardown.current = null;
     levels.current = { agent: 0, mic: 0 };
@@ -71,6 +88,8 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
 
   const fail = useCallback(
     (msg: string) => {
+      track("demo_error", msg);
+      startedAt.current = 0;
       teardown.current?.();
       teardown.current = null;
       levels.current = { agent: 0, mic: 0 };
@@ -84,6 +103,8 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
     if (teardown.current) return;
     setError("");
     setStatus("connecting");
+    if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined")
+      return fail("Live calls don't work in this browser. Open this page in Safari or Chrome to try it.");
     const cleanups: (() => void)[] = [];
     const mine = () => cleanups.forEach((c) => c());
     teardown.current = mine;
@@ -94,14 +115,20 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       return true;
     };
     try {
-      const res = await fetch("/api/voice/session", { method: "POST", cache: "no-store" });
+      const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+      cleanups.push(() => mic.getTracks().forEach((t) => t.stop()));
+      if (cancelled()) return;
+
+      const res = await fetch("/api/voice/session", {
+        method: "POST",
+        cache: "no-store",
+        body: JSON.stringify({ persona }),
+        headers: { "content-type": "application/json" },
+      });
       const data = await res.json();
       if (cancelled()) return;
       if (!res.ok) return fail(data.error || "Could not start the demo.");
 
-      const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
-      cleanups.push(() => mic.getTracks().forEach((t) => t.stop()));
-      if (cancelled()) return;
       const conn = new RTCPeerConnection();
       cleanups.push(() => conn.close());
       const audioCtx = new AudioContext();
@@ -123,7 +150,7 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       const events = conn.createDataChannel("oai-events");
       events.onopen = () => {
         // A user-role message, not `response.instructions`: per-response instructions
-        // REPLACE the session persona for that turn, which lost Maoshi's script.
+        // REPLACE the session persona for that turn, which lost the persona's script.
         events.send(
           JSON.stringify({
             type: "conversation.item.create",
@@ -131,6 +158,8 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
           }),
         );
         events.send(JSON.stringify({ type: "response.create" }));
+        startedAt.current = Date.now();
+        track("demo_start", persona);
         setStatus("live");
         const t = setTimeout(stop, MAX_CALL_MS);
         cleanups.push(() => clearTimeout(t));
@@ -149,11 +178,11 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       if (cancelled()) return;
       fail(
         (e as Error).name === "NotAllowedError"
-          ? "Microphone access was blocked. Allow it and try again."
+          ? "Microphone access was blocked. Allow it in your browser settings, or open this page in Safari or Chrome."
           : "Could not start the call. Please try again.",
       );
     }
-  }, [fail, stop]);
+  }, [fail, stop, persona]);
 
   const toggle = useCallback(() => {
     if (teardown.current) stop();

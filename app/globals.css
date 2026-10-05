@@ -10,6 +10,12 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (min-width: 1280px) {
+  html {
+    font-size: 112.5%;
+  }
+}
+
 body {
   background-color: #080808;
   color: #ffffff;
@@ -226,7 +232,7 @@ h3,
   4%, 90% { opacity: 1; transform: none; }
   96%, 100% { opacity: 0; transform: translateY(-4px); }
 }
-.tx-line { opacity: 0; animation: tx-in 14s ease-out infinite; animation-delay: var(--d, 0s); }
+.tx-line { opacity: 0; animation: tx-in var(--dur, 14s) ease-out infinite; animation-delay: var(--d, 0s); }
 
 @media (prefers-reduced-motion: reduce) {
   .orb-ripple { animation: none; opacity: 0; }

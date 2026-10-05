@@ -33,6 +33,9 @@ export function FinalCTA() {
   const [service, setService] = useState<ServiceInterest | "">("");
   const [leadType, setLeadType] = useState<LeadType>("book_call");
   const [message, setMessage] = useState("");
+  const [when, setWhen] = useState("");
+  const [bookedFor, setBookedFor] = useState("");
+  const [bookError, setBookError] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">(
     "idle",
   );
@@ -43,14 +46,43 @@ export function FinalCTA() {
     e.preventDefault();
     if (!valid || status === "submitting") return;
     setStatus("submitting");
+    setBookError("");
     try {
+      // Book first: a taken slot should fail before a duplicate-able lead is saved.
+      // 503 = booking not configured, so fall through to a plain lead.
+      let booked = false;
+      if (when) {
+        const start = new Date(when);
+        const res = await fetch("/api/book", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            company: company.trim(),
+            service,
+            message: message.trim(),
+            start: start.toISOString(),
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          }),
+        });
+        if (res.ok) {
+          booked = true;
+          setBookedFor(start.toLocaleString([], { dateStyle: "full", timeStyle: "short" }));
+        } else if (res.status !== 503) {
+          const err = await res.json().catch(() => ({}));
+          setBookError(err.error || "Couldn't book that time. Please try another.");
+          setStatus("idle");
+          return;
+        }
+      }
       await submitLead({
         name: name.trim(),
         email: email.trim(),
         company: company.trim() || undefined,
         service_interest: service || undefined,
         lead_type: leadType,
-        message: message.trim() || undefined,
+        message: (booked ? `[Booked ${when}] ` : when ? `[Wants ${when}] ` : "") + (message.trim() || "") || undefined,
       });
       setStatus("done");
     } catch {
@@ -86,7 +118,9 @@ export function FinalCTA() {
 
         {status === "done" ? (
           <p className="mx-auto mt-9 max-w-md rounded-xl border border-border-active bg-surface px-5 py-4 text-sm text-text-primary">
-            Got it. We&rsquo;ll reply within one business day with times.
+            {bookedFor
+              ? `You're booked for ${bookedFor}. A calendar invite with a Google Meet link is on its way to ${email.trim()}.`
+              : "Got it. We\u2019ll reply within one business day with times."}
           </p>
         ) : (
           <form onSubmit={onSubmit} className="mt-9 space-y-3 text-left">
@@ -178,6 +212,20 @@ export function FinalCTA() {
             </fieldset>
 
             <div>
+              <label htmlFor="lead-when" className="mb-1 block text-xs text-text-secondary">
+                Preferred time for the call (optional, your local time)
+              </label>
+              <input
+                id="lead-when"
+                type="datetime-local"
+                value={when}
+                onChange={(e) => setWhen(e.target.value)}
+                className={cn(inputClass, "[color-scheme:dark]")}
+              />
+              {bookError && <p className="mt-2 text-sm text-text-secondary">{bookError}</p>}
+            </div>
+
+            <div>
               <label htmlFor="lead-message" className="sr-only">
                 Anything we should know?
               </label>
@@ -209,21 +257,23 @@ export function FinalCTA() {
           </form>
         )}
 
+        <div className="mt-8 flex flex-col items-center gap-3">
         <a
           href="https://www.instagram.com/flowstate.agents"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-8 inline-flex items-center gap-2 text-sm text-text-secondary transition-colors hover:text-text-primary"
+          className="inline-flex items-center gap-2 text-sm text-text-secondary transition-colors hover:text-text-primary"
         >
           <IconInstagram className="h-4 w-4" />
           Follow @flowstate.agents on Instagram
         </a>
         <a
           href="tel:+16292818264"
-          className="mt-3 block text-sm text-text-secondary transition-colors hover:text-text-primary"
+          className="block text-sm text-text-secondary transition-colors hover:text-text-primary"
         >
           Or call us: +1 (629) 281-8264
         </a>
+        </div>
       </div>
     </section>
   );
