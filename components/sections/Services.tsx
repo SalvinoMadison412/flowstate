@@ -148,7 +148,7 @@ export function Services() {
                 </p>
 
                 <div className="mt-6 lg:mt-auto lg:pt-8">
-                  <Button href={s.cta.href} variant="ghost" size="md">
+                  <Button href={s.cta.href} variant="ghost" size="md" data-maoshi-point>
                     {s.cta.label}
                     <IconArrowRight className="h-4 w-4" />
                   </Button>

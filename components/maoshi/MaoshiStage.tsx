@@ -62,7 +62,7 @@ export default function MaoshiStage() {
         place = { x: window.innerWidth / 2, footY: window.innerHeight / 2 + h * 0.45, h };
       } else {
         const hr = hero?.getBoundingClientRect();
-        const scrolledPast = !hr || window.scrollY > hr.height * SCROLL_TO_HANG || hr.bottom < 80;
+        const scrolledPast = !hr || hr.top < -hr.height * SCROLL_TO_HANG || hr.bottom < 80 || hr.top > window.innerHeight;
         if (hr && !scrolledPast) {
           mode = 'hero';
           const h = Math.min(hr.height * 0.9, hr.width * 1.15);

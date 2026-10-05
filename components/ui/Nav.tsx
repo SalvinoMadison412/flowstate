@@ -62,7 +62,7 @@ export function Nav() {
       )}
     >
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link href="/" aria-label="Flow State home" className="shrink-0">
+        <Link href="/" aria-label="Flow State home" className="shrink-0" data-maoshi-anchor="grip">
           <Logo />
         </Link>
 
@@ -84,7 +84,7 @@ export function Nav() {
         </ul>
 
         <div className="hidden lg:block">
-          <Button href="/contact" variant="outline" size="md">
+          <Button href="/contact" variant="outline" size="md" data-maoshi-point>
             Book a strategy call
           </Button>
         </div>
