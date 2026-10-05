@@ -163,16 +163,6 @@ lp = lambda a: pose(lean(10, LeftArm=[('Y', a), ('Z', -14)], Head=[('Z', 22), ('
 make('LeanPoint', [(0,) + L(10), (8, lp(10), 0, sq(-0.02), lx(10)), (14, lp(-14), 0, S1, lx(10)), (18, lp(-10), 0, S1, lx(10)), (36, lp(-12), 0, S1, lx(10))])
 lpn = lambda a: pose(lean(10, RightArm=[('Y', -a), ('Z', 14)], Head=[('Z', -22), ('X', 6)]))   # pointing with the arm nearest the logo
 make('LeanPointNear', [(0,) + L(10), (8, lpn(10), 0, sq(-0.02), lx(10)), (14, lpn(-14), 0, S1, lx(10)), (18, lpn(-10), 0, S1, lx(10)), (36, lpn(-12), 0, S1, lx(10))])
-# Roll: tucked forward somersault back down to the hero when scrolling up
-TUCK = {'Spine1': [('X', 22)], 'Head': [('X', 14)], 'LeftArm': [('Y', 50), ('Z', -60)], 'RightArm': [('Y', -50), ('Z', 60)],
-        'LeftUpLeg': [('X', -40)], 'RightUpLeg': [('X', -40)], 'LeftLeg': [('X', 80)], 'RightLeg': [('X', 80)]}
-zs = [0.02, 0.1, 0.2, 0.28, 0.3, 0.28, 0.2, 0.1, 0.02]
-keys = [(0,) + L(10), (5, pose(legs(14), ARMS_BACK), -0.02, sq(0.08), 0)]
-for i in range(9):
-    keys.append((9 + 2 * i, pose(TUCK, {'Hips': [('X', 45 * i)]}), zs[i], S1, 0))
-keys += [(28, pose(legs(12), ARMS_BACK), -0.022, sq(0.1), 0), (32, pose(), 0.004, sq(-0.02), 0), (36, pose(), 0, S1, 0)]
-make('Roll', keys)
-
 # ---------- export: one NLA track per clip ----------
 ad = rig.animation_data
 for t in list(ad.nla_tracks):

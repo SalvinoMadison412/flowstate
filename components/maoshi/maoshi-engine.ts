@@ -17,6 +17,9 @@ export type FrameInfo = { x: number; y: number; w: number; h: number }; // scree
 /** Cursor tracking pauses while scrolling and resumes this long after the last scroll event. */
 const TRACK_RESUME_MS = 1000;
 
+/** Played when he goes from the nav back to the hero (scroll up): a simple hop. */
+const BACK_TO_HERO = 'Hop';
+
 const LOOPING = new Set(['Idle', 'Listen', 'Think', 'Talk', 'BoxReady', 'LeanIdle']);
 const HOLD_LAST_FRAME = new Set(['Point', 'LeanPoint', 'LeanPointNear']);
 
@@ -111,7 +114,7 @@ export class MaoshiEngine {
     if (m === this.mode) return;
     const from = this.mode; this.mode = m; this.springT = 1;
     if (from === 'hero' && m === 'lean') this.play('LeanEnter');
-    else if (from === 'lean' && m === 'hero') this.play('Roll');
+    else if (from === 'lean' && m === 'hero') this.play(BACK_TO_HERO);
     else if (m === 'immersive') this.play('BoxOpen');
     else if (from === 'immersive') this.play(m === 'lean' ? 'LeanWave' : 'Wave');
     else this.toBase();
