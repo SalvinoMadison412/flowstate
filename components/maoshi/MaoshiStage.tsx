@@ -19,6 +19,8 @@ const BUBBLE_MS = 14000;                          // bubble auto-hides after thi
 const SCROLL_TO_LEAN = 0.35;                      // fraction of the hero height scrolled before he goes to the icon
 const SCROLL_BACK = 0.12;                         // he only returns to the hero below this (hysteresis: no flip-flopping while scrolling)
 const VOICE_PATH = '/voice-agent';
+const STAGE_LEAVE = 0.3;                          // /voice-agent: he leaves the stage once only this fraction of it is still on screen
+const STAGE_BACK = 0.55;                          // ...and returns once this fraction is back (hysteresis)
 
 /** Voice-agent page entrance: boxing show, then settle. Returns a cleanup. */
 function boxShow(e: MaoshiEngine) {
@@ -89,8 +91,11 @@ export default function MaoshiStage() {
         place = { x: window.innerWidth / 2, footY: window.innerHeight / 2 + h * 0.45, h };
       } else {
         const hr = hero?.getBoundingClientRect();
-        const lim = hr ? hr.height * (leanRef.current ? SCROLL_BACK : SCROLL_TO_LEAN) : 0;
+        const was = leanRef.current;
+        const lim = hr ? hr.height * (was ? SCROLL_BACK : SCROLL_TO_LEAN) : 0;
         leanRef.current = !hr || window.scrollY > lim || hr.bottom < 80;
+        // the voice page's stage sits below the intro text: stay in it until it has mostly scrolled away
+        if (hr && pathRef.current === VOICE_PATH) leanRef.current = hr.bottom < hr.height * (was ? STAGE_BACK : STAGE_LEAVE);
         if (hr && !leanRef.current) {
           mode = 'hero';
           const h = Math.min(hr.height * 0.9, hr.width * 1.15);
