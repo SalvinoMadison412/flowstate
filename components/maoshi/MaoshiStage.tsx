@@ -20,11 +20,20 @@ const SCROLL_TO_LEAN = 0.35;                      // fraction of the hero height
 const SCROLL_BACK = 0.12;                         // he only returns to the hero below this (hysteresis: no flip-flopping while scrolling)
 const VOICE_PATH = '/voice-agent';
 
+/** Voice-agent page entrance: boxing show, then settle. Returns a cleanup. */
+function boxShow(e: MaoshiEngine) {
+  e.heroClip = 'BoxReady';
+  if (e.mode === 'hero') e.play('BoxingIntro');
+  const t = setTimeout(() => { e.heroClip = 'Idle'; if (e.mode === 'hero') e.play('Happy'); }, 9000);
+  return () => clearTimeout(t);
+}
+
 export default function MaoshiStage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitRef = useRef<HTMLButtonElement>(null);
   const engineRef = useRef<MaoshiEngine | null>(null);
   const pathname = usePathname();
+  const pathRef = useRef(pathname); pathRef.current = pathname;
   const [talkOpen, setTalkOpen] = useState(false);
   const [help, setHelp] = useState(false);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -53,7 +62,9 @@ export default function MaoshiStage() {
       if (cancelled) { e.destroy(); return; }
       engineRef.current = e; maoshi._attach(e);
       // first visit greeting
-      try { if (!sessionStorage.getItem('maoshi-hi')) { sessionStorage.setItem('maoshi-hi', '1'); e.play('PopIn', 'Wave'); } } catch { e.play('Wave'); }
+      // first paint of whatever page the visitor landed on (the route effect below only handles later navigations)
+      if (pathRef.current === VOICE_PATH) { boxShow(e); return; }
+      try { if (!sessionStorage.getItem('maoshi-hi')) { sessionStorage.setItem('maoshi-hi', '1'); e.play('PopIn', 'BoxOpen', 'Wave'); } } catch { e.play('Wave'); }
     };
     const id = 'requestIdleCallback' in window ? (window as any).requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 300);
     return () => { cancelled = true; ('cancelIdleCallback' in window) ? (window as any).cancelIdleCallback(id) : clearTimeout(id); engineRef.current?.destroy(); maoshi._attach(null); };
@@ -105,12 +116,7 @@ export default function MaoshiStage() {
   // route changes: voice-agent page gets the boxing entrance; other pages a small hello
   useEffect(() => {
     const e = engineRef.current; if (!e) return;
-    if (pathname === VOICE_PATH) {
-      e.heroClip = 'BoxReady';
-      if (e.mode === 'hero') e.play('BoxingIntro');
-      const t = setTimeout(() => { e.heroClip = 'Idle'; if (e.mode === 'hero') e.play('Happy'); }, 9000); // settle after the show
-      return () => clearTimeout(t);
-    }
+    if (pathname === VOICE_PATH) return boxShow(e);
     e.heroClip = 'Idle';
     e.play(document.querySelector('[data-maoshi-anchor="hero"]') ? 'Hop' : 'LeanWave');
   }, [pathname]);
