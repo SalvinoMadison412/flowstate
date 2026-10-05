@@ -17,11 +17,15 @@ export type FrameInfo = { x: number; y: number; w: number; h: number }; // scree
 /** Cursor tracking pauses while scrolling and resumes this long after the last scroll event. */
 const TRACK_RESUME_MS = 1000;
 
-/** Played when he goes from the nav back to the hero (scroll up): a simple hop. */
-const BACK_TO_HERO = 'Hop';
+/** Played when he goes from the nav back to the hero (scroll up): the simple Hop, travelling in an arc. */
+const BACK_TO_HERO = 'HopFloat';                 // slow floaty jump nav -> hero
+const BACK_DELAY = 0.65, BACK_DUR = 1.1;          // tween timing matched to HopFloat (rises f16, lands f44 @24fps); tune with the clip
+/** Little hero-mode antics, played at random while he idles (every IDLE_FX_MIN..+RANGE seconds). */
+const IDLE_FX = ['Wave', 'Nod', 'Happy', 'Hop'];
+const IDLE_FX_MIN = 7, IDLE_FX_RANGE = 6;
 
 const LOOPING = new Set(['Idle', 'Listen', 'Think', 'Talk', 'BoxReady', 'LeanIdle']);
-const HOLD_LAST_FRAME = new Set(['Point', 'LeanPoint', 'LeanPointNear']);
+const HOLD_LAST_FRAME = new Set(['Point', 'LeanPoint']);
 
 export class MaoshiEngine {
   private renderer: THREE.WebGLRenderer;
@@ -50,9 +54,12 @@ export class MaoshiEngine {
   onFrame?: (box: FrameInfo) => void;
 
   private target: Placement = { x: -999, footY: -999, h: 1 };
-  private pos = { x: -999, y: -999, h: 1, vx: 0, vy: 0, vh: 0 };
-  private snapNext = true; private springT = 0;   // spring only for a moment after a mode change, otherwise follow the anchor exactly (no jiggle while scrolling)
-  private mir = 1;                                 // 1 = normal, -1 = mirrored (leaning on a logo that is to his right)
+  private pos = { x: -999, y: -999, h: 1 };
+  private snapNext = true;
+  /** Mode-change travel: eased move from where he was to the live target, with a jump arc. */
+  private tw = { on: false, t: 0, delay: 0, dur: 0.5, arc: 0, fx: 0, fy: 0, fh: 1 };
+  private fxIn = IDLE_FX_MIN + 4;
+  private mir = 1;                                 // 1 = normal, -1 = mirrored (only when there is no room to stand left of the icon)
   private mouse = { x: 0, y: 0 };
   private look = { yaw: 0, pitch: 0, ex: 0, ey: 0, body: 0 };
   private lastScrollAt = -1e9;
@@ -63,11 +70,11 @@ export class MaoshiEngine {
     this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 0.9;
+    this.renderer.toneMapping = THREE.NoToneMapping;   // keep the Baymax vinyl tone exactly as authored
     const pm = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x1a1d22, 0.5));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(300, 500, 600); this.scene.add(key);
+    this.scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; this.scene.environmentIntensity = 0.25;
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d2c6, 0.4));
+    const key = new THREE.DirectionalLight(0xffffff, 0.25); key.position.set(300, 500, 600); this.scene.add(key);
     this.cam.position.z = 2000;
     this.pivot.add(this.body); this.scene.add(this.pivot);
     this.body.add(this.rim); this.rim.position.set(0, 0.9, -0.8);
@@ -86,7 +93,8 @@ export class MaoshiEngine {
       if (m.isMesh) {
         m.frustumCulled = false;
         const mat = m.material as THREE.MeshStandardMaterial;
-        mat.envMapIntensity = o.name.startsWith('Eye') ? 1.4 : 0.6;
+        if (o.name.startsWith('Eye')) mat.envMapIntensity = 1.4;
+        else { mat.envMapIntensity = 0.05; mat.roughness = 0.95; mat.metalness = 0; mat.emissive.copy(mat.color).multiplyScalar(0.45); }   // flat, matte Baymax vinyl: no dark shading
       }
       if (/^Eye_[LR]$/.test(o.name)) this.eyes.push({ o, s: o.scale.clone(), p: o.position.clone() });
     });
@@ -112,7 +120,10 @@ export class MaoshiEngine {
   play(...names: string[]) { this.queue = names.filter((n) => this.actions[n]); this.next(0.2); }
   setMode(m: Mode) {
     if (m === this.mode) return;
-    const from = this.mode; this.mode = m; this.springT = 1;
+    const from = this.mode; this.mode = m;
+    const P = this.pos, T = this.target, jump = (from === 'hero' && m === 'lean') || (from === 'lean' && m === 'hero');
+    this.tw = { on: true, t: 0, delay: jump ? (m === 'hero' ? BACK_DELAY : 0.13) : 0, dur: jump ? (m === 'hero' ? BACK_DUR : 0.5) : 0.55,
+      arc: jump ? Math.min(130, 0.25 * Math.hypot(T.x - P.x, T.footY - P.y)) : 0, fx: P.x, fy: P.y, fh: P.h };
     if (from === 'hero' && m === 'lean') this.play('LeanEnter');
     else if (from === 'lean' && m === 'hero') this.play(BACK_TO_HERO);
     else if (m === 'immersive') this.play('BoxOpen');
@@ -121,7 +132,7 @@ export class MaoshiEngine {
   }
   setVoice(v: VoiceState) { if (v === this.voice) return; const was = this.voice; this.voice = v; if (v === 'off' && was !== 'off') this.play(this.mode === 'lean' ? 'LeanWave' : 'Wave'); else this.toBase(); }
   get flipped() { return this.mir < 0; }
-  /** Release a held pose (Point / LeanPoint / LeanPointNear). */
+  /** Release a held pose (Point / LeanPoint). */
   release() { if (this.current && HOLD_LAST_FRAME.has(this.current.getClip().name)) this.toBase(); }
   destroy() {
     this.alive = false; cancelAnimationFrame(this.raf);
@@ -167,19 +178,28 @@ export class MaoshiEngine {
     if (document.hidden || !this.mixer) return;
     const dt = Math.min(this.clock.getDelta(), 0.05), t = this.clock.elapsedTime, rm = this.reducedMotion;
 
-    // 1) placement spring (slight overshoot = "jump" feel). Snap on first frame / when asked.
-    const T = this.target, P = this.pos;
-    this.springT -= dt;
-    if (this.snapNext || rm || this.springT <= 0) { P.x = T.x; P.y = T.footY; P.h = T.h; P.vx = P.vy = P.vh = 0; this.snapNext = false; }
-    const k = 90, d = 14;
-    P.vx += ((T.x - P.x) * k - P.vx * d) * dt; P.x += P.vx * dt;
-    P.vy += ((T.footY - P.y) * k - P.vy * d) * dt; P.y += P.vy * dt;
-    P.vh += ((T.h - P.h) * k - P.vh * d) * dt; P.h += P.vh * dt;
+    // 1) placement: follow the anchor exactly; after a mode change travel there on an eased path with a jump arc
+    const T = this.target, P = this.pos, W = this.tw;
+    if (this.snapNext || rm) { P.x = T.x; P.y = T.footY; P.h = T.h; W.on = false; this.snapNext = false; }
+    else if (W.on) {
+      W.t += dt;
+      const u = THREE.MathUtils.clamp((W.t - W.delay) / W.dur, 0, 1), k = u * u * (3 - 2 * u);
+      P.x = W.fx + (T.x - W.fx) * k; P.y = W.fy + (T.footY - W.fy) * k - W.arc * 4 * u * (1 - u); P.h = W.fh + (T.h - W.fh) * k;
+      if (u >= 1) W.on = false;
+    } else { P.x = T.x; P.y = T.footY; P.h = T.h; }
 
     this.pivot.position.set(P.x, -P.y, 0);
-    this.mir += ((T.flip ? -1 : 1) - this.mir) * Math.min(1, dt * (rm ? 60 : 10));   // turns around through a thin squash
-    const m = this.mir < 0 ? -1 : 1, sx = Math.abs(this.mir) < 0.06 ? 0.06 * m : this.mir, H = Math.max(P.h, 1);
-    this.body.scale.set(H * sx, H, H);
+    this.mir = T.flip ? -1 : 1;
+    const m = this.mir, H = Math.max(P.h, 1);
+    this.body.scale.set(H * m, H, H);
+
+    // random little antics while idling in the hero
+    this.fxIn -= dt;
+    if (this.fxIn <= 0) {
+      this.fxIn = IDLE_FX_MIN + Math.random() * IDLE_FX_RANGE;
+      if (this.mode === 'hero' && this.voice === 'off' && !this.queue.length && this.current?.getClip().name === 'Idle')
+        this.play(IDLE_FX[Math.floor(Math.random() * IDLE_FX.length)]);
+    }
 
     // 3) animation, then additive layers on a restored clean pose
     this.clean.forEach((v, o) => { o.quaternion.copy(v.q); o.scale.copy(v.s); });

@@ -100,8 +100,8 @@ export default function MaoshiStage() {
           const g = grip?.getBoundingClientRect();
           const nav = grip?.closest('header, nav')?.getBoundingClientRect();
           const h = Math.max(44, Math.min(LEAN_MAX_H, (nav ? nav.height : 64) - 8));
-          flip = !!g && g.left > h * 0.75;                              // room on the icon's left → stand there, lean right onto it
-          const gx = !g ? window.innerWidth - 60 : flip ? g.left - h * LEAN_GAP : g.right + h * LEAN_GAP;
+          flip = !!g && g.left <= h * 0.75;                             // no room on the icon's left (narrow screens) → stand on its right, mirrored
+          const gx = !g ? window.innerWidth - 60 : flip ? g.right + h * LEAN_GAP : g.left - h * LEAN_GAP;
           const gy = nav ? nav.bottom - 3 : g ? g.bottom + 8 : 60;      // feet rest on the nav's bottom edge
           place = { x: gx, footY: gy, h, flip };
         }
@@ -126,7 +126,8 @@ export default function MaoshiStage() {
     const over = (ev: Event) => {
       const el = (ev.target as HTMLElement).closest?.('[data-maoshi-point]'); const e = engineRef.current;
       if (!el || !e || e.voice !== 'off') return;
-      e.play(e.mode === 'lean' ? (e.flipped ? 'LeanPointNear' : 'LeanPoint') : 'Point');
+      if (e.mode === 'lean' && e.flipped) return;   // pointing arm only makes sense in the native (left-of-icon) pose
+      e.play(e.mode === 'lean' ? 'LeanPoint' : 'Point');
     };
     const out = (ev: Event) => { if ((ev.target as HTMLElement).closest?.('[data-maoshi-point]')) engineRef.current?.release(); };
     document.addEventListener('pointerover', over); document.addEventListener('pointerout', out);
