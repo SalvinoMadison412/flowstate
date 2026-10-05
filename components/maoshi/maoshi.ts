@@ -18,7 +18,7 @@ export const maoshi = {
   setAgentLevel(level: number) { if (engine) engine.agentLevel = Math.max(0, Math.min(1, level)); },
   /** 0..1 loudness of the USER's mic (optional; makes him nod while listening). */
   setUserLevel(level: number) { if (engine) engine.userLevel = Math.max(0, Math.min(1, level)); },
-  /** One-shot reactions: 'Happy', 'Wave', 'Nod', 'Point', 'HangPoint', 'HangPeek', ... */
+  /** One-shot reactions: 'Happy', 'Wave', 'Nod', 'Point', 'LeanPoint', ... */
   react(...clips: string[]) { engine?.play(...clips); },
   release() { engine?.release(); },
 

@@ -58,13 +58,13 @@ def make(name, keys):
     rig.animation_data_create(); rig.animation_data.action = act
     for pb in rig.pose.bones:
         pb.rotation_mode = 'QUATERNION'
-    for f, p, z, s in keys:
+    for f, p, z, s, *xo in keys:
         for b in ALL:
             pb = rig.pose.bones[P + b]
             pb.rotation_quaternion = local_q(b, R(*p.get(b, [])))
             pb.keyframe_insert('rotation_quaternion', frame=f, group=pb.name)
         hb = rig.pose.bones[P + 'Hips']
-        hb.location = HIPR.inverted() @ V((0, 0, z)); hb.keyframe_insert('location', frame=f, group=hb.name)
+        hb.location = HIPR.inverted() @ V((xo[0] if xo else 0, 0, z)); hb.keyframe_insert('location', frame=f, group=hb.name)
         hb.scale = (s[0], s[1], s[0]); hb.keyframe_insert('scale', frame=f, group=hb.name)
 
 # ---------- reusable pose fragments ----------
@@ -80,17 +80,12 @@ def g(**extra):
 JAB   = g(LeftArm=[('Y', -10), ('Z', -94)], Spine2=[('Z', -24)])
 CROSS = g(RightArm=[('Y', 10), ('Z', 94)], Spine2=[('Z', 22)], Spine1=[('Z', 8)])
 UPPER = g(RightArm=[('Y', 48), ('Z', 62)], Spine2=[('Z', 10)], Head=[('X', -6)])
-# hanging (hands up beside the head, gripping the nav edge)
-HANG = {'LeftArm': [('Y', -48), ('Z', -8)], 'RightArm': [('Y', 48), ('Z', 8)], 'Head': [('X', 6)]}
-def hang(lk=0, rk=0, **extra):
-    d = dict(HANG); d.update({'LeftUpLeg': [('X', lk)], 'RightUpLeg': [('X', rk)]}); d.update(extra); return d
-
 # ---------- clips ----------
 # Home hero / general
 make('Idle', [(0, pose(), 0, S1),
-    (18, pose({'Head': [('Y', 2.5)], 'LeftArm': [('Y', 52), ('Z', -12)], 'RightArm': [('Y', -52), ('Z', 12)]}), 0.004, sq(-0.015)),
+    (18, pose({'Head': [('Y', 2.5)], 'LeftArm': [('Y', 18), ('Z', -108)], 'RightArm': [('Y', -8), ('Z', 108)]}), 0.004, sq(-0.015)),
     (36, pose(), 0, S1),
-    (54, pose({'Head': [('Y', -2.5)], 'LeftArm': [('Y', 52), ('Z', -12)], 'RightArm': [('Y', -52), ('Z', 12)]}), 0.004, sq(-0.015)),
+    (54, pose({'Head': [('Y', -2.5)], 'LeftArm': [('Y', 18), ('Z', -108)], 'RightArm': [('Y', -8), ('Z', 108)]}), 0.004, sq(-0.015)),
     (72, pose(), 0, S1)])
 make('PopIn', [(0, pose(cheer(20)), 0, (0.05, 0.05)), (9, pose(cheer(40)), 0.03, (1.05, 1.18)),
     (14, pose(cheer(25)), 0, (1.1, 0.88)), (19, pose(), 0.004, (0.98, 1.03)), (24, pose(), 0, S1)])
@@ -128,21 +123,35 @@ make('BoxingIntro', [
     (88, pose(cheer(35), {'Head': [('X', -4), ('Y', 6)]}), 0, sq(0.04)), (96, pose(GUARD), 0, S1)])
 make('BoxReady', [(0, pose(GUARD), 0, S1), (6, pose(GUARD), 0.014, sq(-0.03)), (12, pose(GUARD), 0, sq(0.03)),
     (18, pose(GUARD), 0.014, sq(-0.03)), (24, pose(GUARD), 0, S1)])
-# Scroll: jump up, cling to the nav edge, hang, peek, point, wave, drop back down
-make('JumpGrab', [(0, pose(), 0, S1), (4, pose(legs(12), ARMS_BACK), -0.02, sq(0.08)),
-    (9, pose(hang(-10, 10)), 0.08, sq(-0.08)), (14, pose(hang(12, -8)), 0.02, sq(-0.03)), (20, pose(hang(-4, 4)), 0, sq(-0.02))])
-make('HangIdle', [(0, pose(hang(-8, 6)), 0, sq(-0.02)), (15, pose(hang(-2, 0, Spine=[('Y', 2)])), 0, sq(-0.025)),
-    (30, pose(hang(6, -8)), 0, sq(-0.02)), (45, pose(hang(0, -2, Spine=[('Y', -2)])), 0, sq(-0.025)), (60, pose(hang(-8, 6)), 0, sq(-0.02))])
-make('HangPeek', [(0, pose(hang(-4, 4)), 0, sq(-0.02)), (10, pose(hang(-14, -12, Head=[('X', 24), ('Z', -12)])), 0, sq(-0.03)),
-    (40, pose(hang(-12, -14, Head=[('X', 22), ('Z', -16)])), 0, sq(-0.03))])
-hp = lambda a: hang(-4, 4, RightArm=[('Y', a), ('Z', 40)], Head=[('X', 14), ('Z', -18)])
-make('HangPoint', [(0, pose(hang(-4, 4)), 0, sq(-0.02)), (8, pose(hp(10)), 0, sq(-0.03)), (13, pose(hp(-24)), 0, S1),
-    (17, pose(hp(-18)), 0, S1), (36, pose(hp(-20)), 0, S1)])
-hw = lambda a: hang(-4, 4, RightArm=[('Y', a), ('Z', 30)], Head=[('Y', -6)])
-make('HangWave', [(0, pose(hang(-4, 4)), 0, sq(-0.02)), (8, pose(hw(25)), 0, S1), (14, pose(hw(5)), 0, S1), (20, pose(hw(30)), 0, S1),
-    (26, pose(hw(5)), 0, S1), (32, pose(hw(28)), 0, S1), (40, pose(hang(-4, 4)), 0, sq(-0.02))])
-make('DropLand', [(0, pose(hang(-4, 4)), 0, sq(-0.02)), (5, pose(hang(-10, 10, LeftArm=[('Y', -62)], RightArm=[('Y', 62)])), 0.02, sq(-0.06)),
-    (11, pose(cheer(30)), 0, (0.95, 1.08)), (15, pose(legs(12), ARMS_BACK), -0.022, sq(0.1)), (20, pose(), 0.004, sq(-0.02)), (24, pose(), 0, S1)])
+# ---------- leaning on the nav logo, arms crossed (character leans toward viewer's LEFT = the logo) ----------
+HL = rig.data.bones[P + 'Hips'].head_local.z
+def lean(r=10, arms=True, legs_=True, **extra):
+    d = {'Hips': [('Y', -r)], 'Spine': [('Y', -r * 0.3)], 'Spine1': [('Y', -r * 0.25)], 'Spine2': [('Y', -r * 0.2)],
+         'Head': [('Y', r * 0.9)], 'LeftUpLeg': [('Y', r * 0.5 + 4), ('X', -5)], 'RightUpLeg': [('Y', r * 0.5)]}
+    if arms:
+        d.update({'LeftArm': [('Y', 18), ('Z', -108)], 'RightArm': [('Y', -8), ('Z', 108)]})
+    d.update(extra); return d
+def lx(r): return -HL * math.sin(math.radians(r))
+def L(r=10, z=0, s=S1, **kw): return (pose(lean(r, **kw)), z, s, lx(r))
+
+wv = lambda a, r=10: pose(lean(r, LeftArm=[('Y', -a), ('Z', -32)], Head=[('Y', 4), ('Z', 8)]))
+make('LeanEnter', [(0, pose(), 0, S1, 0), (4, pose(legs(12), ARMS_BACK), -0.02, sq(0.08), 0),
+    (9, pose(lean(4, arms=False), ARMS_UP), 0.07, sq(-0.07), lx(4) * 2), (14, pose(lean(12, arms=False), ARMS_BACK), -0.015, sq(0.07), lx(12)),
+    (19, pose(lean(9, LeftArm=[('Y', 50), ('Z', -70)], RightArm=[('Y', -45), ('Z', 70)])), 0.004, sq(-0.02), lx(9)),
+    (24,) + L(10)])
+tap = lambda a: lean(10, RightUpLeg=[('Y', 5), ('X', -a)], RightLeg=[('X', a * 1.5)])
+make('LeanIdle', [(0,) + L(10),
+    (14, pose(lean(10.8, Head=[('Y', 12), ('Z', 5)])), 0.004, sq(-0.015), lx(10.8)),
+    (30,) + L(10, 0, S1),
+    (44, pose(lean(9.2, Head=[('Y', 6), ('Z', -6)])), 0.004, sq(-0.015), lx(9.2)),
+    (56, pose(tap(0)), 0, S1, lx(10)), (61, pose(tap(9)), 0, S1, lx(10)), (66, pose(tap(0)), 0, S1, lx(10)),
+    (71, pose(tap(9)), 0, S1, lx(10)), (76, pose(tap(0)), 0, S1, lx(10)), (90,) + L(10)])
+make('LeanWave', [(0,) + L(10), (8, wv(40), 0.003, S1, lx(10)), (14, wv(22), 0, S1, lx(10)), (20, wv(48), 0.003, S1, lx(10)),
+    (26, wv(22), 0, S1, lx(10)), (32, wv(48), 0.003, S1, lx(10)), (40, wv(35), 0, S1, lx(10)), (48,) + L(10)])
+lp = lambda a: pose(lean(10, LeftArm=[('Y', a), ('Z', -14)], Head=[('Z', 22), ('X', 6)]))
+make('LeanPoint', [(0,) + L(10), (8, lp(10), 0, sq(-0.02), lx(10)), (14, lp(-14), 0, S1, lx(10)), (18, lp(-10), 0, S1, lx(10)), (36, lp(-12), 0, S1, lx(10))])
+make('DropLand', [(0,) + L(10), (5, pose(lean(4, arms=False), cheer(20)), 0.03, sq(-0.06), lx(4)),
+    (11, pose(cheer(30)), 0, (0.95, 1.08), 0), (15, pose(legs(12), ARMS_BACK), -0.022, sq(0.1), 0), (20, pose(), 0.004, sq(-0.02), 0), (24, pose(), 0, S1, 0)])
 
 # ---------- export: one NLA track per clip ----------
 ad = rig.animation_data
