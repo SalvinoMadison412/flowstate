@@ -19,6 +19,8 @@ const BUBBLE_MS = 14000;                          // bubble auto-hides after thi
 const SCROLL_TO_LEAN = 0.35;                      // fraction of the hero height scrolled before he goes to the icon
 const SCROLL_BACK = 0.12;                         // he only returns to the hero below this (hysteresis: no flip-flopping while scrolling)
 const VOICE_PATH = '/voice-agent';
+const STAGE_LEAVE = 0.3;                          // /voice-agent: he leaves the stage once only this fraction of it is still on screen
+const STAGE_BACK = 0.55;                          // ...and returns once this fraction is back (hysteresis)
 
 /** Voice-agent page entrance: boxing show, then settle. Returns a cleanup. */
 function boxShow(e: MaoshiEngine) {
@@ -89,8 +91,11 @@ export default function MaoshiStage() {
         place = { x: window.innerWidth / 2, footY: window.innerHeight / 2 + h * 0.45, h };
       } else {
         const hr = hero?.getBoundingClientRect();
-        const lim = hr ? hr.height * (leanRef.current ? SCROLL_BACK : SCROLL_TO_LEAN) : 0;
+        const was = leanRef.current;
+        const lim = hr ? hr.height * (was ? SCROLL_BACK : SCROLL_TO_LEAN) : 0;
         leanRef.current = !hr || window.scrollY > lim || hr.bottom < 80;
+        // the voice page's stage sits below the intro text: stay in it until it has mostly scrolled away
+        if (hr && pathRef.current === VOICE_PATH) leanRef.current = hr.bottom < hr.height * (was ? STAGE_BACK : STAGE_LEAVE);
         if (hr && !leanRef.current) {
           mode = 'hero';
           const h = Math.min(hr.height * 0.9, hr.width * 1.15);
@@ -100,8 +105,8 @@ export default function MaoshiStage() {
           const g = grip?.getBoundingClientRect();
           const nav = grip?.closest('header, nav')?.getBoundingClientRect();
           const h = Math.max(44, Math.min(LEAN_MAX_H, (nav ? nav.height : 64) - 8));
-          flip = !!g && g.left > h * 0.75;                              // room on the icon's left → stand there, lean right onto it
-          const gx = !g ? window.innerWidth - 60 : flip ? g.left - h * LEAN_GAP : g.right + h * LEAN_GAP;
+          flip = !!g && g.left <= h * 0.75;                             // no room on the icon's left (narrow screens) → stand on its right, mirrored
+          const gx = !g ? window.innerWidth - 60 : flip ? g.right + h * LEAN_GAP : g.left - h * LEAN_GAP;
           const gy = nav ? nav.bottom - 3 : g ? g.bottom + 8 : 60;      // feet rest on the nav's bottom edge
           place = { x: gx, footY: gy, h, flip };
         }
@@ -126,7 +131,8 @@ export default function MaoshiStage() {
     const over = (ev: Event) => {
       const el = (ev.target as HTMLElement).closest?.('[data-maoshi-point]'); const e = engineRef.current;
       if (!el || !e || e.voice !== 'off') return;
-      e.play(e.mode === 'lean' ? (e.flipped ? 'LeanPointNear' : 'LeanPoint') : 'Point');
+      if (e.mode === 'lean' && e.flipped) return;   // pointing arm only makes sense in the native (left-of-icon) pose
+      e.play(e.mode === 'lean' ? 'LeanPoint' : 'Point');
     };
     const out = (ev: Event) => { if ((ev.target as HTMLElement).closest?.('[data-maoshi-point]')) engineRef.current?.release(); };
     document.addEventListener('pointerover', over); document.addEventListener('pointerout', out);
