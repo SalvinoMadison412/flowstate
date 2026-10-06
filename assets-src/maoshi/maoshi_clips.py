@@ -86,11 +86,13 @@ CROSS = g(RightArm=[('Y', 10), ('Z', 94)], Spine2=[('Z', 22)], Spine1=[('Z', 8)]
 UPPER = g(RightArm=[('Y', 48), ('Z', 62)], Spine2=[('Z', 10)], Head=[('X', -6)])
 # ---------- clips ----------
 # Home hero / general
-make('Idle', [(0, pose(), 0, S1),
-    (18, pose({'Head': [('Y', 2.5)], 'LeftArm': [('Y', 18), ('Z', -108)], 'RightArm': [('Y', -8), ('Z', 108)]}), 0.004, sq(-0.015)),
-    (36, pose(), 0, S1),
-    (54, pose({'Head': [('Y', -2.5)], 'LeftArm': [('Y', 18), ('Z', -108)], 'RightArm': [('Y', -8), ('Z', 108)]}), 0.004, sq(-0.015)),
-    (72, pose(), 0, S1)])
+# Hero idle: open, friendly arms that sway, little knee-bounces, head tilting side to side (never "hands at sides")
+def idl(ly, ry, hy=0, hx=0, tw=0):
+    return pose({'LeftArm': [('Y', ly), ('Z', -20)], 'RightArm': [('Y', -ry), ('Z', 20)], 'Head': [('Y', hy), ('X', hx)], 'Spine1': [('Y', tw)]})
+make('Idle', [(0, idl(30, 30), 0, S1), (10, idl(22, 38, 5, 2, -2), 0.012, sq(0.035)), (20, idl(30, 30, 0, 0, 0), 0, S1),
+    (30, idl(38, 22, -5, 2, 2), 0.012, sq(0.035)), (40, idl(30, 30), 0, S1),
+    (50, idl(16, 16, 3, -3), 0.02, sq(-0.04)), (58, idl(26, 26, 3, 0), -0.006, sq(0.05)),
+    (66, idl(16, 16, -3, -3), 0.02, sq(-0.04)), (74, idl(26, 26, -3, 0), -0.006, sq(0.05)), (84, idl(32, 32, 0, 2), 0.004, S1), (96, idl(30, 30), 0, S1)])
 make('PopIn', [(0, pose(cheer(20)), 0, (0.05, 0.05)), (9, pose(cheer(40)), 0.03, (1.05, 1.18)),
     (14, pose(cheer(25)), 0, (1.1, 0.88)), (19, pose(), 0.004, (0.98, 1.03)), (24, pose(), 0, S1)])
 up = lambda a: {'RightArm': [('Y', a), ('Z', 32)], 'RightForeArm': [('Y', 8)], 'Head': [('Y', -6), ('Z', -6)], 'Spine1': [('Y', -3)]}
@@ -100,6 +102,13 @@ make('Hop', [(0, pose(), 0, S1), (5, pose(legs(12), ARMS_BACK, {'Head': [('X', 6
     (10, pose(ARMS_UP, {'Head': [('X', -4)]}), 0.07, sq(-0.07)), (15, pose(legs(18), ARMS_UP), 0.10, S1),
     (21, pose(legs(10), {'LeftArm': [('Y', 68), ('Z', -10)], 'RightArm': [('Y', -68), ('Z', 10)], 'Head': [('X', 5)]}), -0.018, sq(0.09)),
     (26, pose(), 0.004, sq(-0.03)), (30, pose(), 0, S1)])
+
+# ---- scroll-up (nav -> hero) ----
+LND = {'LeftArm': [('Y', 68), ('Z', -10)], 'RightArm': [('Y', -68), ('Z', 10)], 'Head': [('X', 5)]}
+# HopFloat: slow floaty jump (BACK_TO_HERO): crouch, rise lazily, hang, soft settle
+make('HopFloat', [(0, pose(), 0, S1), (8, pose(legs(14), ARMS_BACK, {'Head': [('X', 8)]}), -0.025, sq(0.1)),
+    (16, pose(ARMS_UP, {'Head': [('X', -6)]}), 0.09, sq(-0.07)), (26, pose(cheer(30)), 0.14, sq(-0.03)),
+    (36, pose(ARMS_UP), 0.08, S1), (44, pose(legs(10), LND), -0.014, sq(0.07)), (50, pose(), 0.004, sq(-0.02)), (56, pose(), 0, S1)])
 pt = lambda yaw, f, d, nod: {'Spine2': [('Z', yaw * 0.6)], 'Head': [('X', nod), ('Z', yaw)], 'RightArm': [('Y', d), ('Z', f)], 'RightForeArm': [('Y', -4)]}
 make('Point', [(0, pose(), 0, S1), (7, pose(pt(-10, 10, -30, -3)), 0.003, sq(-0.02)), (13, pose(pt(-24, 38, 10, 9)), 0, S1),
     (17, pose(pt(-20, 34, 6, 7)), 0, S1), (40, pose(pt(-21, 35, 7, 8)), 0, S1)])
@@ -134,22 +143,26 @@ make('BoxOpen', [(0, pose(), 0, S1), (5, pose(legs(10), ARMS_BACK), -0.02, sq(0.
     (37, pose(legs(8), GUARD), -0.015, sq(0.06)), (42, pose(UPPER), 0.035, sq(-0.08)), (47, pose(GUARD), 0, sq(0.05)),
     (54, pose(cheer(30), {'Head': [('X', -6)]}), 0.03, sq(-0.04)), (60, pose(), 0, S1)])
 
-# ---------- leaning on the nav logo, arms crossed (character leans toward viewer's LEFT = the logo) ----------
+# ---------- leaning on the nav ICON, arms crossed. He stands LEFT of the icon and leans toward viewer's RIGHT (native, no runtime mirroring) ----------
 HL = rig.data.bones[P + 'Hips'].head_local.z
-def lean(r=10, arms=True, legs_=True, **extra):
+def mirror(d):                                   # reflect a pose across the X=0 plane: swap sides, negate Y/Z rotations
+    sw = lambda n: n.replace('Left', 'Tmp').replace('Right', 'Left').replace('Tmp', 'Right')
+    return {sw(k): [(ax, -a if ax in 'YZ' else a) for ax, a in v] for k, v in d.items()}
+def lean(r=10, arms=True, **extra):
     d = {'Hips': [('Y', -r)], 'Spine': [('Y', -r * 0.3)], 'Spine1': [('Y', -r * 0.25)], 'Spine2': [('Y', -r * 0.2)],
          'Head': [('Y', r * 0.9)], 'LeftUpLeg': [('Y', r * 0.5 + 4), ('X', -5)], 'RightUpLeg': [('Y', r * 0.5)]}
     if arms:
-        d.update({'LeftArm': [('Y', 18), ('Z', -108)], 'RightArm': [('Y', -8), ('Z', 108)]})
-    d.update(extra); return d
-def lx(r): return -HL * math.sin(math.radians(r))
+        d.update({'LeftArm': [('Y', 42), ('Z', -125)], 'RightArm': [('Y', -30), ('Z', 125)]})
+    d.update(extra); return mirror(d)
+def lx(r): return HL * math.sin(math.radians(r))       # hips shift toward the icon so the feet stay planted
 def L(r=10, z=0, s=S1, **kw): return (pose(lean(r, **kw)), z, s, lx(r))
 
-wv = lambda a, r=10: pose(lean(r, LeftArm=[('Y', -a), ('Z', -32)], Head=[('Y', 4), ('Z', 8)]))
-make('LeanEnter', [(0, pose(), 0, S1, 0), (4, pose(legs(12), ARMS_BACK), -0.02, sq(0.08), 0),
-    (9, pose(lean(4, arms=False), ARMS_UP), 0.07, sq(-0.07), lx(4) * 2), (14, pose(lean(12, arms=False), ARMS_BACK), -0.015, sq(0.07), lx(12)),
-    (19, pose(lean(9, LeftArm=[('Y', 50), ('Z', -70)], RightArm=[('Y', -45), ('Z', 70)])), 0.004, sq(-0.02), lx(9)),
-    (24,) + L(10)])
+wv = lambda a, r=10: pose(lean(r, LeftArm=[('Y', -a), ('Z', -32)], Head=[('Y', 4), ('Z', 8)]))      # waves with the arm away from the icon
+make('LeanEnter', [(0, pose(), 0, S1, 0), (4, pose(legs(14), ARMS_BACK), -0.022, sq(0.09), 0),
+    (8, pose(cheer(40), legs(8)), 0.1, sq(-0.08), 0), (13, pose(cheer(30), legs(12)), 0.17, S1, 0),
+    (17, pose(cheer(20), legs(8)), 0.08, S1, lx(4)), (20, pose(lean(12, arms=False), ARMS_BACK), -0.018, sq(0.08), lx(12)),
+    (24, pose(lean(9, LeftArm=[('Y', 50), ('Z', -70)], RightArm=[('Y', -45), ('Z', 70)])), 0.004, sq(-0.02), lx(9)),
+    (28,) + L(10)])
 tap = lambda a: lean(10, RightUpLeg=[('Y', 5), ('X', -a)], RightLeg=[('X', a * 1.5)])
 make('LeanIdle', [(0,) + L(10),
     (14, pose(lean(10.8, Head=[('Y', 12), ('Z', 5)])), 0.004, sq(-0.015), lx(10.8)),
@@ -159,10 +172,8 @@ make('LeanIdle', [(0,) + L(10),
     (71, pose(tap(9)), 0, S1, lx(10)), (76, pose(tap(0)), 0, S1, lx(10)), (90,) + L(10)])
 make('LeanWave', [(0,) + L(10), (8, wv(40), 0.003, S1, lx(10)), (14, wv(22), 0, S1, lx(10)), (20, wv(48), 0.003, S1, lx(10)),
     (26, wv(22), 0, S1, lx(10)), (32, wv(48), 0.003, S1, lx(10)), (40, wv(35), 0, S1, lx(10)), (48,) + L(10)])
-lp = lambda a: pose(lean(10, LeftArm=[('Y', a), ('Z', -14)], Head=[('Z', 22), ('X', 6)]))
+lp = lambda a: pose(lean(10, RightArm=[('Y', -a), ('Z', 14)], Head=[('Z', -22), ('X', 6)]))      # points with the arm nearest the icon, toward the nav links
 make('LeanPoint', [(0,) + L(10), (8, lp(10), 0, sq(-0.02), lx(10)), (14, lp(-14), 0, S1, lx(10)), (18, lp(-10), 0, S1, lx(10)), (36, lp(-12), 0, S1, lx(10))])
-lpn = lambda a: pose(lean(10, RightArm=[('Y', -a), ('Z', 14)], Head=[('Z', -22), ('X', 6)]))   # pointing with the arm nearest the logo
-make('LeanPointNear', [(0,) + L(10), (8, lpn(10), 0, sq(-0.02), lx(10)), (14, lpn(-14), 0, S1, lx(10)), (18, lpn(-10), 0, S1, lx(10)), (36, lpn(-12), 0, S1, lx(10))])
 # ---------- export: one NLA track per clip ----------
 ad = rig.animation_data
 for t in list(ad.nla_tracks):
