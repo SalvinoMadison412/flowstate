@@ -61,8 +61,14 @@ export function VoiceAgent() {
       <div className="mt-12">
         <CallStage />
       </div>
+    </Section>
+  );
+}
 
-      <Reveal className="mt-6 grid gap-4 sm:grid-cols-3">
+export function VoiceAgentDetails() {
+  return (
+    <Section>
+      <Reveal className="grid gap-4 sm:grid-cols-3">
         {STEPS.map((st, i) => (
           <div key={st.title} className="rounded-2xl border border-border-subtle bg-surface p-5 sm:p-6">
             <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, "0")}</span>

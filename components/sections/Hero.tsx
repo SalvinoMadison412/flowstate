@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { VoiceWaveform } from "@/components/ui/VoiceWaveform";
 import { EndCallButton } from "@/components/ui/EndCallButton";
@@ -147,8 +148,14 @@ function ParticleField() {
 
 /* -------------------------------------------------------------------------- */
 
+// three.js is loaded on the client only, after first paint.
+const VoiceOrb = dynamic(() => import("@/components/ui/VoiceOrb").then((m) => m.VoiceOrb), {
+  ssr: false,
+  loading: () => null,
+});
+
 const STATUS_COPY = {
-  idle: "Tap Maoshi or press the button. Allow your mic and say hello.",
+  idle: "Tap the orb or press the button. Allow your mic and say hello.",
   connecting: "Connecting to Maoshi…",
   live: "Live. Maoshi is listening. Say hello.",
   error: "",
@@ -196,11 +203,11 @@ export function Hero() {
             {status === "live" || status === "connecting" ? (
               <EndCallButton />
             ) : (
-              <Button variant="filled" size="lg" onClick={toggle} data-maoshi-point>
+              <Button variant="filled" size="lg" onClick={toggle}>
                 Talk to Maoshi, live
               </Button>
             )}
-            <Button href="/contact" variant="ghost" size="lg" data-maoshi-point>
+            <Button href="/contact" variant="ghost" size="lg">
               Book a strategy call
             </Button>
           </div>
@@ -216,7 +223,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div data-maoshi-anchor="hero" className="relative order-1 mx-auto aspect-square w-full max-w-[280px] sm:max-w-[380px] lg:order-2 lg:max-w-[520px]">
+        <div className="relative order-1 mx-auto aspect-square w-full max-w-[280px] sm:max-w-[380px] lg:order-2 lg:max-w-[520px]">
           {/* ripples while the call is live */}
           {status === "live" &&
             [0, 1, 2].map((i) => (
@@ -231,6 +238,7 @@ export function Hero() {
             aria-hidden
             className="pointer-events-none absolute inset-[8%] rounded-full bg-accent/10 blur-3xl"
           />
+          <VoiceOrb className="absolute inset-0" />
         </div>
       </div>
     </section>
