@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/Button";
 import { EndCallButton } from "@/components/ui/EndCallButton";
 import { VoiceWaveform } from "@/components/ui/VoiceWaveform";
 import { useVoiceCall } from "@/lib/useVoiceCall";
 import { usePrefersReducedMotion } from "@/lib/useReveal";
 import { cn } from "@/lib/utils";
+
+const VoiceOrb = dynamic(() => import("@/components/ui/VoiceOrb").then((m) => m.VoiceOrb), {
+  ssr: false,
+  loading: () => null,
+});
 
 type Who = "idle" | "agent" | "you";
 
@@ -101,7 +107,7 @@ export function CallStage() {
       />
 
       <div className="relative grid items-center gap-8 md:grid-cols-[1fr_1fr]">
-        <div data-maoshi-anchor="hero" className="relative mx-auto aspect-square w-full max-w-[18.75rem] sm:max-w-[25rem]">
+        <div className="relative mx-auto aspect-square w-full max-w-[18.75rem] sm:max-w-[25rem]">
           {[0, 1, 2].map((i) => (
             <span
               key={i}
@@ -112,6 +118,7 @@ export function CallStage() {
               className="pointer-events-none absolute inset-[10%] rounded-full border border-accent/60 opacity-0 will-change-transform"
             />
           ))}
+          <VoiceOrb className="absolute inset-0" />
         </div>
 
         <div className="text-center md:text-left">
@@ -144,7 +151,7 @@ export function CallStage() {
             {live || status === "connecting" ? (
               <EndCallButton />
             ) : (
-              <Button variant="filled" size="lg" onClick={toggle} data-maoshi-point>
+              <Button variant="filled" size="lg" onClick={toggle}>
                 Start the demo call
               </Button>
             )}

@@ -18,7 +18,7 @@ export function Explore() {
           <Link
             key={p.href}
             href={p.href}
-            data-maoshi-point className="group rounded-2xl border border-border-subtle bg-surface p-6 transition-all hover:-translate-y-1 hover:border-border-active sm:p-7"
+            className="group rounded-2xl border border-border-subtle bg-surface p-6 transition-all hover:-translate-y-1 hover:border-border-active sm:p-7"
           >
             <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">{p.kicker}</span>
             <h3 className="mt-3 font-display text-xl font-bold tracking-display">{p.title}</h3>
