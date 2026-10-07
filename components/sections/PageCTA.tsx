@@ -11,7 +11,7 @@ export function PageCTA({ heading = "Ready to stop missing calls?" }: { heading?
             Book a free 30-minute strategy call with the founder.
           </p>
         </div>
-        <Button href="/contact" variant="filled" size="lg" data-track="closing" data-maoshi-point>
+        <Button href="/contact" variant="filled" size="lg" data-track="closing">
           Book a strategy call
         </Button>
       </div>
