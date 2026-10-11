@@ -52,15 +52,21 @@ export function VoiceOrb({ className }: { className?: string }) {
   // Zoom in/out: slide and scale the disc between where it sits on the page and the full-screen spot (FLIP).
   const rects = useRef<{ inline?: DOMRect; full?: DOMRect }>({});
   const wasFull = useRef(false);
+  const opener = useRef<HTMLElement | null>(null); // what had focus before the call screen opened
   useEffect(() => {
     const note = () => {
       if (!wasFull.current && stage.current) rects.current.inline = stage.current.getBoundingClientRect();
     };
     note();
+    const onFocusIn = (e: FocusEvent) => {
+      if (!wasFull.current && !host.current?.contains(e.target as Node)) opener.current = e.target as HTMLElement;
+    };
+    window.addEventListener("focusin", onFocusIn);
     window.addEventListener("pointerdown", note, true);
     window.addEventListener("resize", note);
     return () => {
-      window.removeEventListener("pointerdown", note, true);
+      window.removeEventListener("focusin", onFocusIn);
+    window.removeEventListener("pointerdown", note, true);
       window.removeEventListener("resize", note);
     };
   }, []);
@@ -84,7 +90,6 @@ export function VoiceOrb({ className }: { className?: string }) {
   useEffect(() => {
     if (!full) return;
     const prev = document.body.style.overflow;
-    const opener = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") stop();
@@ -96,7 +101,7 @@ export function VoiceOrb({ className }: { className?: string }) {
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
-      opener?.focus?.();
+      opener.current?.focus?.();
       window.removeEventListener("keydown", onKey);
     };
   }, [full, stop]);

@@ -18,7 +18,7 @@ businesses.
   CSS `animation … forwards` always settles to its end state, and a 2.5s
   observer-timeout fallback plus a `<noscript>` rule guarantee nothing can stay
   hidden. Motion values still match the brief's spec.
-- No external UI libraries; the logo, icons, dashboard, and diagrams are hand-built SVG
+- No external UI libraries; the logo and icons are hand-built SVG
 
 ## Develop
 
