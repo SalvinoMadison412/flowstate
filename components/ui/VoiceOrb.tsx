@@ -43,9 +43,23 @@ export function VoiceOrb({ className }: { className?: string }) {
   const glow = useRef<HTMLDivElement>(null);
   const rings = useRef<(HTMLSpanElement | null)[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const { status, toggle, levels } = useVoiceCall();
+  const { status, toggle, stop, levels } = useVoiceCall();
+  // while a call is connecting or live, Maoshi takes over the whole screen
+  const full = status === "connecting" || status === "live";
   const reduceMotion = usePrefersReducedMotion();
   const [noGL, setNoGL] = useState(false);
+
+  useEffect(() => {
+    if (!full) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && stop();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [full, stop]);
   const live = useRef({ status, toggle });
   live.current = { status, toggle };
 
@@ -318,23 +332,27 @@ export function VoiceOrb({ className }: { className?: string }) {
     <div
       ref={host}
       className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent`}
-      role="button"
-      tabIndex={0}
+      role={full ? "dialog" : "button"}
+      tabIndex={full ? -1 : 0}
       aria-label={status === "live" ? "End call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
-      onClick={() => toggle()}
+      onClick={() => !full && toggle()}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (!full && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           toggle();
         }
       }}
-      style={{ overflow: "visible", touchAction: "manipulation" }}
+      style={
+        full
+          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: "orb-full-in .5s ease-out" }
+          : { overflow: "visible", touchAction: "manipulation" }
+      }
     >
       {/* disc box: 2R, centred; the glow overflows it on purpose */}
       <div
         ref={stage}
         className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[68%] -translate-x-1/2 -translate-y-1/2"
-        style={{ ["--R" as string]: "100px" }}
+        style={{ ["--R" as string]: "100px", ...(full ? { width: "min(56vh, 86vw)", top: "44%" } : null) }}
       >
         <div ref={pane} className="absolute inset-0 will-change-transform">
           {/* 1. glow behind the glass */}
@@ -405,6 +423,21 @@ export function VoiceOrb({ className }: { className?: string }) {
           />
         </div>
       </div>
+      {full && (
+        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4">
+          <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
+            {status === "live" ? "Live. Say hello" : "Connecting…"}
+          </p>
+          <button
+            type="button"
+            autoFocus
+            onClick={stop}
+            className="inline-flex h-12 items-center justify-center rounded-full bg-red-600 px-6 text-[0.95rem] font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          >
+            End call
+          </button>
+        </div>
+      )}
     </div>
   );
 }
