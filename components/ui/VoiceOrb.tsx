@@ -6,7 +6,7 @@
  * The glass is plain CSS (blurred blobs + backdrop-filter); per-frame work is transforms and
  * opacity only. Loaded with dynamic({ ssr: false }); without WebGL the glass shows on its own.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
@@ -48,6 +48,38 @@ export function VoiceOrb({ className }: { className?: string }) {
   const full = status === "connecting" || status === "live";
   const reduceMotion = usePrefersReducedMotion();
   const [noGL, setNoGL] = useState(false);
+
+  // Zoom in/out: slide and scale the disc between where it sits on the page and the full-screen spot (FLIP).
+  const rects = useRef<{ inline?: DOMRect; full?: DOMRect }>({});
+  const wasFull = useRef(false);
+  useEffect(() => {
+    const note = () => {
+      if (!wasFull.current && stage.current) rects.current.inline = stage.current.getBoundingClientRect();
+    };
+    note();
+    window.addEventListener("pointerdown", note, true);
+    window.addEventListener("resize", note);
+    return () => {
+      window.removeEventListener("pointerdown", note, true);
+      window.removeEventListener("resize", note);
+    };
+  }, []);
+  useLayoutEffect(() => {
+    const st = stage.current;
+    if (!st || full === wasFull.current) return;
+    wasFull.current = full;
+    const to = st.getBoundingClientRect();
+    const from = full ? rects.current.inline : rects.current.full;
+    if (full) rects.current.full = to;
+    else rects.current.inline = to;
+    if (!from || reduceMotion || !st.animate) return;
+    const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+    const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+    st.animate(
+      [{ translate: `${dx}px ${dy}px`, scale: from.width / to.width }, { translate: "0 0", scale: 1 }],
+      { duration: 900, easing: "cubic-bezier(.45,0,.2,1)" },
+    );
+  }, [full, reduceMotion]);
 
   useEffect(() => {
     if (!full) return;
@@ -344,7 +376,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       }}
       style={
         full
-          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: "orb-full-in .5s ease-out" }
+          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: "orb-bg-in .6s ease-out" }
           : { overflow: "visible", touchAction: "manipulation" }
       }
     >
@@ -424,7 +456,7 @@ export function VoiceOrb({ className }: { className?: string }) {
         </div>
       </div>
       {full && (
-        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4">
+        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: "orb-full-in .5s ease-out .45s both" }}>
           <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
             {status === "live" ? "Live. Say hello" : "Connecting…"}
           </p>
