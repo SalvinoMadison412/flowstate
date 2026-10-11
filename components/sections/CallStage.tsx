@@ -101,23 +101,13 @@ export function CallStage() {
         aria-hidden
         className={cn(
           "pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[110px] transition-opacity duration-700",
-          live ? "opacity-20" : "opacity-[0.07]",
+          live ? "opacity-[0.08]" : "opacity-[0.03]",
           !reduceMotion && "animate-radial-pulse",
         )}
       />
 
       <div className="relative grid items-center gap-8 md:grid-cols-[1fr_1fr]">
         <div className="relative mx-auto aspect-square w-full max-w-[18.75rem] sm:max-w-[25rem]">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              ref={(el) => {
-                rings.current[i] = el;
-              }}
-              aria-hidden
-              className="pointer-events-none absolute inset-[10%] rounded-full border border-accent/60 opacity-0 will-change-transform"
-            />
-          ))}
           <VoiceOrb className="absolute inset-0" />
         </div>
 
