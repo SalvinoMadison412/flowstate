@@ -108,8 +108,8 @@ export function FinalCTA() {
           Book a free strategy call.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-lg text-text-secondary">
-          Tell us where you want to grow. We&rsquo;ll show you what gets you there
-          fastest &mdash; a voice agent or an automation. 30 minutes, no
+          Tell us what&rsquo;s eating your team&rsquo;s time. We&rsquo;ll show you how a
+          voice agent or an automation could take it on. 30 minutes, no
           pitch.
         </p>
 
