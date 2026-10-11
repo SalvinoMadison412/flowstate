@@ -144,7 +144,7 @@ export const CHANNEL_KEYS = Object.keys(CHANNELS) as Channel[];
  * in the database — the list is expected to grow — so treat an unknown value as valid and just
  * show it.
  */
-export const OFFERINGS = ["Website", "Voice Agent", "GEO", "Ads"] as const;
+export const OFFERINGS = ["Website", "Voice Agent", "Automation", "GEO", "Ads"] as const;
 export type Offering = (typeof OFFERINGS)[number];
 
 /** Evidence behind an offering. Every field optional: a Maps read can partially fail. */

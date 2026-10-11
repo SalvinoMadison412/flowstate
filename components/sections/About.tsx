@@ -27,7 +27,7 @@ export const FOUNDERS = [
     linkedin: "https://www.linkedin.com/in/sherwin-judas-madison-b7b649338/",
     bio: [
       "Sherwin is a Chartered Accountancy candidate who has spent the past one and a half years at SRVN & Associates working closely with businesses on accounting, taxation, and advisory.",
-      "He supports Flow State on compliance and finance: every dollar of client spend is tracked back to return, and everything is held to the discipline he'd bring to an audit.",
+      "He supports Flow State on compliance and finance: the numbers are tracked carefully, and everything is held to the discipline he'd bring to an audit.",
       "In practice that means clear records, sensible handling of client data and money, and a second pair of eyes on the numbers, so clients can trust what they are being shown and what they are being billed.",
       "Working alongside Salvino, he helps make sure the automations and voice agents Flow State builds are not only effective, but also sound from a financial and regulatory point of view.",
     ],
@@ -38,7 +38,7 @@ const PRINCIPLES = [
   { n: "01", title: "Data over instinct", body: "Every recommendation starts from how your calls and workflows actually run, not from what sounds good in a pitch." },
   { n: "02", title: "One point of contact", body: "No account managers and no hand-offs. The person who builds your strategy is the person who answers when you call." },
   { n: "03", title: "Test, don't set and forget", body: "We keep tuning scripts, prompts and workflows after launch, so nothing we build goes stale." },
-  { n: "04", title: "Reported in plain numbers", body: "Plain reporting on the numbers that matter: calls answered, bookings taken and time saved." },
+  { n: "04", title: "Reported in plain numbers", body: "Plain reporting. We agree up front which numbers matter, such as calls answered and time saved, and share them." },
 ];
 
 const OFFERS = [
@@ -109,8 +109,8 @@ export function About() {
               See what we&apos;re building on Instagram.
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-secondary">
-              Automations, AI voice agents and marketing tips for local businesses, posted on our
-              own Flow State account.
+              Automations and AI voice agents for local businesses, posted on our own Flow State
+              account.
             </p>
           </div>
           <a
@@ -145,9 +145,9 @@ export function About() {
       <Section id="what-we-do">
         <SectionLabel>What we do</SectionLabel>
         <SectionHeading className="mt-4 max-w-2xl">
-          Automation for the busywork. Marketing to bring customers in.
+          Automation for the busywork. Voice agents for the phones.
         </SectionHeading>
-        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2">
           {OFFERS.map((o) => (
             <Link
               key={o.title}
