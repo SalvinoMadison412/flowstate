@@ -84,11 +84,19 @@ export function VoiceOrb({ className }: { className?: string }) {
   useEffect(() => {
     if (!full) return;
     const prev = document.body.style.overflow;
+    const opener = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && stop();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") stop();
+      if (e.key === "Tab") {
+        e.preventDefault(); // End call is the only control, keep focus on it
+        host.current?.querySelector("button")?.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
+      opener?.focus?.();
       window.removeEventListener("keydown", onKey);
     };
   }, [full, stop]);
@@ -352,6 +360,7 @@ export function VoiceOrb({ className }: { className?: string }) {
         const m = o as THREE.Mesh;
         if (m.isMesh) {
           m.geometry.dispose();
+          (m.material as THREE.MeshStandardMaterial).map?.dispose();
           (m.material as THREE.Material).dispose();
         }
       });
@@ -365,8 +374,9 @@ export function VoiceOrb({ className }: { className?: string }) {
       ref={host}
       className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent`}
       role={full ? "dialog" : "button"}
+      aria-modal={full || undefined}
       tabIndex={full ? -1 : 0}
-      aria-label={status === "live" ? "End call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
+      aria-label={full ? "Call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
       onClick={() => !full && toggle()}
       onKeyDown={(e) => {
         if (!full && (e.key === "Enter" || e.key === " ")) {
@@ -376,7 +386,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       }}
       style={
         full
-          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: "orb-bg-in .6s ease-out" }
+          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: reduceMotion ? undefined : "orb-bg-in .6s ease-out" }
           : { overflow: "visible", touchAction: "manipulation" }
       }
     >
@@ -456,7 +466,7 @@ export function VoiceOrb({ className }: { className?: string }) {
         </div>
       </div>
       {full && (
-        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: "orb-full-in .5s ease-out .45s both" }}>
+        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: reduceMotion ? undefined : "orb-full-in .5s ease-out .45s both" }}>
           <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
             {status === "live" ? "Live. Say hello" : "Connecting…"}
           </p>

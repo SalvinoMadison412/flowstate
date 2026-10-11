@@ -4,12 +4,12 @@ import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 
 const INDUSTRIES = [
-  { name: "Salons & Nail Bars", stat: "New clients pick from the top 3 on Google Maps and Instagram" },
-  { name: "Spas & Med Spas", stat: "People ask ChatGPT for the best spa near them before they book" },
-  { name: "Clinics & Dental", stat: "Patients compare reviews and AI answers before they call" },
-  { name: "Cafés & Restaurants", stat: "Reels and Maps decide where people eat tonight" },
-  { name: "Boutique Hotels & Resorts", stat: "Travellers shortlist stays from AI answers and Instagram" },
-  { name: "Fitness & Yoga Studios", stat: "Local search and Reels fill trial classes" },
+  { name: "Salons & Nail Bars", stat: "Missed calls while the team is with a client become lost bookings" },
+  { name: "Spas & Med Spas", stat: "Booking requests, rescheduling and reminders eat the front desk's day" },
+  { name: "Clinics & Dental", stat: "Patients call after hours and the line goes to voicemail" },
+  { name: "Cafés & Restaurants", stat: "Reservation calls land in the middle of a dinner rush" },
+  { name: "Boutique Hotels & Resorts", stat: "Guests ask the same questions at all hours, in many languages" },
+  { name: "Fitness & Yoga Studios", stat: "Trial-class enquiries come in while the instructor is teaching" },
 ];
 
 export function Industries() {

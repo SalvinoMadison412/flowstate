@@ -11,80 +11,12 @@ const base = {
   strokeLinejoin: "round" as const,
 };
 
-export function IconQuote({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M7 7h4v4a4 4 0 0 1-4 4" />
-      <path d="M14 7h4v4a4 4 0 0 1-4 4" />
-    </svg>
-  );
-}
-
-export function IconShield({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
-export function IconRadar({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 12 19 5" />
-      <circle cx="12" cy="12" r="1" fill="currentColor" />
-    </svg>
-  );
-}
-
-export function IconNetwork({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <circle cx="12" cy="5" r="2" />
-      <circle cx="5" cy="18" r="2" />
-      <circle cx="19" cy="18" r="2" />
-      <path d="M10.5 6.8 6.5 16m7-9.2 4 9.2M7 18h10" />
-    </svg>
-  );
-}
-
 export function IconLoop({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
       <path d="M4 9a8 8 0 0 1 14-3l2 2" />
       <path d="M20 15a8 8 0 0 1-14 3l-2-2" />
       <path d="M20 4v4h-4M4 20v-4h4" />
-    </svg>
-  );
-}
-
-export function IconLayers({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
-      <path d="m3 13 9 5 9-5" />
-    </svg>
-  );
-}
-
-export function IconSearch({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <circle cx="11" cy="11" r="6" />
-      <path d="m20 20-4.3-4.3" />
-    </svg>
-  );
-}
-
-export function IconSliders({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M4 8h10M18 8h2M4 16h4M12 16h8" />
-      <circle cx="15" cy="8" r="2" />
-      <circle cx="9" cy="16" r="2" />
     </svg>
   );
 }
