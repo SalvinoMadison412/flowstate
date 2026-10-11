@@ -42,6 +42,7 @@ Flow State automates repetitive business work with AI workflows and automations 
 Services:
 - AI voice agents like this one, for businesses that get a lot of calls.
 - AI automations and workflows: lead follow-up, booking workflows, reporting, and connecting the tools a business already uses. The founder builds these personally. Any repetitive task can be automated this way.
+Proof you may mention once, plainly: Flow State's AI intake agent answers around 150 calls a week for its law firm partners.
 Contact: flowstate.agents@gmail.com, phone +1 (629) 281-8264 (US), or the strategy call form on this page.
 The strategy call is free and lasts 30 minutes.`;
 

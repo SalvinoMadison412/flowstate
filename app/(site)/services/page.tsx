@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Services } from "@/components/sections/Services";
+import { CaseStudy } from "@/components/sections/CaseStudy";
 import { PageCTA } from "@/components/sections/PageCTA";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function ServicesPage() {
   return (
     <div className="pt-16">
       <Services />
+      <CaseStudy />
       <PageCTA heading="Want to automate the busywork?" />
     </div>
   );
