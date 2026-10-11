@@ -36,7 +36,7 @@ export const FOUNDERS = [
 
 const PRINCIPLES = [
   { n: "01", title: "Data over instinct", body: "Every recommendation starts from how your calls and workflows actually run, not from what sounds good in a pitch." },
-  { n: "02", title: "One point of contact", body: "No account managers and no hand-offs. The person who builds your strategy is the person who answers when you call." },
+  { n: "02", title: "One point of contact", body: "No account managers and no hand-offs. The person who builds your system is the person who answers when you call." },
   { n: "03", title: "Test, don't set and forget", body: "We keep tuning scripts, prompts and workflows after launch, so nothing we build goes stale." },
   { n: "04", title: "Reported in plain numbers", body: "Plain reporting. We agree up front which numbers matter, such as calls answered and time saved, and share them." },
 ];
@@ -57,7 +57,7 @@ export function About() {
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-text-secondary">
           Flow State is founded and run by Salvino Madison, with Sherwin Madison
           on compliance and finance. No account managers, no hand-offs
-          &mdash; the person who builds the strategy is the person who answers
+          &mdash; the person who builds your system is the person who answers
           when you call.
         </p>
 
