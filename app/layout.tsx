@@ -33,7 +33,7 @@ const ORG_JSON_LD = {
   url: SITE_URL,
   email: "flowstate.agents@gmail.com",
   telephone: "+1-629-281-8264",
-  sameAs: ["https://www.instagram.com/flowstate.agents"],
+  sameAs: ["https://www.instagram.com/flowstate.agents", "https://www.youtube.com/channel/UCSzJ1MweDDLcGezsNY1juLw"],
   description:
     "Builds AI voice agents, automations and AI workflows for local businesses.",
   founder: {

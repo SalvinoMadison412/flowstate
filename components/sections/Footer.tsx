@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
-import { IconInstagram, IconLinkedIn, IconX } from "@/components/ui/icons";
+import { IconInstagram, IconLinkedIn, IconX, IconYouTube } from "@/components/ui/icons";
 
 const CONTACT_EMAIL = "flowstate.agents@gmail.com";
 const CONTACT_PHONE = "+1 (629) 281-8264";
@@ -33,6 +33,7 @@ const COLUMNS = [
 // Add { label, href, Icon } entries only for profiles that exist.
 const SOCIALS: { label: string; href: string; Icon: typeof IconLinkedIn }[] = [
   { label: "Flow State on Instagram", href: "https://www.instagram.com/flowstate.agents", Icon: IconInstagram },
+  { label: "Flow State on YouTube", href: "https://www.youtube.com/channel/UCSzJ1MweDDLcGezsNY1juLw", Icon: IconYouTube },
   // { label: "Flow State on LinkedIn", href: "LINKEDIN_URL", Icon: IconLinkedIn },
   // { label: "Flow State on X", href: "X_URL", Icon: IconX },
 ];
