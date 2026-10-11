@@ -25,30 +25,3 @@ node_modules/
 
 # strategy docs — never publish
 council/
-
-# ---- allowlist: only the website, CRM and their config get committed ----
-# Videos, lead sheets, scrapers, handoff folders and notes live in ~/Desktop/FlowState-Work, not here.
-/*
-!/.gitignore
-!/.env.example
-!/.eslintrc.json
-!/.claude/
-/.claude/*
-!/.claude/launch.json
-!/CLAUDE.md
-!/README.md
-!/BOOKING_SETUP.md
-!/DIALER_SETUP.md
-!/logo.jpg
-!/package.json
-!/package-lock.json
-!/next.config.mjs
-!/postcss.config.mjs
-!/tailwind.config.ts
-!/tsconfig.json
-!/app/
-!/components/
-!/lib/
-!/public/
-!/chrome-extension/
-!/supabase/
