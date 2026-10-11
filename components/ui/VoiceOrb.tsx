@@ -154,7 +154,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       const shut = 1 - o;
       for (const e of eyes) {
         e.o.scale.set(e.s.x * (1 + shut * 0.12), e.s.y * o, e.s.z * (1 + shut * 0.5));
-        e.o.position.set(e.p.x + ex * 0.012, e.p.y - ey * 0.01, e.p.z + 0.006 + shut * 0.012);
+        e.o.position.set(e.p.x + ex * 0.005, e.p.y - ey * 0.004, e.p.z + 0.012 + shut * 0.012);
       }
     };
 
@@ -288,8 +288,8 @@ export function VoiceOrb({ className }: { className?: string }) {
         if (head) {
           headClean.copy(head.quaternion);
           const a = Math.min(1, dt * 5);
-          look.yaw += (look.tx * 0.45 - look.yaw) * a;
-          look.pitch += (look.ty * 0.28 - look.pitch) * a;
+          look.yaw += (look.tx * 0.2 - look.yaw) * a;
+          look.pitch += (look.ty * 0.12 - look.pitch) * a;
           look.ex += (look.tx - look.ex) * Math.min(1, dt * 14);
           look.ey += (look.ty - look.ey) * Math.min(1, dt * 14);
           head.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(look.pitch * 0.9, look.yaw, 0, "YXZ")));
