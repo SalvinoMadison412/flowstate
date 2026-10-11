@@ -25,7 +25,8 @@ const INK = [
 
 const TAU = Math.PI * 2;
 const SKIN = 0xf3eadd;
-const CLIPS = ["Idle", "Listen", "Talk"];
+const CLIPS = ["Idle", "Listen", "Talk", "Wave", "Nod", "Happy"];
+const FX = ["Wave", "Nod", "Happy"]; // little antics while idle
 const FADE = 0.15; // clip crossfade, seconds
 const TALK_HOLD = 0.3; // keep Talk this long after the agent goes quiet
 const FRAME_R = { feet: 1.95, height: 2.57 }; // in disc radii: only the face and shoulders show
@@ -89,6 +90,11 @@ export function VoiceOrb({ className }: { className?: string }) {
     let mixer: THREE.AnimationMixer | undefined;
     const actions: Record<string, THREE.AnimationAction> = {};
     let hips: THREE.Object3D | undefined;
+    let head: THREE.Object3D | undefined;
+    const headClean = new THREE.Quaternion();
+    const look = { yaw: 0, pitch: 0, ex: 0, ey: 0, tx: 0, ty: 0 };
+    let fxUntil = 0;
+    let fxIn = 5;
     const hipsScale = new THREE.Vector3(1, 1, 1);
     const eyes: { o: THREE.Object3D; s: THREE.Vector3; p: THREE.Vector3 }[] = [];
     let current: THREE.AnimationAction | undefined;
@@ -129,12 +135,12 @@ export function VoiceOrb({ className }: { className?: string }) {
       if (glow.current) glow.current.style.transform = `translate3d(${lean.x}px,${lean.y}px,0)`;
     };
 
-    const setBlink = (open: number) => {
+    const setBlink = (open: number, ex = 0, ey = 0) => {
       const o = Math.max(0.14, open);
       const shut = 1 - o;
       for (const e of eyes) {
         e.o.scale.set(e.s.x * (1 + shut * 0.12), e.s.y * o, e.s.z * (1 + shut * 0.5));
-        e.o.position.set(e.p.x, e.p.y, e.p.z + 0.006 + shut * 0.012);
+        e.o.position.set(e.p.x + ex * 0.012, e.p.y - ey * 0.01, e.p.z + 0.006 + shut * 0.012);
       }
     };
 
@@ -157,6 +163,7 @@ export function VoiceOrb({ className }: { className?: string }) {
             hips = o;
             hipsScale.copy(o.scale);
           }
+          if (/Head$/.test(o.name) && (o as THREE.Bone).isBone) head = o;
           const m = o as THREE.Mesh;
           if (m.isMesh) {
             m.frustumCulled = false;
@@ -176,7 +183,12 @@ export function VoiceOrb({ className }: { className?: string }) {
         mixer = new THREE.AnimationMixer(gltf.scene);
         for (const clip of gltf.animations) {
           if (!CLIPS.includes(clip.name)) continue;
-          actions[clip.name] = mixer.clipAction(clip);
+          const a = mixer.clipAction(clip);
+          if (FX.includes(clip.name)) {
+            a.setLoop(THREE.LoopOnce, 1);
+            a.clampWhenFinished = true;
+          }
+          actions[clip.name] = a;
         }
         loaded = true;
         play("Idle");
@@ -185,6 +197,12 @@ export function VoiceOrb({ className }: { className?: string }) {
       .catch(() => alive && setNoGL(true));
 
     // ── pointer: blobs lean a few px toward the cursor
+    const onLook = (e: PointerEvent) => {
+      const r = st.getBoundingClientRect();
+      look.tx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / 500));
+      look.ty = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / 400));
+    };
+    window.addEventListener("pointermove", onLook, { passive: true });
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       lean.tx = ((e.clientX - r.left) / r.width - 0.5) * 0.08 * R * 2;
@@ -222,7 +240,20 @@ export function VoiceOrb({ className }: { className?: string }) {
       // clip: Talk while the agent speaks (held briefly), Listen on a call, else Idle
       const speaking = s === "live" && lv.agent > 0.08;
       if (speaking) talkUntil = now + TALK_HOLD * 1000;
-      play(s === "idle" ? "Idle" : now < talkUntil ? "Talk" : "Listen");
+      // idle antics: Wave / Nod / Happy every so often, then back to Idle
+      if (s !== "idle") fxUntil = 0;
+      else if (now > fxUntil) {
+        fxIn -= dt;
+        if (fxIn <= 0 && loaded) {
+          fxIn = 7 + Math.random() * 6;
+          const n = FX[Math.floor(Math.random() * FX.length)];
+          if (actions[n]) {
+            play(n);
+            fxUntil = now + actions[n].getClip().duration * 1000;
+          }
+        }
+      }
+      if (!(s === "idle" && now < fxUntil)) play(s === "idle" ? "Idle" : now < talkUntil ? "Talk" : "Listen");
 
       lean.x += (lean.tx - lean.x) * 0.08;
       lean.y += (lean.ty - lean.y) * 0.08;
@@ -238,14 +269,24 @@ export function VoiceOrb({ className }: { className?: string }) {
       if (loaded && renderer && mixer) {
         const talk = current === actions.Talk;
         if (talk) current!.setEffectiveTimeScale(0.7 + agentLevel * 0.9);
+        if (head) head.quaternion.copy(headClean);
         mixer.update(dt);
+        if (head) {
+          headClean.copy(head.quaternion);
+          const a = Math.min(1, dt * 5);
+          look.yaw += (look.tx * 0.45 - look.yaw) * a;
+          look.pitch += (look.ty * 0.28 - look.pitch) * a;
+          look.ex += (look.tx - look.ex) * Math.min(1, dt * 14);
+          look.ey += (look.ty - look.ey) * Math.min(1, dt * 14);
+          head.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(look.pitch * 0.9, look.yaw, 0, "YXZ")));
+        }
         if (hips) {
           const k = 1 + agentLevel * 0.035;
           hips.scale.set(hipsScale.x / Math.sqrt(k), hipsScale.y * k, hipsScale.z / Math.sqrt(k));
         }
         blinkT += dt;
         if (blinkT > 3.2) blinkT = 0;
-        setBlink(blinkT < 0.16 ? Math.abs(Math.cos((blinkT / 0.16) * Math.PI)) : 1);
+        setBlink(blinkT < 0.16 ? Math.abs(Math.cos((blinkT / 0.16) * Math.PI)) : 1, look.ex, look.ey);
         renderer.render(scene, cam);
       }
     };
@@ -260,6 +301,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       io.disconnect();
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointermove", onLook);
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
         if (m.isMesh) {
