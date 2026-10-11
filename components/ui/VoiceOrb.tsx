@@ -52,15 +52,21 @@ export function VoiceOrb({ className }: { className?: string }) {
   // Zoom in/out: slide and scale the disc between where it sits on the page and the full-screen spot (FLIP).
   const rects = useRef<{ inline?: DOMRect; full?: DOMRect }>({});
   const wasFull = useRef(false);
+  const opener = useRef<HTMLElement | null>(null); // what had focus before the call screen opened
   useEffect(() => {
     const note = () => {
       if (!wasFull.current && stage.current) rects.current.inline = stage.current.getBoundingClientRect();
     };
     note();
+    const onFocusIn = (e: FocusEvent) => {
+      if (!wasFull.current && !host.current?.contains(e.target as Node)) opener.current = e.target as HTMLElement;
+    };
+    window.addEventListener("focusin", onFocusIn);
     window.addEventListener("pointerdown", note, true);
     window.addEventListener("resize", note);
     return () => {
-      window.removeEventListener("pointerdown", note, true);
+      window.removeEventListener("focusin", onFocusIn);
+    window.removeEventListener("pointerdown", note, true);
       window.removeEventListener("resize", note);
     };
   }, []);
@@ -85,10 +91,17 @@ export function VoiceOrb({ className }: { className?: string }) {
     if (!full) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && stop();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") stop();
+      if (e.key === "Tab") {
+        e.preventDefault(); // End call is the only control, keep focus on it
+        host.current?.querySelector("button")?.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
+      opener.current?.focus?.();
       window.removeEventListener("keydown", onKey);
     };
   }, [full, stop]);
@@ -352,6 +365,7 @@ export function VoiceOrb({ className }: { className?: string }) {
         const m = o as THREE.Mesh;
         if (m.isMesh) {
           m.geometry.dispose();
+          (m.material as THREE.MeshStandardMaterial).map?.dispose();
           (m.material as THREE.Material).dispose();
         }
       });
@@ -365,8 +379,9 @@ export function VoiceOrb({ className }: { className?: string }) {
       ref={host}
       className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent`}
       role={full ? "dialog" : "button"}
+      aria-modal={full || undefined}
       tabIndex={full ? -1 : 0}
-      aria-label={status === "live" ? "End call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
+      aria-label={full ? "Call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
       onClick={() => !full && toggle()}
       onKeyDown={(e) => {
         if (!full && (e.key === "Enter" || e.key === " ")) {
@@ -376,7 +391,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       }}
       style={
         full
-          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: "orb-bg-in .6s ease-out" }
+          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: reduceMotion ? undefined : "orb-bg-in .6s ease-out" }
           : { overflow: "visible", touchAction: "manipulation" }
       }
     >
@@ -456,7 +471,7 @@ export function VoiceOrb({ className }: { className?: string }) {
         </div>
       </div>
       {full && (
-        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: "orb-full-in .5s ease-out .45s both" }}>
+        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: reduceMotion ? undefined : "orb-full-in .5s ease-out .45s both" }}>
           <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
             {status === "live" ? "Live. Say hello" : "Connecting…"}
           </p>

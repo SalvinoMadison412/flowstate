@@ -11,16 +11,12 @@ const COLUMNS = [
     links: [
       { label: "AI Voice Agents", href: "/voice-agent" },
       { label: "AI Automations", href: "/services#ai-automation" },
-      { label: "Meta Ads", href: "/services#meta-ads" },
-      { label: "Google Ads", href: "/services#google-ads" },
-      { label: "GEO — Generative Engine Optimization", href: "/services#geo" },
     ],
   },
   {
     heading: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "How it works", href: "/services#how-it-works" },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -49,7 +45,7 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary">
-              Get found by AI. Get clicked on Google. Get discovered on Meta.
+              Meet the AI that answers your phone.
             </p>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
