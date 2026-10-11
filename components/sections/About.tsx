@@ -14,7 +14,7 @@ export const FOUNDERS = [
     linkedin: "https://www.linkedin.com/in/salvino-madison",
     email: "salvino@flowstateaiagents.com",
     bio: [
-      "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's full marketing operation on the side, proving he could turn strategy into execution, not just slides.",
+      "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's operations on the side, proving he could turn strategy into execution, not just slides.",
       "At Flow State, he brings both disciplines together: the rigor to read what the data is actually saying, and the creative judgment to act on it. He builds the automations and AI workflows behind a business: lead follow-up, booking, reporting and the repetitive work that eats a team's day.",
       "He is the person you talk to from the first call to the day a workflow goes live. He scopes the work, builds it himself, and stays on it after launch, so nothing gets lost between a sales conversation and delivery.",
       "Salvino is multilingual, so he can work with businesses and their customers in the language they are most comfortable in.",
