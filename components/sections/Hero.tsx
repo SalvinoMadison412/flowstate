@@ -224,20 +224,6 @@ export function Hero() {
         </div>
 
         <div className="relative order-1 mx-auto aspect-square w-full max-w-[280px] sm:max-w-[380px] lg:order-2 lg:max-w-[520px]">
-          {/* ripples while the call is live */}
-          {status === "live" &&
-            [0, 1, 2].map((i) => (
-              <span
-                key={i}
-                aria-hidden
-                className="orb-ripple pointer-events-none absolute inset-[12%] rounded-full border border-accent/40"
-                style={{ animationDelay: `${i * 0.9}s` }}
-              />
-            ))}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-[8%] rounded-full bg-accent/10 blur-3xl"
-          />
           <VoiceOrb className="absolute inset-0" />
         </div>
       </div>

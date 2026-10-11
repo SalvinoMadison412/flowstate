@@ -1,251 +1,410 @@
 "use client";
 
 /**
- * Interactive 3D orb (three.js). Drag to spin it, hover to tilt it, click to
- * start/stop the call. It idles with a slow breathing swell, spins up while
- * connecting, and while live its surface is displaced by the agent's voice level.
- * Loaded with dynamic({ ssr: false }); falls back to a CSS glow without WebGL.
+ * Glass orb: a flat frosted-glass disc with six colours drifting behind it and
+ * Maoshi's face (three.js, transparent canvas) inside the pane. Spec: glass-orb-handoff/DESIGN.md.
+ * The glass is plain CSS (blurred blobs + backdrop-filter); per-frame work is transforms and
+ * opacity only. Loaded with dynamic({ ssr: false }); without WebGL the glass shows on its own.
  */
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { useVoiceCall } from "@/lib/useVoiceCall";
 import { usePrefersReducedMotion } from "@/lib/useReveal";
 
-// Shared displacement: cheap layered sines, amplitude driven by the voice level.
-const DISPLACE = /* glsl */ `
-  uniform float uTime;
-  uniform float uAmp;
-  vec3 displace(vec3 p) {
-    float n = sin(p.x * 3.1 + uTime * 1.1) * sin(p.y * 3.7 - uTime * 0.9) * sin(p.z * 2.9 + uTime * 0.7);
-    float m = sin(p.x * 7.0 - uTime * 2.0) * sin(p.y * 6.0 + p.z * 5.0 + uTime * 1.6);
-    return p * (1.0 + uAmp * (n + 0.35 * m));
-  }
-`;
+// [colour, phase, turns round x, turns round y, orbit, size] (from INK in frosted_glass.html)
+const INK = [
+  ["#00C8F0", 0.0, 1, 1, 1.0, 1.0],
+  ["#3B6BFF", 1.1, 1, 2, 0.9, 0.9],
+  ["#9B5CFF", 2.3, 2, 1, 0.95, 0.85],
+  ["#FF4FA3", 3.4, 1, 1, 0.85, 0.8],
+  ["#FFB02E", 4.4, 1, 2, 0.95, 0.72],
+  ["#2EE6A6", 5.5, 2, 1, 0.9, 0.8],
+] as const;
 
-const BODY_VERT = /* glsl */ `
-  ${DISPLACE}
-  varying vec3 vNormal;
-  varying vec3 vView;
-  varying float vDisp;
-  void main() {
-    vec3 p = displace(position);
-    vDisp = length(p) - 1.0;
-    vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    vNormal = normalize(normalMatrix * normalize(position));
-    vView = normalize(-mv.xyz);
-    gl_Position = projectionMatrix * mv;
-  }
-`;
-
-const BODY_FRAG = /* glsl */ `
-  uniform float uActive;
-  varying vec3 vNormal;
-  varying vec3 vView;
-  varying float vDisp;
-  void main() {
-    float fres = pow(1.0 - max(dot(normalize(vNormal), normalize(vView)), 0.0), 2.4);
-    vec3 deep = vec3(0.02, 0.05, 0.08);
-    vec3 cyan = vec3(0.0, 0.78, 0.94);
-    vec3 col = mix(deep, cyan, fres * (0.75 + uActive * 0.5));
-    col += vec3(1.0) * smoothstep(0.06, 0.28, vDisp) * 0.55; // bright crests while speaking
-    gl_FragColor = vec4(col, 1.0);
-  }
-`;
-
-const DOT_VERT = /* glsl */ `
-  ${DISPLACE}
-  uniform float uSize;
-  void main() {
-    vec3 p = displace(position) * 1.16;
-    vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    gl_PointSize = uSize * (1.0 / -mv.z);
-    gl_Position = projectionMatrix * mv;
-  }
-`;
-
-const DOT_FRAG = /* glsl */ `
-  void main() {
-    float d = length(gl_PointCoord - 0.5);
-    if (d > 0.5) discard;
-    gl_FragColor = vec4(0.55, 0.92, 1.0, (0.5 - d) * 1.1);
-  }
-`;
+const TAU = Math.PI * 2;
+const SKIN = 0xf3eadd;
+const CLIPS = ["Idle", "Listen", "Talk", "Wave", "Nod", "Happy"];
+const FX = ["Wave", "Nod", "Happy"]; // little antics while idle
+const FADE = 0.15; // clip crossfade, seconds
+const TALK_HOLD = 0.3; // keep Talk this long after the agent goes quiet
+const FRAME_R = { feet: 1.95, height: 2.57 }; // in disc radii: only the face and shoulders show
+const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>",
+)}")`;
+const abs = "absolute inset-0 rounded-full pointer-events-none";
 
 export function VoiceOrb({ className }: { className?: string }) {
   const host = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null); // the disc box, 2R square
+  const pane = useRef<HTMLDivElement>(null); // scaled with the voice
+  const blobs = useRef<(HTMLSpanElement | null)[]>([]);
+  const glow = useRef<HTMLDivElement>(null);
+  const rings = useRef<(HTMLSpanElement | null)[]>([]);
+  const canvas = useRef<HTMLCanvasElement>(null);
   const { status, toggle, levels } = useVoiceCall();
   const reduceMotion = usePrefersReducedMotion();
   const [noGL, setNoGL] = useState(false);
-  // The render loop reads these; keeping them in refs avoids rebuilding the scene.
   const live = useRef({ status, toggle });
   live.current = { status, toggle };
 
   useEffect(() => {
     const el = host.current;
-    if (!el) return;
+    const st = stage.current;
+    const cv = canvas.current;
+    if (!el || !st || !cv) return;
 
-    let renderer: THREE.WebGLRenderer;
+    let R = 100;
+    // ── three.js: Maoshi, orthographic, 1 unit = 1 disc radius
+    let renderer: THREE.WebGLRenderer | null = null;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true });
     } catch {
       setNoGL(true);
-      return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    el.appendChild(renderer.domElement);
-    renderer.domElement.style.cssText = "width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab";
-
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 20);
-    camera.position.z = 4.2;
+    const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
+    cam.position.z = 10;
+    const body = new THREE.Group();
+    body.position.y = -FRAME_R.feet;
+    body.scale.setScalar(FRAME_R.height);
+    scene.add(body);
+    for (const sx of [-1, 1]) {
+      const l = new THREE.PointLight(0x00c8f0, 1.2, 0, 0);
+      l.position.set(sx * 0.8, 0.9, -0.7);
+      body.add(l);
+    }
+    if (renderer) {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.NoToneMapping;
+      scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environmentIntensity = 0.25;
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d2c6, 0.4));
+      const key = new THREE.DirectionalLight(0xffffff, 0.25);
+      key.position.set(300, 500, 600);
+      scene.add(key);
+    }
 
-    const uniforms = { uTime: { value: 0 }, uAmp: { value: 0.05 }, uActive: { value: 0 }, uSize: { value: 11 } };
-    const geo = new THREE.IcosahedronGeometry(1, 24);
-    const body = new THREE.Mesh(geo, new THREE.ShaderMaterial({ uniforms, vertexShader: BODY_VERT, fragmentShader: BODY_FRAG }));
-    const dots = new THREE.Points(
-      new THREE.IcosahedronGeometry(1, 14),
-      new THREE.ShaderMaterial({
-        uniforms,
-        vertexShader: DOT_VERT,
-        fragmentShader: DOT_FRAG,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      }),
-    );
-    const group = new THREE.Group();
-    group.add(body, dots);
-    scene.add(group);
+    let mixer: THREE.AnimationMixer | undefined;
+    const actions: Record<string, THREE.AnimationAction> = {};
+    let hips: THREE.Object3D | undefined;
+    let head: THREE.Object3D | undefined;
+    const headClean = new THREE.Quaternion();
+    const look = { yaw: 0, pitch: 0, ex: 0, ey: 0, tx: 0, ty: 0 };
+    let fxUntil = 0;
+    let fxIn = 5;
+    const hipsScale = new THREE.Vector3(1, 1, 1);
+    const eyes: { o: THREE.Object3D; s: THREE.Vector3; p: THREE.Vector3 }[] = [];
+    let current: THREE.AnimationAction | undefined;
+    let loaded = false;
+    let alive = true;
+
+    const play = (name: string) => {
+      const a = actions[name];
+      if (!a || a === current) return;
+      a.reset().setEffectiveWeight(1).play();
+      current?.crossFadeTo(a, reduceMotion ? 0.05 : FADE, false);
+      current = a;
+    };
 
     const resize = () => {
-      const w = el.clientWidth || 1;
-      const h = el.clientHeight || 1;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
+      R = (st.clientWidth || 200) / 2;
+      st.style.setProperty("--R", `${R}px`);
+      renderer?.setSize(2 * R, 2 * R, false);
     };
-    const ro = new ResizeObserver(resize);
-    ro.observe(el);
-    resize();
+    const ro = new ResizeObserver(() => {
+      resize();
+      if (reduceMotion) drawStatic();
+    });
+    ro.observe(st);
 
-    // ── interaction: drag to spin (with inertia), hover to tilt, click to toggle
-    let dragging = false;
-    let moved = 0;
-    let lastX = 0;
-    let lastY = 0;
-    let velX = 0;
-    let velY = 0;
-    let tiltX = 0;
-    let tiltY = 0;
-    const cv = renderer.domElement;
-    const onDown = (e: PointerEvent) => {
-      dragging = true;
-      moved = 0;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      cv.setPointerCapture(e.pointerId);
-      cv.style.cursor = "grabbing";
+    // ── glass: blob positions are the only thing that moves (transforms), plus pane scale and rings
+    let phase = 0; // 0..1 loops are 5 s at rest
+    let lean = { x: 0, y: 0, tx: 0, ty: 0 };
+    const place = (v: number, k: number) => {
+      INK.forEach(([, p, nx, ny, orbit, size], i) => {
+        const b = blobs.current[i];
+        if (!b) return;
+        const x = (190 + 50 * v) / 300 * orbit * Math.cos(phase * TAU * nx + p) * R;
+        const y = (175 + 40 * v) / 300 * orbit * Math.sin(phase * TAU * ny + p * 1.3) * R;
+        b.style.transform = `translate3d(${x}px,${y}px,0) scale(${((150 + 36 * v) / 300) * size})`;
+      });
+      if (pane.current) pane.current.style.transform = `scale(${k})`;
+      if (glow.current) glow.current.style.transform = `translate3d(${lean.x}px,${lean.y}px,0)`;
     };
+
+    const setBlink = (open: number, ex = 0, ey = 0) => {
+      const o = Math.max(0.14, open);
+      const shut = 1 - o;
+      for (const e of eyes) {
+        e.o.scale.set(e.s.x * (1 + shut * 0.12), e.s.y * o, e.s.z * (1 + shut * 0.5));
+        e.o.position.set(e.p.x + ex * 0.012, e.p.y - ey * 0.01, e.p.z + 0.006 + shut * 0.012);
+      }
+    };
+
+    function drawStatic() {
+      place(0, 1);
+      for (const r of rings.current) if (r) r.style.opacity = "0";
+      if (loaded && renderer) {
+        play("Idle");
+        mixer?.update(0);
+        renderer.render(scene, cam);
+      }
+    }
+
+    new GLTFLoader()
+      .loadAsync("/maoshi/maoshi.glb")
+      .then((gltf) => {
+        if (!alive) return;
+        gltf.scene.traverse((o) => {
+          if (/Hips$/.test(o.name) && (o as THREE.Bone).isBone) {
+            hips = o;
+            hipsScale.copy(o.scale);
+          }
+          if (/Head$/.test(o.name) && (o as THREE.Bone).isBone) head = o;
+          const m = o as THREE.Mesh;
+          if (m.isMesh) {
+            m.frustumCulled = false;
+            const mat = m.material as THREE.MeshStandardMaterial;
+            if (o.name.startsWith("Eye")) mat.envMapIntensity = 1.4;
+            else {
+              mat.envMapIntensity = 0.05;
+              mat.roughness = 0.95;
+              mat.metalness = 0;
+              mat.color.set(SKIN);
+              mat.emissive.copy(mat.color).multiplyScalar(0.3);
+            }
+          }
+          if (/^Eye_[LR]$/.test(o.name)) eyes.push({ o, s: o.scale.clone(), p: o.position.clone() });
+        });
+        body.add(gltf.scene);
+        mixer = new THREE.AnimationMixer(gltf.scene);
+        for (const clip of gltf.animations) {
+          if (!CLIPS.includes(clip.name)) continue;
+          const a = mixer.clipAction(clip);
+          if (FX.includes(clip.name)) {
+            a.setLoop(THREE.LoopOnce, 1);
+            a.clampWhenFinished = true;
+          }
+          actions[clip.name] = a;
+        }
+        loaded = true;
+        play("Idle");
+        if (reduceMotion) drawStatic();
+      })
+      .catch(() => alive && setNoGL(true));
+
+    // ── pointer: blobs lean a few px toward the cursor
+    const onLook = (e: PointerEvent) => {
+      const r = st.getBoundingClientRect();
+      look.tx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / 500));
+      look.ty = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / 400));
+    };
+    window.addEventListener("pointermove", onLook, { passive: true });
     const onMove = (e: PointerEvent) => {
-      const r = cv.getBoundingClientRect();
-      tiltY = ((e.clientX - r.left) / r.width - 0.5) * 0.6;
-      tiltX = ((e.clientY - r.top) / r.height - 0.5) * 0.6;
-      if (!dragging) return;
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      moved += Math.abs(dx) + Math.abs(dy);
-      velY = dx * 0.006;
-      velX = dy * 0.006;
-      group.rotation.y += velY;
-      group.rotation.x += velX;
-      lastX = e.clientX;
-      lastY = e.clientY;
+      const r = el.getBoundingClientRect();
+      lean.tx = ((e.clientX - r.left) / r.width - 0.5) * 0.08 * R * 2;
+      lean.ty = ((e.clientY - r.top) / r.height - 0.5) * 0.08 * R * 2;
     };
-    const onUp = () => {
-      dragging = false;
-      cv.style.cursor = "grab";
-      if (moved < 6) live.current.toggle(); // a click, not a drag
-    };
-    const onLeave = () => {
-      tiltX = tiltY = 0;
-    };
-    cv.addEventListener("pointerdown", onDown);
-    cv.addEventListener("pointermove", onMove);
-    cv.addEventListener("pointerup", onUp);
-    cv.addEventListener("pointercancel", onUp);
-    cv.addEventListener("pointerleave", onLeave);
+    const onLeave = () => (lean.tx = lean.ty = 0);
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
 
-    // ── loop (paused while offscreen)
+    // ── loop: paused offscreen / hidden tab
     let visible = true;
     const io = new IntersectionObserver(([en]) => (visible = en.isIntersecting));
     io.observe(el);
     let raf = 0;
     let last = performance.now();
-    let amp = 0.05;
-    let active = 0;
+    let level = 0;
+    let talkUntil = 0;
+    let blinkT = 0;
+    let t = 0;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      if (!visible) return;
+      if (!visible || document.hidden) {
+        last = now;
+        return;
+      }
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      const st = live.current.status;
+      t += dt;
+      const s = live.current.status;
       const lv = levels.current;
-      const level = Math.max(lv.agent, lv.mic * 0.5);
+      const target = s === "live" ? Math.max(lv.agent, lv.mic * 0.5) : 0;
+      level += (target - level) * Math.min(1, dt * 14);
+      phase = (phase + (dt / 5) * (s === "connecting" ? 1.5 : 1)) % 1000;
 
-      const targetAmp =
-        st === "live" ? 0.05 + level * 0.55 : st === "connecting" ? 0.11 + Math.sin(now / 160) * 0.03 : 0.05 + Math.sin(now / 900) * 0.015;
-      amp += (targetAmp - amp) * 0.2;
-      active += ((st === "live" ? 1 : 0) - active) * 0.08;
-      uniforms.uAmp.value = amp;
-      uniforms.uActive.value = active;
-      uniforms.uTime.value += dt * (st === "connecting" ? 2.4 : 0.7 + active * 0.8);
-
-      if (!dragging) {
-        velX *= 0.94;
-        velY *= 0.94;
-        group.rotation.y += velY + dt * (st === "connecting" ? 0.9 : 0.18);
-        group.rotation.x += velX;
+      // clip: Talk while the agent speaks (held briefly), Listen on a call, else Idle
+      const speaking = s === "live" && lv.agent > 0.08;
+      if (speaking) talkUntil = now + TALK_HOLD * 1000;
+      // idle antics: Wave / Nod / Happy every so often, then back to Idle
+      if (s !== "idle") fxUntil = 0;
+      else if (now > fxUntil) {
+        fxIn -= dt;
+        if (fxIn <= 0 && loaded) {
+          fxIn = 7 + Math.random() * 6;
+          const n = FX[Math.floor(Math.random() * FX.length)];
+          if (actions[n]) {
+            play(n);
+            fxUntil = now + actions[n].getClip().duration * 1000;
+          }
+        }
       }
-      // ease the hover tilt on the camera so it never fights the drag rotation
-      camera.position.x += (tiltY * 1.4 - camera.position.x) * 0.06;
-      camera.position.y += (tiltX * 1.4 - camera.position.y) * 0.06;
-      camera.lookAt(0, 0, 0);
-      renderer.render(scene, camera);
+      if (!(s === "idle" && now < fxUntil)) play(s === "idle" ? "Idle" : now < talkUntil ? "Talk" : "Listen");
+
+      lean.x += (lean.tx - lean.x) * 0.08;
+      lean.y += (lean.ty - lean.y) * 0.08;
+      const agentLevel = s === "live" ? lv.agent : 0;
+      place(level, 1 + 0.022 * level);
+      rings.current.forEach((r, i) => {
+        if (!r) return;
+        const u = (t * 3 + i / 3) % 1;
+        r.style.transform = `scale(${(40 + u * 250) / 300})`;
+        r.style.opacity = String(0.5 * agentLevel * Math.sin(u * Math.PI));
+      });
+
+      if (loaded && renderer && mixer) {
+        const talk = current === actions.Talk;
+        if (talk) current!.setEffectiveTimeScale(0.7 + agentLevel * 0.9);
+        if (head) head.quaternion.copy(headClean);
+        mixer.update(dt);
+        if (head) {
+          headClean.copy(head.quaternion);
+          const a = Math.min(1, dt * 5);
+          look.yaw += (look.tx * 0.45 - look.yaw) * a;
+          look.pitch += (look.ty * 0.28 - look.pitch) * a;
+          look.ex += (look.tx - look.ex) * Math.min(1, dt * 14);
+          look.ey += (look.ty - look.ey) * Math.min(1, dt * 14);
+          head.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(look.pitch * 0.9, look.yaw, 0, "YXZ")));
+        }
+        if (hips) {
+          const k = 1 + agentLevel * 0.035;
+          hips.scale.set(hipsScale.x / Math.sqrt(k), hipsScale.y * k, hipsScale.z / Math.sqrt(k));
+        }
+        blinkT += dt;
+        if (blinkT > 3.2) blinkT = 0;
+        setBlink(blinkT < 0.16 ? Math.abs(Math.cos((blinkT / 0.16) * Math.PI)) : 1, look.ex, look.ey);
+        renderer.render(scene, cam);
+      }
     };
-    if (reduceMotion) {
-      renderer.render(scene, camera); // one static frame
-    } else {
-      raf = requestAnimationFrame(frame);
-    }
+    resize();
+    if (reduceMotion) drawStatic();
+    else raf = requestAnimationFrame(frame);
 
     return () => {
+      alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
       io.disconnect();
-      cv.removeEventListener("pointerdown", onDown);
-      cv.removeEventListener("pointermove", onMove);
-      cv.removeEventListener("pointerup", onUp);
-      cv.removeEventListener("pointercancel", onUp);
-      cv.removeEventListener("pointerleave", onLeave);
-      geo.dispose();
-      dots.geometry.dispose();
-      (body.material as THREE.Material).dispose();
-      (dots.material as THREE.Material).dispose();
-      renderer.dispose();
-      renderer.domElement.remove();
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointermove", onLook);
+      scene.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.isMesh) {
+          m.geometry.dispose();
+          (m.material as THREE.Material).dispose();
+        }
+      });
+      scene.environment?.dispose();
+      renderer?.dispose();
     };
   }, [levels, reduceMotion]);
 
   return (
     <div
       ref={host}
-      className={className}
+      className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent`}
       role="button"
+      tabIndex={0}
       aria-label={status === "live" ? "End call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
+      onClick={() => toggle()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      }}
+      style={{ overflow: "visible", touchAction: "manipulation" }}
     >
-      {noGL && (
-        <div className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(0,200,240,0.5),rgba(0,200,240,0.05)_60%,transparent_70%)]" />
-      )}
+      {/* disc box: 2R, centred; the glow overflows it on purpose */}
+      <div
+        ref={stage}
+        className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[68%] -translate-x-1/2 -translate-y-1/2"
+        style={{ ["--R" as string]: "100px" }}
+      >
+        <div ref={pane} className="absolute inset-0 will-change-transform">
+          {/* 1. glow behind the glass */}
+          <div ref={glow} className={abs} style={{ filter: "blur(calc(var(--R) * .15))", opacity: 0.95 }}>
+            {INK.map(([col, , , , , ], i) => (
+              <span
+                key={col}
+                ref={(n) => {
+                  blobs.current[i] = n;
+                }}
+                className="absolute rounded-full will-change-transform"
+                style={{ left: "0%", top: "0%", width: "100%", height: "100%", background: col, transform: "scale(0)" }}
+              />
+            ))}
+          </div>
+          {/* 2. soft shadow */}
+          <span
+            className={abs}
+            style={{ background: "#060d24", opacity: 0.55, filter: "blur(calc(var(--R) * .11))", transform: "translateY(calc(var(--R) * .09)) scale(.98)" }}
+          />
+          {/* 3. the pane: frost over the glow */}
+          <div
+            className={`${abs} overflow-hidden`}
+            style={{
+              background: "rgba(22,24,30,.42)",
+              WebkitBackdropFilter: "blur(calc(var(--R) * .32)) saturate(1.1)",
+              backdropFilter: "blur(calc(var(--R) * .32)) saturate(1.1)",
+            }}
+          >
+            <span className={abs} style={{ background: "#101216", opacity: 0.35, mixBlendMode: "multiply" }} />
+            <span className={abs} style={{ background: "linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 50%,rgba(255,255,255,.03))" }} />
+            <span className={abs} style={{ backgroundImage: GRAIN, backgroundSize: "200px", opacity: 0.05 }} />
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                ref={(n) => {
+                  rings.current[i] = n;
+                }}
+                className={abs}
+                style={{ border: "calc(var(--R) * .05) solid #fff", filter: "blur(calc(var(--R) * .033))", opacity: 0 }}
+              />
+            ))}
+          </div>
+          {/* 4. Maoshi, clipped just inside the lit edge */}
+          <canvas
+            ref={canvas}
+            className="absolute inset-0 h-full w-full"
+            style={{ clipPath: "circle(49.35%)", display: noGL ? "none" : "block" }}
+          />
+          {/* 5. glass sheen over him */}
+          <span
+            className={abs}
+            style={{
+              background: "linear-gradient(180deg,rgba(255,255,255,.34) 0%,transparent 42%,transparent 78%,rgba(255,255,255,.14) 100%)",
+              boxShadow: "inset 0 0 calc(var(--R) * .2) rgba(255,255,255,.22)",
+            }}
+          />
+          {/* 6. lit edge */}
+          <span
+            className={abs}
+            style={{
+              border: "calc(var(--R) * .01) solid transparent",
+              background: "linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.14)) border-box",
+              WebkitMask: "linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0)",
+              WebkitMaskComposite: "xor",
+              mask: "linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0)",
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
