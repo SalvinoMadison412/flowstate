@@ -6,7 +6,7 @@
  * The glass is plain CSS (blurred blobs + backdrop-filter); per-frame work is transforms and
  * opacity only. Loaded with dynamic({ ssr: false }); without WebGL the glass shows on its own.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
@@ -43,9 +43,55 @@ export function VoiceOrb({ className }: { className?: string }) {
   const glow = useRef<HTMLDivElement>(null);
   const rings = useRef<(HTMLSpanElement | null)[]>([]);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const { status, toggle, levels } = useVoiceCall();
+  const { status, toggle, stop, levels } = useVoiceCall();
+  // while a call is connecting or live, Maoshi takes over the whole screen
+  const full = status === "connecting" || status === "live";
   const reduceMotion = usePrefersReducedMotion();
   const [noGL, setNoGL] = useState(false);
+
+  // Zoom in/out: slide and scale the disc between where it sits on the page and the full-screen spot (FLIP).
+  const rects = useRef<{ inline?: DOMRect; full?: DOMRect }>({});
+  const wasFull = useRef(false);
+  useEffect(() => {
+    const note = () => {
+      if (!wasFull.current && stage.current) rects.current.inline = stage.current.getBoundingClientRect();
+    };
+    note();
+    window.addEventListener("pointerdown", note, true);
+    window.addEventListener("resize", note);
+    return () => {
+      window.removeEventListener("pointerdown", note, true);
+      window.removeEventListener("resize", note);
+    };
+  }, []);
+  useLayoutEffect(() => {
+    const st = stage.current;
+    if (!st || full === wasFull.current) return;
+    wasFull.current = full;
+    const to = st.getBoundingClientRect();
+    const from = full ? rects.current.inline : rects.current.full;
+    if (full) rects.current.full = to;
+    else rects.current.inline = to;
+    if (!from || reduceMotion || !st.animate) return;
+    const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+    const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+    st.animate(
+      [{ translate: `${dx}px ${dy}px`, scale: from.width / to.width }, { translate: "0 0", scale: 1 }],
+      { duration: 900, easing: "cubic-bezier(.45,0,.2,1)" },
+    );
+  }, [full, reduceMotion]);
+
+  useEffect(() => {
+    if (!full) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && stop();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [full, stop]);
   const live = useRef({ status, toggle });
   live.current = { status, toggle };
 
@@ -140,7 +186,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       const shut = 1 - o;
       for (const e of eyes) {
         e.o.scale.set(e.s.x * (1 + shut * 0.12), e.s.y * o, e.s.z * (1 + shut * 0.5));
-        e.o.position.set(e.p.x + ex * 0.012, e.p.y - ey * 0.01, e.p.z + 0.006 + shut * 0.012);
+        e.o.position.set(e.p.x + ex * 0.005, e.p.y - ey * 0.004, e.p.z + 0.012 + shut * 0.012);
       }
     };
 
@@ -274,8 +320,8 @@ export function VoiceOrb({ className }: { className?: string }) {
         if (head) {
           headClean.copy(head.quaternion);
           const a = Math.min(1, dt * 5);
-          look.yaw += (look.tx * 0.45 - look.yaw) * a;
-          look.pitch += (look.ty * 0.28 - look.pitch) * a;
+          look.yaw += (look.tx * 0.2 - look.yaw) * a;
+          look.pitch += (look.ty * 0.12 - look.pitch) * a;
           look.ex += (look.tx - look.ex) * Math.min(1, dt * 14);
           look.ey += (look.ty - look.ey) * Math.min(1, dt * 14);
           head.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(look.pitch * 0.9, look.yaw, 0, "YXZ")));
@@ -318,23 +364,27 @@ export function VoiceOrb({ className }: { className?: string }) {
     <div
       ref={host}
       className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent`}
-      role="button"
-      tabIndex={0}
+      role={full ? "dialog" : "button"}
+      tabIndex={full ? -1 : 0}
       aria-label={status === "live" ? "End call with Maoshi" : "Talk to Maoshi, our AI voice agent"}
-      onClick={() => toggle()}
+      onClick={() => !full && toggle()}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (!full && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           toggle();
         }
       }}
-      style={{ overflow: "visible", touchAction: "manipulation" }}
+      style={
+        full
+          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: "orb-bg-in .6s ease-out" }
+          : { overflow: "visible", touchAction: "manipulation" }
+      }
     >
       {/* disc box: 2R, centred; the glow overflows it on purpose */}
       <div
         ref={stage}
         className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[68%] -translate-x-1/2 -translate-y-1/2"
-        style={{ ["--R" as string]: "100px" }}
+        style={{ ["--R" as string]: "100px", ...(full ? { width: "min(56vh, 86vw)", top: "44%" } : null) }}
       >
         <div ref={pane} className="absolute inset-0 will-change-transform">
           {/* 1. glow behind the glass */}
@@ -405,6 +455,21 @@ export function VoiceOrb({ className }: { className?: string }) {
           />
         </div>
       </div>
+      {full && (
+        <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: "orb-full-in .5s ease-out .45s both" }}>
+          <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
+            {status === "live" ? "Live. Say hello" : "Connecting…"}
+          </p>
+          <button
+            type="button"
+            autoFocus
+            onClick={stop}
+            className="inline-flex h-12 items-center justify-center rounded-full bg-red-600 px-6 text-[0.95rem] font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          >
+            End call
+          </button>
+        </div>
+      )}
     </div>
   );
 }
