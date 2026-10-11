@@ -238,3 +238,5 @@ h3,
   .orb-ripple { animation: none; opacity: 0; }
   .tx-line { animation: none; opacity: 1; }
 }
+
+@keyframes orb-full-in { from { opacity: 0; } to { opacity: 1; } }
