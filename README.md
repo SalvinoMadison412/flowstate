@@ -1,10 +1,9 @@
 # Flow State
 
-Marketing homepage for **Flow State** — a marketing agency running three
-standalone services: **Meta Ads**, **Google Ads**, and **GEO** (Generative
-Engine Optimization).
+Website for **Flow State**: AI voice agents and AI automations for local
+businesses.
 
-> Get found by AI. Get clicked on Google. Get discovered on Meta.
+> Meet the AI that answers your phone.
 
 ## Stack
 
@@ -49,13 +48,9 @@ app/
                       LeadList.tsx (filters + list), LeadDetail.tsx (log form,
                       history), calls/ and outreach/ pick the channel
 components/
-  ui/                 Logo, Nav, Button, Card, Section, CountUp, icons
-  sections/           Hero, Problem, Services (3 service panels), GEOMockup,
-                      AgenticWorkflow (How It Works), Industries, CaseStudy,
-                      FinalCTA, Footer
-                      — Dashboard.tsx and AuthorityDiagram.tsx are kept but no
-                        longer mounted (GEO-only visuals from the old single-
-                        service site)
+  ui/                 Logo, Nav, Button, Section, CountUp, icons
+  sections/           Hero, Services (automation + voice agents), Explore,
+                      Industries, FinalCTA, Footer
 lib/utils.ts          cn(), shared motion presets
 lib/supabase.ts       CRM client, CHANNELS config, Lead/Touch types, date helper
 ```
