@@ -1,13 +1,10 @@
 # Flow State
 
-> Flow State builds AI voice agents, automations and AI workflows and runs marketing, run by founder Salvino Madison, with Sherwin Madison on compliance and finance. We help local businesses (salons, spas, med spas, clinics, cafés, boutique hotels, fitness studios) get more bookings through Meta Ads, Google Ads, and GEO (Generative Engine Optimization: getting recommended by ChatGPT, Perplexity, Gemini and Claude).
+> Flow State builds AI voice agents, automations and AI workflows run by founder Salvino Madison, with Sherwin Madison on compliance and finance. We help local businesses (salons, spas, med spas, clinics, cafés, boutique hotels, fitness studios) save time and take more bookings with AI voice agents and automations.
 
 ## Services
 - AI automations and workflows: lead follow-up, booking workflows, reporting and connecting the tools a business already uses.
 - AI voice agents: answer business phones around the clock, take booking requests, hand off to your team. Built for multi-location and high-call-volume businesses. A live demo (Maoshi) is on the homepage.
-- Meta Ads: Instagram and Facebook campaigns, creative testing, retargeting.
-- Google Ads: Search and Performance Max campaigns, conversion tracking.
-- GEO: schema and entity markup, citation building, AI visibility monitoring.
 
 ## Apps
 - WealthFlow: a privacy-first personal finance app for Android. Bank statement PDFs are read and stored only on the phone. https://www.flowsstateagents.com/apps/wealthflow

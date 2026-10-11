@@ -35,7 +35,7 @@ const ORG_JSON_LD = {
   telephone: "+1-629-281-8264",
   sameAs: ["https://www.instagram.com/flowstate.agents"],
   description:
-    "Builds AI voice agents, automations and AI workflows for local businesses, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization).",
+    "Builds AI voice agents, automations and AI workflows for local businesses.",
   founder: {
     "@type": "Person",
     name: "Salvino Kevin Madison",
@@ -47,31 +47,25 @@ const ORG_JSON_LD = {
     jobTitle: "Compliance & Finance",
     sameAs: "https://www.linkedin.com/in/sherwin-judas-madison-b7b649338/",
   },
-  knowsAbout: ["AI voice agents", "Business automation", "AI workflows", "Meta Ads", "Google Ads", "Generative Engine Optimization"],
+  knowsAbout: ["AI voice agents", "Business automation", "AI workflows"],
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
+      "Flow State — AI voice agents and automations",
     template: "%s — Flow State",
   },
   description:
-    "Flow State builds AI voice agents, automations and AI workflows, and runs Meta Ads, Google Ads, and GEO (Generative Engine Optimization). Talk to a live voice agent in your browser.",
+    "Flow State builds AI voice agents, automations and AI workflows for local businesses. Talk to a live voice agent in your browser.",
   keywords: [
     "AI voice agent",
     "AI receptionist",
     "business automation",
     "AI workflows",
-    "Meta Ads agency",
-    "Google Ads agency",
-    "generative engine optimization",
-    "GEO",
-    "paid social",
-    "paid search",
-    "AI search optimization",
-    "ChatGPT citations",
+    "AI phone answering",
+    "AI booking assistant",
   ],
   authors: [{ name: "Flow State" }],
   creator: "Flow State",
@@ -79,16 +73,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: SITE_URL,
-    title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
+    title: "Flow State — AI voice agents and automations",
     description:
-      "Meet the AI that answers your phone. Talk to a live voice agent, then see the automations and ads that fill your calendar.",
+      "Meet the AI that answers your phone. Talk to a live voice agent, then see the automations that take busywork off your team.",
     siteName: "Flow State",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flow State — AI voice agents, Meta Ads, Google Ads, and GEO",
+    title: "Flow State — AI voice agents and automations",
     description:
-      "Get found by AI. Get clicked on Google. Get discovered on Meta.",
+      "Meet the AI that answers your phone.",
   },
   robots: { index: true, follow: true },
 };

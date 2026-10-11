@@ -15,7 +15,7 @@ export const FOUNDERS = [
     email: "salvino@flowstateaiagents.com",
     bio: [
       "Salvino spent two years as a Data Analyst at S&P Global, building the habit of making calls from data, not instinct, while running The Library Company's full marketing operation on the side, proving he could turn strategy into execution, not just slides.",
-      "At Flow State, he brings both disciplines together: the rigor to read what Meta, Google, and AI-answer data are actually saying, and the creative judgment to act on it. He also builds the automations and AI workflows behind a business: lead follow-up, booking, reporting and the repetitive work that eats a team's day.",
+      "At Flow State, he brings both disciplines together: the rigor to read what the data is actually saying, and the creative judgment to act on it. He builds the automations and AI workflows behind a business: lead follow-up, booking, reporting and the repetitive work that eats a team's day.",
       "He is the person you talk to from the first call to the day a workflow goes live. He scopes the work, builds it himself, and stays on it after launch, so nothing gets lost between a sales conversation and delivery.",
       "Salvino is multilingual, so he can work with businesses and their customers in the language they are most comfortable in.",
     ],
@@ -29,24 +29,21 @@ export const FOUNDERS = [
       "Sherwin is a Chartered Accountancy candidate who has spent the past one and a half years at SRVN & Associates working closely with businesses on accounting, taxation, and advisory.",
       "He supports Flow State on compliance and finance: every dollar of client spend is tracked back to return, and everything is held to the discipline he'd bring to an audit.",
       "In practice that means clear records, sensible handling of client data and money, and a second pair of eyes on the numbers, so clients can trust what they are being shown and what they are being billed.",
-      "Working alongside Salvino, he helps make sure the automations and campaigns Flow State builds are not only effective, but also sound from a financial and regulatory point of view.",
+      "Working alongside Salvino, he helps make sure the automations and voice agents Flow State builds are not only effective, but also sound from a financial and regulatory point of view.",
     ],
   },
 ];
 
 const PRINCIPLES = [
-  { n: "01", title: "Data over instinct", body: "Every recommendation starts from what Meta, Google and AI-answer data are actually saying, not from what sounds good in a pitch." },
+  { n: "01", title: "Data over instinct", body: "Every recommendation starts from how your calls and workflows actually run, not from what sounds good in a pitch." },
   { n: "02", title: "One point of contact", body: "No account managers and no hand-offs. The person who builds your strategy is the person who answers when you call." },
-  { n: "03", title: "Test, don't set and forget", body: "We iterate on creative, copy, bidding and workflows constantly, so nothing we build goes stale." },
-  { n: "04", title: "Reported in plain numbers", body: "Monthly reporting on the numbers that matter for the channel: ROAS, CPA, conversions and audience growth." },
+  { n: "03", title: "Test, don't set and forget", body: "We keep tuning scripts, prompts and workflows after launch, so nothing we build goes stale." },
+  { n: "04", title: "Reported in plain numbers", body: "Plain reporting on the numbers that matter: calls answered, bookings taken and time saved." },
 ];
 
 const OFFERS = [
   { href: "/voice-agent", title: "AI Voice Agents", body: "An AI receptionist that answers every call and takes booking requests." },
   { href: "/services#ai-automation", title: "AI Automations", body: "Workflows that connect your tools and handle the repetitive work." },
-  { href: "/services#meta-ads", title: "Meta Ads", body: "Instagram and Facebook campaigns built on creative testing." },
-  { href: "/services#google-ads", title: "Google Ads", body: "Search and Performance Max, tracked to conversions." },
-  { href: "/services#geo", title: "GEO", body: "Getting recommended by ChatGPT, Perplexity, Gemini and Claude." },
 ];
 
 export function About() {

@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 import {
   IconBroadcast,
   IconLoop,
-  IconSearch,
-  IconQuote,
   IconCheck,
   IconArrowRight,
 } from "@/components/ui/icons";
@@ -35,70 +33,32 @@ const SERVICES: Service[] = [
       "Booking workflows, reminders and confirmations",
       "AI assistants that draft replies, summarise calls and sort inbound requests",
       "Connecting the tools you already use, with no copy-pasting between them",
-      "Reporting that assembles itself from your ad, CRM and booking data",
+      "Reporting that assembles itself from your CRM and booking data",
       "Custom workflows built around how your business actually runs",
     ],
     differentiator:
-      "Built by the same person who runs your marketing, so the automations are wired to the numbers you actually track instead of bolted on as a separate project.",
+      "Built by the founder, so the automations are wired to the numbers you actually track instead of bolted on as a separate project.",
     cta: { label: "Automate a workflow", href: "/contact" },
     Icon: IconLoop,
   },
   {
-    id: "meta-ads",
-    kicker: "Paid social",
-    title: "Meta Ads",
+    id: "voice-agents",
+    kicker: "Voice",
+    title: "AI Voice Agents",
     positioning:
-      "Find your buyers before they go looking. Demand creation on Instagram and Facebook — not just demand capture.",
+      "An AI receptionist that picks up every call, day or night, answers questions and takes booking requests, and hands anything urgent to your team.",
     covers: [
-      "Instagram and Facebook feed, Stories, and Reels campaigns",
-      "Audience research, interest targeting, and lookalike building",
-      "Creative strategy across static, video, and carousel",
-      "Retargeting and full-funnel sequencing",
-      "A/B testing creative and copy at scale",
-      "Monthly reporting on CPM, CTR, ROAS, and audience growth",
+      "Answers business phones around the clock, in the caller's language",
+      "Takes booking requests and captures the caller's details",
+      "Hands off to a person for anything urgent or unusual",
+      "Built for businesses with many branches or a high call volume",
+      "Connects to the booking and CRM tools you already use",
+      "Try a live one on the voice agent page",
     ],
     differentiator:
-      "Creative-led, not just targeting-led. Most agencies run the same ads for months. We test and iterate constantly so the algorithm always has fresh signal.",
-    cta: { label: "Start a Meta campaign", href: "/contact" },
+      "Built and tuned by the founder for your business, not a generic template. You talk to the person who builds it.",
+    cta: { label: "Talk to Maoshi, live", href: "/voice-agent" },
     Icon: IconBroadcast,
-  },
-  {
-    id: "google-ads",
-    kicker: "Paid search",
-    title: "Google Ads",
-    positioning:
-      "Own the top of search every time someone is ready to buy. Intent is everything — we capture it.",
-    covers: [
-      "Search campaigns — keyword strategy, match types, negative lists",
-      "Performance Max across Google's full inventory",
-      "Landing page optimization and conversion tracking",
-      "AI-driven bidding strategy and budget allocation",
-      "Ad copy variation testing at scale",
-      "Monthly reporting on ROAS, CPA, and conversion trends",
-    ],
-    differentiator:
-      "AI-assisted copy testing and bidding. More variants, faster learning, and a lower cost per lead than agencies running campaigns by hand.",
-    cta: { label: "Get a free ad audit", href: "/contact" },
-    Icon: IconSearch,
-  },
-  {
-    id: "geo",
-    kicker: "AI visibility",
-    title: "GEO — Generative Engine Optimization",
-    positioning:
-      "When someone asks AI about your category, you should be the answer. Get cited by ChatGPT, Gemini, Perplexity, and Claude.",
-    covers: [
-      "Schema, entity markup, and answer-ready content structure",
-      "Citation seeding across sources LLMs trust — Reddit, forums, expert roundups, reference sites",
-      "AI visibility monitoring across every major model",
-      "Community intelligence — Reddit and UGC signals that shape AI training data",
-      "Reputation architecture — control the narrative AI associates with your brand",
-      "Agentic content strategy — AI-native workflows that compound monthly",
-    ],
-    differentiator:
-      "Community-driven, not keyword-driven. Most agencies optimize for Google. We optimize for what is replacing it — the training and retrieval data AI actually reads.",
-    cta: { label: "Get your GEO audit", href: "/contact" },
-    Icon: IconQuote,
   },
 ];
 
@@ -107,11 +67,10 @@ export function Services() {
     <Section id="services">
       <SectionLabel>What we do</SectionLabel>
       <SectionHeading className="mt-4 max-w-3xl">
-        Four services. Each one stands on its own.
+        Two services. Each one stands on its own.
       </SectionHeading>
       <p className="mt-5 max-w-2xl text-lg text-text-secondary">
-        AI automation, Meta Ads, Google Ads, and GEO. Different jobs, different
-        playbooks. Hire us for the one you need &mdash; or all of them.
+        AI automations and AI voice agents. Hire us for the one you need &mdash; or both.
       </p>
 
       <div className="mt-14 flex flex-col gap-4">
