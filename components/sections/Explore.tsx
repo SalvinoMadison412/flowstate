@@ -4,8 +4,8 @@ import { IconArrowRight } from "@/components/ui/icons";
 
 const PAGES = [
   { href: "/voice-agent", kicker: "Voice agents", title: "Meet Maoshi", body: "See how an AI receptionist answers every call, and talk to one live." },
-  { href: "/services", kicker: "Automation & marketing", title: "AI workflows, Meta, Google, GEO", body: "Automations that remove the busywork, plus the campaigns and AI-search work that bring customers in." },
-  { href: "/about", kicker: "Who we are", title: "One founder, no hand-offs", body: "The people who build your strategy are the people who answer when you call." },
+  { href: "/services", kicker: "Automation", title: "AI automations & workflows", body: "Workflows that connect your tools and take the repetitive work off your team." },
+  { href: "/about", kicker: "Who we are", title: "One founder, no hand-offs", body: "The people who build your system are the people who answer when you call." },
 ];
 
 export function Explore() {
