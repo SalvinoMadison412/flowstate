@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { VoiceAgent, VoiceAgentDetails } from "@/components/sections/VoiceAgent";
+import { Guarantee } from "@/components/sections/Guarantee";
 import { Integrations } from "@/components/sections/Integrations";
 import { PageCTA } from "@/components/sections/PageCTA";
 
@@ -16,6 +17,7 @@ export default function VoiceAgentPage() {
       <VoiceAgent />
       <Integrations />
       <VoiceAgentDetails />
+      <Guarantee />
       <PageCTA heading="Want an intake line like this for your firm?" />
     </div>
   );
