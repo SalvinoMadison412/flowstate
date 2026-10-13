@@ -11,7 +11,7 @@ const EMAIL = "salvinokevin7@gmail.com";
 
 export default function WealthFlowPrivacy() {
   return (
-    <DocPage label="WealthFlow" title="WealthFlow Privacy Policy" updated="27 September 2026">
+    <DocPage label="WealthFlow" title="WealthFlow Privacy Policy" updated="13 October 2026">
       <p>
         WealthFlow (&ldquo;the app&rdquo;, &ldquo;we&rdquo;) is a personal finance app for Android,
         operated by Salvino Madison, an individual developer. Contact:{" "}
@@ -30,7 +30,14 @@ export default function WealthFlowPrivacy() {
       <h2>What we store on our servers</h2>
       <p>When you sign in we keep:</p>
       <ul>
-        <li><strong>Sign-in details</strong> from Google: your account identifier and email address.</li>
+        <li>
+          <strong>Sign-in details</strong> from Google: your account identifier, email address,
+          display name and profile picture link.
+        </li>
+        <li>
+          <strong>Sign-in logs</strong>: the IP address and time of each sign-in, kept by our
+          backend provider to keep accounts secure.
+        </li>
         <li>
           <strong>Your profile</strong>, as you enter it: name, email, phone number, age range,
           monthly income range, main goal and occupation.
@@ -72,6 +79,30 @@ export default function WealthFlowPrivacy() {
         </li>
       </ul>
 
+      <h2>Your rights</h2>
+      <p>
+        We hold your account data because you agreed to it by signing in and filling in your
+        profile. You can:
+      </p>
+      <ul>
+        <li>
+          <strong>See and correct it</strong>: your profile, categories and rules are shown in the
+          app and can be edited there. For a copy of everything we hold, email us.
+        </li>
+        <li>
+          <strong>Erase it</strong>: use Delete account, or email us.
+        </li>
+        <li>
+          <strong>Withdraw your consent</strong> at any time by deleting your account. The app
+          needs an account to work, so this ends your use of it.
+        </li>
+      </ul>
+      <p>
+        <strong>Complaints</strong>: email Salvino Madison at <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+        We reply within 30 days. If you are in India and are not satisfied with the reply, you can
+        complain to the Data Protection Board of India.
+      </p>
+
       <h2>Deleting your account</h2>
       <p>
         In the app, go to Menu &gt; Profile &gt; <strong>Delete account</strong>, type DELETE and
@@ -94,10 +125,12 @@ export default function WealthFlowPrivacy() {
 
       <h2>Children</h2>
       <p>
-        WealthFlow can be used by people of any age. Children and teenagers should use it with the
+        WealthFlow is for people aged 13 and over. It is not directed at children under 13, and we
+        do not knowingly collect data from them. If you are under 18, use WealthFlow only with the
         permission and help of a parent or guardian. A parent or guardian can delete a child&apos;s
         account and data at any time with Delete account in the app, or by emailing{" "}
-        <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+        <a href={`mailto:${EMAIL}`}>{EMAIL}</a>. If you believe a child under 13 has an account,
+        email us and we will delete it.
       </p>
 
       <h2>Changes</h2>
