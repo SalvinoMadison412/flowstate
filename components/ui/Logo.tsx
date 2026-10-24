@@ -43,7 +43,7 @@ export function Logo({ variant = "full", className, accentDot = false }: LogoPro
       )}
     >
       <FlowStateIcon className="h-9 w-9 shrink-0" />
-      <span className="text-[1.35rem] font-semibold leading-none tracking-tight2">
+      <span className="font-[family-name:var(--font-manrope)] text-[1.35rem] font-bold leading-none tracking-[-0.03em]">
         Flowstate
       </span>
     </span>

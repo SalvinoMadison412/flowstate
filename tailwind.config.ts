@@ -49,12 +49,12 @@ const config: Config = {
         mono: ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
       },
       letterSpacing: {
-        display: "-0.04em",
-        tight2: "-0.03em",
+        display: "-0.03em",
+        tight2: "-0.025em",
         wide: "0.02em",
       },
       borderRadius: { btn: "12px", card: "18px", panel: "48px" },
-      maxWidth: { site: "1280px" },
+      maxWidth: { site: "1600px" },
       boxShadow: {
         float: "0 12px 36px -8px rgba(21,21,24,0.10)",
         ring: "0 0 0 0.5px rgb(var(--border-active))",
