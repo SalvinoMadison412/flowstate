@@ -15,7 +15,7 @@ export function Hero() {
   const { status, error, toggle } = useVoiceCall();
 
   return (
-    <section id="top" className="px-4 pb-16 pt-8 sm:px-6">
+    <section id="top" className="px-[5vw] pb-16 pt-8">
       {/* Panel runs the full width (Clay-style); content stays at max-w-site inside it. */}
       <div>
         <div className="relative overflow-hidden rounded-panel bg-tile-sky px-6 pb-10 pt-12 sm:px-12 sm:pt-16 lg:py-16 2xl:px-0">
