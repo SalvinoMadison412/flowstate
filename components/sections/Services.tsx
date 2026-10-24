@@ -78,7 +78,7 @@ export function Services() {
           <article
             key={s.id}
             id={s.id}
-            className="scroll-mt-24 rounded-2xl border border-border-subtle bg-surface p-6 transition-colors duration-300 hover:border-border-active sm:p-9"
+            className="scroll-mt-24 rounded-card shadow-ring bg-surface-elevated p-6 transition-colors duration-300 sm:p-9"
           >
             <div
               className={cn(
@@ -91,15 +91,15 @@ export function Services() {
               {/* Identity + CTA */}
               <div className={cn("flex flex-col", i % 2 === 1 && "lg:order-2")}>
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-border-subtle text-text-primary">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg shadow-ring text-text-primary">
                     <s.Icon className="h-5 w-5" />
                   </span>
-                  <span className="font-mono text-xs uppercase tracking-[0.18em] text-text-secondary">
+                  <span className="font-medium text-xs uppercase tracking-[0.18em] text-text-secondary">
                     {s.kicker}
                   </span>
                 </div>
 
-                <h3 className="mt-5 font-display text-2xl font-bold leading-tight tracking-display sm:text-3xl">
+                <h3 className="mt-5 font-display text-2xl font-medium leading-tight tracking-tight2 sm:text-3xl">
                   {s.title}
                 </h3>
                 <p className="mt-4 max-w-md text-base leading-relaxed text-text-secondary">
@@ -127,8 +127,8 @@ export function Services() {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-6 rounded-xl border border-border-subtle bg-bg p-4">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
+                <div className="mt-6 rounded-card shadow-ring bg-bg p-4">
+                  <span className="font-medium text-[10px] uppercase tracking-[0.18em] text-text-muted">
                     Why Flow State
                   </span>
                   <p className="mt-2 text-sm leading-relaxed text-text-secondary">

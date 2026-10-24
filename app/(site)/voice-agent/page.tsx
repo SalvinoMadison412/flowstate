@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function VoiceAgentPage() {
   return (
-    <div className="pt-16">
+    <div>
       <VoiceAgent />
       <Integrations />
       <VoiceAgentDetails />

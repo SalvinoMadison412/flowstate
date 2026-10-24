@@ -18,7 +18,7 @@ const LEAD_TYPES: { value: LeadType; label: string }[] = [
 ];
 
 const inputClass =
-  "h-12 w-full rounded-xl border border-border-active bg-bg px-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:border-white focus-visible:outline-none";
+  "h-12 w-full rounded-card shadow-ring bg-bg px-4 text-sm text-text-primary placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink";
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -90,12 +90,9 @@ export function FinalCTA() {
   return (
     <section
       id="audit"
-      className="relative overflow-hidden border-y border-border-subtle px-5 py-28 sm:py-36"
+      className="px-4 py-12 sm:px-6 sm:py-16"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 animate-radial-pulse rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,transparent_65%)]"
-      />
+      <div className="mx-auto max-w-site rounded-panel bg-tile-sky px-6 py-16 sm:px-12 sm:py-20">
 
       <div
         ref={ref}
@@ -104,7 +101,7 @@ export function FinalCTA() {
           shown && "is-visible",
         )}
       >
-        <h2 className="font-display text-3xl font-bold leading-[1.1] tracking-display sm:text-5xl">
+        <h2 className="font-display text-3xl font-medium leading-[1.1] tracking-tight2 sm:text-5xl">
           Book a free strategy call.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-lg text-text-secondary">
@@ -114,7 +111,7 @@ export function FinalCTA() {
         </p>
 
         {status === "done" ? (
-          <p className="mx-auto mt-9 max-w-md rounded-xl border border-border-active bg-surface px-5 py-4 text-sm text-text-primary">
+          <p className="mx-auto mt-9 max-w-md rounded-card shadow-ring bg-bg px-5 py-4 text-sm text-text-primary">
             {bookedFor
               ? `You're booked for ${bookedFor}. A calendar invite with a Google Meet link is on its way to ${email.trim()}.`
               : "Got it. We\u2019ll reply within one business day with times."}
@@ -197,10 +194,10 @@ export function FinalCTA() {
                   aria-pressed={leadType === t.value}
                   onClick={() => setLeadType(t.value)}
                   className={cn(
-                    "h-11 flex-1 rounded-xl border text-sm transition-colors",
+                    "h-11 flex-1 rounded-btn text-sm font-medium transition-colors",
                     leadType === t.value
-                      ? "border-white bg-white/5 text-text-primary"
-                      : "border-border-active text-text-secondary hover:text-text-primary",
+                      ? "bg-text-primary text-bg"
+                      : "bg-bg text-text-primary shadow-ring hover:bg-surface-elevated",
                   )}
                 >
                   {t.label}
@@ -217,7 +214,7 @@ export function FinalCTA() {
                 type="datetime-local"
                 value={when}
                 onChange={(e) => setWhen(e.target.value)}
-                className={cn(inputClass, "[color-scheme:dark]")}
+                className={cn(inputClass)}
               />
               {bookError && <p className="mt-2 text-sm text-text-secondary">{bookError}</p>}
             </div>
@@ -239,7 +236,7 @@ export function FinalCTA() {
             <button
               type="submit"
               disabled={!valid || status === "submitting"}
-              className="h-12 w-full rounded-xl bg-white px-6 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-bg disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-12 w-full rounded-btn bg-text-primary px-6 text-lg font-medium text-bg transition-colors hover:bg-text-primary/85 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {status === "submitting" ? "Sending…" : "Request my call"}
             </button>
@@ -272,6 +269,7 @@ export function FinalCTA() {
         </a>
         </div>
       </div>
+    </div>
     </section>
   );
 }

@@ -3,41 +3,87 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light;
+  --bg: 255 255 255;
+  --surface: 244 243 240;
+  --surface-elevated: 254 253 251;
+  --border-subtle: 239 238 236;
+  --border-active: 224 222 220;
+  --accent: 0 200 240;
+  --accent-ink: 0 111 140;
+  --accent-tint: 234 249 253;
+  --text-primary: 27 26 24;
+  --text-secondary: 85 83 78;
+  --text-muted: 102 100 95;
+}
+
+/* The CRM keeps the original dark palette. `:root:has()` carries it to
+   body, scrollbars and selection too. */
+.theme-dark,
+:root:has(.theme-dark) {
   color-scheme: dark;
+  --bg: 8 8 8;
+  --surface: 17 17 17;
+  --surface-elevated: 23 23 23;
+  --border-subtle: 34 34 34;
+  --border-active: 51 51 51;
+  --accent: 0 200 240;
+  --accent-ink: 0 200 240;
+  --accent-tint: 11 42 49;
+  --text-primary: 255 255 255;
+  --text-secondary: 153 153 153;
+  --text-muted: 85 85 85;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+/* Only the CRM was designed against the bigger root size. */
 @media (min-width: 1280px) {
-  html {
+  html:has(.theme-dark) {
     font-size: 112.5%;
   }
 }
 
 body {
-  background-color: #080808;
-  color: #ffffff;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--text-primary));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Display headlines — wide, heavy grotesque, tight tracking. Cal Sans (CDN)
-   with Space Grotesk 700 as the loaded fallback. */
+/* Display headlines — Inter Tight, medium weight, tight tracking. */
 h1,
 h2,
 h3,
 .font-display {
-  font-family:
-    "Cal Sans", var(--font-space-grotesk), system-ui, sans-serif;
+  font-family: var(--font-inter-tight), Arial, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+/* CRM headings keep the old heavy look (Cal Sans is gone; Inter 700). */
+.theme-dark h1,
+.theme-dark h2,
+.theme-dark h3,
+.theme-dark .font-display {
+  font-family: var(--font-inter), system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
+/* The logo PNG is white; invert it on light pages. */
+.logo-mark {
+  filter: invert(1);
+}
+.theme-dark .logo-mark {
+  filter: none;
+}
+
 ::selection {
-  background: rgba(0, 200, 240, 0.25);
-  color: #ffffff;
+  background: rgb(var(--accent) / 0.25);
+  color: rgb(var(--text-primary));
 }
 
 /* Thin monochrome scrollbar */
@@ -46,14 +92,14 @@ h3,
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #080808;
+  background: rgb(var(--bg));
 }
 ::-webkit-scrollbar-thumb {
-  background: #222222;
+  background: rgb(var(--border-subtle));
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: rgb(var(--border-active));
 }
 
 /* Reveal system — CSS keyframe animations gated by an `.is-visible` class that
@@ -240,4 +286,4 @@ h3,
 }
 
 @keyframes orb-full-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes orb-bg-in { from { background-color: rgba(8, 8, 8, 0); } to { background-color: #080808; } }
+@keyframes orb-bg-in { from { background-color: rgb(var(--bg) / 0); } to { background-color: rgb(var(--bg)); } }
