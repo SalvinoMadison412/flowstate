@@ -13,7 +13,7 @@ export function EndCallButton({ className }: { className?: string }) {
       type="button"
       onClick={stop}
       className={cn(
-        "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-6 text-[0.95rem] font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
+        "inline-flex h-12 items-center justify-center gap-2 rounded-btn bg-red-700 px-[18px] text-lg font-medium text-white transition-colors hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
         className,
       )}
     >

@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter_Tight, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-// Fallback display face — used until/unless Cal Sans (CDN, see <head> below)
-// loads. Both are wide, heavy grotesques.
-const spaceGrotesk = Space_Grotesk({
+// Variable font (no weight list) so intermediate weights like 575 work.
+const interTight = Inter_Tight({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-space-grotesk",
+  variable: "--font-inter-tight",
   display: "swap",
 });
 
@@ -88,8 +86,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#080808",
-  colorScheme: "dark",
+  themeColor: "#FFFFFF",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -100,15 +98,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${interTight.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <head>
-        {/* Primary display face — Cal Sans */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/index.css"
-        />
-      </head>
       <body className="bg-bg font-sans text-text-primary antialiased">
         <script
           type="application/ld+json"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
+import { Section, SectionLabel } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,9 +31,9 @@ const POINTS = [
 ];
 
 const STEPS = [
-  { title: "We learn your intake", body: "Tell us how your firm handles a new caller: the questions you ask, what counts as urgent, and who should hear about it." },
-  { title: "We build and test it", body: "We write its script, connect it to your tools where possible, and you call it yourself before it goes live." },
-  { title: "It answers your calls", body: "It picks up day and night. Anything urgent or outside its script goes to your team." },
+  { tile: "bg-tile-sky text-tile-skyInk", title: "We learn your intake", body: "Tell us how your firm handles a new caller: the questions you ask, what counts as urgent, and who should hear about it." },
+  { tile: "bg-tile-peach text-tile-peachInk", title: "We build and test it", body: "We write its script, connect it to your tools where possible, and you call it yourself before it goes live." },
+  { tile: "bg-tile-lime text-tile-limeInk", title: "It answers your calls", body: "It picks up day and night. Anything urgent or outside its script goes to your team." },
 ];
 
 // TODO(owner): add cost, time to go live, keeping your number, call recording/consent, languages and HIPAA/BAA only once confirmed. Do not add placeholders that render.
@@ -48,14 +48,17 @@ export function VoiceAgent() {
   return (
     <Section id="voice-agent">
       <SectionLabel>Voice agents</SectionLabel>
-      <SectionHeading className="mt-4 max-w-4xl">
-        An AI receptionist that answers your firm&apos;s calls 24/7, takes intake, and passes consult requests to your team.
-      </SectionHeading>
-      <p className="mt-6 max-w-3xl text-sm leading-relaxed text-text-secondary sm:text-lg">
-        It picks up every call, day or night, asks your intake questions, and hands anything urgent or unusual to a person. Try a live one below.
-      </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Button href="/contact" variant="filled" size="lg" data-track="hero">Get one for your firm</Button>
+      <h1 className="mt-4 max-w-5xl font-display text-[2.1rem] font-medium leading-[1.05] tracking-display sm:text-5xl lg:text-[64px]">
+        An AI receptionist that answers your firm&apos;s calls 24/7, takes intake, and{" "}
+        <span className="text-accent-ink">passes consult requests to your team.</span>
+      </h1>
+      <div className="mt-8 grid items-end gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <p className="max-w-2xl text-lg leading-snug text-text-secondary">
+          It picks up every call, day or night, asks your intake questions, and hands anything urgent or unusual to a person. Try a live one below.
+        </p>
+        <div className="lg:text-right">
+          <Button href="/contact" variant="filled" size="lg" data-track="hero">Get one for your firm →</Button>
+        </div>
       </div>
 
       <div className="mt-12">
@@ -70,21 +73,21 @@ export function VoiceAgentDetails() {
     <Section>
       <Reveal className="grid gap-4 sm:grid-cols-3">
         {STEPS.map((st, i) => (
-          <div key={st.title} className="rounded-2xl border border-border-subtle bg-surface p-5 sm:p-6">
-            <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, "0")}</span>
-            <h3 className="mt-2 font-display text-lg font-bold tracking-display">{st.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-text-secondary">{st.body}</p>
+          <div key={st.title} className={cn("rounded-[32px] p-7", st.tile)}>
+            <span className="text-sm font-medium">{String(i + 1).padStart(2, "0")}</span>
+            <h3 className="mt-3 font-display text-2xl font-medium tracking-tight2">{st.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed">{st.body}</p>
           </div>
         ))}
       </Reveal>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Reveal className="rounded-2xl border border-border-active bg-surface-elevated p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-xs uppercase tracking-[0.2em] text-text-secondary">
+        <Reveal className="rounded-panel bg-surface p-6 sm:p-8">
+          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em]">
+            <span className="text-text-secondary">
               Example call · Legal
             </span>
-            <span className="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">
+            <span className="text-text-muted">
               Sample script
             </span>
           </div>
@@ -93,23 +96,23 @@ export function VoiceAgentDetails() {
               <li
                 key={i}
                 className={cn(
-                  "tx-line max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                  "tx-line max-w-[88%] rounded-card px-4 py-2.5 text-sm leading-relaxed shadow-ring",
                   line.who === "Agent"
-                    ? "ml-auto rounded-br-sm border border-accent/30 bg-accent/10 text-text-primary"
-                    : "rounded-bl-sm border border-border-active bg-surface text-text-secondary",
+                    ? "ml-auto rounded-br-sm bg-bg text-text-primary"
+                    : "rounded-bl-sm bg-surface-elevated text-text-secondary",
                 )}
                 style={{ ["--d" as string]: `${i * 2.2}s`, ["--dur" as string]: "34s" }}
               >
-                <span className="mb-0.5 block font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">
+                <span className={cn("block text-[11px] font-medium uppercase tracking-[0.14em]", line.who === "Agent" ? "text-accent-ink" : "text-text-muted")}>
                   {line.who}
                 </span>
                 {line.text}
               </li>
             ))}
           </ul>
-          <div className="mt-6 flex flex-wrap gap-2 border-t border-border-subtle pt-5">
-            {["Intake captured", "Marked urgent", "Sent to your team", "Consult requested"].map((c) => (
-              <span key={c} className="rounded-full border border-border-active px-3 py-1 font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-secondary">
+          <div className="mt-6 flex flex-wrap gap-2 border-t border-border-active pt-5">
+            {["Intake captured", "Marked urgent", "Sent to your team", "Consult requested"].map((c, i, all) => (
+              <span key={c} className={cn("rounded-full px-3 py-1 text-xs font-medium", i === all.length - 1 ? "bg-text-primary text-bg" : "bg-bg shadow-ring")}>
                 {c}
               </span>
             ))}
@@ -119,30 +122,30 @@ export function VoiceAgentDetails() {
         <div className="flex flex-col gap-4">
           <Reveal className="flex flex-col gap-4">
             {POINTS.map((p) => (
-              <div key={p.title} className="rounded-2xl border border-border-subtle bg-surface p-5">
-                <h3 className="font-display text-lg font-bold tracking-display">{p.title}</h3>
+              <div key={p.title} className="rounded-card bg-surface-elevated p-5 shadow-ring">
+                <h3 className="font-display text-xl font-medium tracking-tight2">{p.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">{p.body}</p>
               </div>
             ))}
           </Reveal>
 
           <Reveal className="space-y-3">
-            <h3 className="font-display text-xl font-bold tracking-display">Questions firms ask</h3>
+            <h3 className="mt-4 font-display text-2xl font-medium tracking-tight2">Questions firms ask</h3>
             {FAQ.map(({ q, a }) => (
-              <details key={q} className="group rounded-2xl border border-border-subtle bg-surface p-5">
-                <summary className="cursor-pointer font-display text-lg font-bold tracking-display">{q}</summary>
+              <details key={q} className="group rounded-card bg-surface p-5">
+                <summary className="cursor-pointer text-lg font-medium">{q}</summary>
                 <p className="mt-3 text-sm leading-relaxed text-text-secondary">{a}</p>
               </details>
             ))}
           </Reveal>
 
-          <div className="flex items-center gap-4 rounded-2xl border border-border-subtle bg-surface p-5">
+          <div className="flex items-center gap-4 rounded-card bg-surface-elevated p-5 shadow-float">
             <Image src={FOUNDERS[0].photo} alt={FOUNDERS[0].name} width={64} height={64} className="h-16 w-16 rounded-full object-cover" />
             <div>
-              <p className="font-display text-lg font-bold tracking-display">{FOUNDERS[0].name}</p>
-              <p className="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">{FOUNDERS[0].role}</p>
+              <p className="text-lg font-medium">{FOUNDERS[0].name}</p>
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-text-muted">{FOUNDERS[0].role}</p>
               <p className="mt-1 text-sm text-text-secondary">Flow State is run by its founder. You&apos;ll talk to him directly, not an account manager.</p>
-              <Link href="/about" className="mt-1 inline-block text-sm text-accent underline-offset-4 hover:underline">More about us</Link>
+              <Link href="/about" className="mt-1 inline-block text-sm font-medium text-accent-ink underline underline-offset-4">More about us</Link>
             </div>
           </div>
 

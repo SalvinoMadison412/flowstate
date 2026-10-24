@@ -9,43 +9,55 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand tokens — 90% of the page is monochrome.
-        bg: "#080808",
+        // Tokens are CSS variables (app/globals.css): light on :root, the
+        // original dark values under .theme-dark (the CRM).
+        bg: "rgb(var(--bg) / <alpha-value>)",
         surface: {
-          DEFAULT: "#111111",
-          elevated: "#171717",
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          elevated: "rgb(var(--surface-elevated) / <alpha-value>)",
         },
         border: {
-          subtle: "#222222",
-          active: "#333333",
+          subtle: "rgb(var(--border-subtle) / <alpha-value>)",
+          active: "rgb(var(--border-active) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "#00C8F0",
-          glow: "rgba(0, 200, 240, 0.12)",
+          DEFAULT: "rgb(var(--accent) / <alpha-value>)",
+          ink: "rgb(var(--accent-ink) / <alpha-value>)",
+          tint: "rgb(var(--accent-tint) / <alpha-value>)",
+          glow: "rgba(0, 200, 240, 0.12)", // dark (CRM) only
         },
         text: {
-          primary: "#FFFFFF",
-          secondary: "#999999",
-          muted: "#555555",
+          primary: "rgb(var(--text-primary) / <alpha-value>)",
+          secondary: "rgb(var(--text-secondary) / <alpha-value>)",
+          muted: "rgb(var(--text-muted) / <alpha-value>)",
+        },
+        // Pastel tiles + matching ink — marketing site only.
+        tile: {
+          sky: "#EAF9FD",
+          skyInk: "#00303D",
+          peach: "#FFF3ED",
+          peachInk: "#381005",
+          lime: "#FCFEE2",
+          limeInk: "#102B03",
         },
       },
       fontFamily: {
-        // Cal Sans (CDN, see app/layout.tsx) with Space Grotesk as the loaded
-        // fallback — a wide, heavy grotesque either way.
-        display: [
-          "Cal Sans",
-          "var(--font-space-grotesk)",
-          "system-ui",
-          "sans-serif",
-        ],
+        // Inter Tight (variable) — the marketing site face. The CRM keeps `sans`.
+        display: ["var(--font-inter-tight)", "Arial", "sans-serif"],
+        site: ["var(--font-inter-tight)", "Arial", "sans-serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
       },
       letterSpacing: {
-        display: "-0.02em",
+        display: "-0.04em",
+        tight2: "-0.03em",
         wide: "0.02em",
       },
+      borderRadius: { btn: "12px", card: "18px", panel: "48px" },
+      maxWidth: { site: "1280px" },
       boxShadow: {
+        float: "0 12px 36px -8px rgba(21,21,24,0.10)",
+        ring: "0 0 0 0.5px rgb(var(--border-active))",
         "accent-glow": "0 0 40px rgba(0, 200, 240, 0.12)",
         "card-lift": "0 12px 40px rgba(0, 0, 0, 0.5)",
       },

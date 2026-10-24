@@ -7,9 +7,11 @@ import { VoiceCallProvider } from "@/lib/useVoiceCall";
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <VoiceCallProvider>
-      <Nav />
-      <main>{children}</main>
-      <Footer />
+      <div className="font-site">
+        <Nav />
+        <main>{children}</main>
+        <Footer />
+      </div>
     </VoiceCallProvider>
   );
 }

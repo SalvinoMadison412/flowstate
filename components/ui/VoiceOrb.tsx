@@ -377,7 +377,7 @@ export function VoiceOrb({ className }: { className?: string }) {
   return (
     <div
       ref={host}
-      className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent`}
+      className={`${className ?? ""} cursor-pointer select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent-ink`}
       role={full ? "dialog" : "button"}
       aria-modal={full || undefined}
       tabIndex={full ? -1 : 0}
@@ -391,7 +391,7 @@ export function VoiceOrb({ className }: { className?: string }) {
       }}
       style={
         full
-          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "#080808", animation: reduceMotion ? undefined : "orb-bg-in .6s ease-out" }
+          ? { position: "fixed", inset: 0, zIndex: 1000, borderRadius: 0, background: "rgb(var(--bg))", animation: reduceMotion ? undefined : "orb-bg-in .6s ease-out" }
           : { overflow: "visible", touchAction: "manipulation" }
       }
     >
@@ -418,18 +418,18 @@ export function VoiceOrb({ className }: { className?: string }) {
           {/* 2. soft shadow */}
           <span
             className={abs}
-            style={{ background: "#060d24", opacity: 0.55, filter: "blur(calc(var(--R) * .11))", transform: "translateY(calc(var(--R) * .09)) scale(.98)" }}
+            style={{ background: "rgb(var(--accent-ink))", opacity: 0.28, filter: "blur(calc(var(--R) * .11))", transform: "translateY(calc(var(--R) * .09)) scale(.98)" }}
           />
           {/* 3. the pane: frost over the glow */}
           <div
             className={`${abs} overflow-hidden`}
             style={{
-              background: "rgba(22,24,30,.42)",
+              background: "rgba(255,255,255,.34)",
               WebkitBackdropFilter: "blur(calc(var(--R) * .32)) saturate(1.1)",
               backdropFilter: "blur(calc(var(--R) * .32)) saturate(1.1)",
             }}
           >
-            <span className={abs} style={{ background: "#101216", opacity: 0.35, mixBlendMode: "multiply" }} />
+            <span className={abs} style={{ background: "rgb(var(--accent-tint))", opacity: 0.45 }} />
             <span className={abs} style={{ background: "linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 50%,rgba(255,255,255,.03))" }} />
             <span className={abs} style={{ backgroundImage: GRAIN, backgroundSize: "200px", opacity: 0.05 }} />
             {[0, 1, 2].map((i) => (
@@ -439,7 +439,7 @@ export function VoiceOrb({ className }: { className?: string }) {
                   rings.current[i] = n;
                 }}
                 className={abs}
-                style={{ border: "calc(var(--R) * .05) solid #fff", filter: "blur(calc(var(--R) * .033))", opacity: 0 }}
+                style={{ border: "calc(var(--R) * .05) solid rgb(var(--accent))", filter: "blur(calc(var(--R) * .033))", opacity: 0 }}
               />
             ))}
           </div>
@@ -472,14 +472,14 @@ export function VoiceOrb({ className }: { className?: string }) {
       </div>
       {full && (
         <div className="absolute inset-x-0 bottom-[8vh] flex flex-col items-center gap-4" style={{ animation: reduceMotion ? undefined : "orb-full-in .5s ease-out .45s both" }}>
-          <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
+          <p role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-text-secondary">
             {status === "live" ? "Live. Say hello" : "Connecting…"}
           </p>
           <button
             type="button"
             autoFocus
             onClick={stop}
-            className="inline-flex h-12 items-center justify-center rounded-full bg-red-600 px-6 text-[0.95rem] font-medium text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            className="inline-flex h-12 items-center justify-center rounded-btn bg-red-700 px-[18px] text-lg font-medium text-white transition-colors hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink"
           >
             End call
           </button>

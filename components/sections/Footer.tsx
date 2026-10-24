@@ -40,8 +40,8 @@ const SOCIALS: { label: string; href: string; Icon: typeof IconLinkedIn }[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#1E1E1E] px-5 py-16 sm:px-8">
-      <div className="mx-auto w-full max-w-6xl">
+    <footer className="border-t border-border-subtle px-4 py-16 sm:px-6">
+      <div className="mx-auto w-full max-w-site">
         <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(3,1fr)]">
           <div>
             <Logo />
@@ -64,7 +64,7 @@ export function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h3 className="font-mono text-xs uppercase tracking-[0.16em] text-text-primary">
+              <h3 className="font-medium text-xs uppercase tracking-[0.16em] text-text-primary">
                 {col.heading}
               </h3>
               <ul className="mt-4 space-y-2.5">
@@ -83,10 +83,10 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-[#1E1E1E] pt-6 sm:flex-row sm:items-center">
-          <p className="font-mono text-xs text-text-muted">
+        <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-border-subtle pt-6 sm:flex-row sm:items-center">
+          <p className="font-medium text-xs text-text-muted">
             © {new Date().getFullYear()} Flow State. All rights reserved.
-            <span aria-hidden className="mx-2 text-border-active">&middot;</span>
+            <span aria-hidden className="mx-2 text-text-muted">&middot;</span>
             <Link href="/crm" className="transition-colors hover:text-text-primary">
               Admin login
             </Link>
@@ -99,7 +99,7 @@ export function Footer() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border-subtle text-text-secondary transition-all hover:-translate-y-0.5 hover:border-border-active hover:text-text-primary"
+                className="flex h-9 w-9 items-center justify-center rounded-btn shadow-ring text-text-secondary transition-all hover:-translate-y-0.5 hover:text-text-primary"
               >
                 <Icon className="h-4 w-4" />
               </a>

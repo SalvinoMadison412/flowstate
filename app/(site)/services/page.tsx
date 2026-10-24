@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function ServicesPage() {
   return (
-    <div className="pt-16">
+    <div>
       <Services />
       <CaseStudy />
       <PageCTA heading="Want to automate the busywork?" />

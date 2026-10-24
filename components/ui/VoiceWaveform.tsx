@@ -43,7 +43,7 @@ export function VoiceWaveform({ className }: { className?: string }) {
           }}
           className={cn(
             "h-full w-[3px] origin-center rounded-full transition-colors",
-            status === "live" ? "bg-accent" : "bg-white/35",
+            status === "live" ? "bg-accent" : "bg-text-muted/40",
           )}
           style={{ transform: "scaleY(0.2)" }}
         />

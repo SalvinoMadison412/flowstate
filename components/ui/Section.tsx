@@ -28,7 +28,7 @@ export function Section({
       ref={ref}
       id={id}
       className={cn(
-        "reveal relative px-5 py-14 sm:px-8 sm:py-20",
+        "reveal relative px-4 py-12 sm:px-6 sm:py-16",
         shown && "is-visible",
         className,
       )}
@@ -36,7 +36,7 @@ export function Section({
       {bleed ? (
         children
       ) : (
-        <div className={cn("mx-auto w-full max-w-6xl", innerClassName)}>
+        <div className={cn("mx-auto w-full max-w-site", innerClassName)}>
           {children}
         </div>
       )}
@@ -46,7 +46,7 @@ export function Section({
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="font-mono text-xs uppercase tracking-[0.2em] text-text-secondary">
+    <span className="text-xs font-medium uppercase tracking-[0.18em] text-text-muted">
       {children}
     </span>
   );
@@ -62,7 +62,7 @@ export function SectionHeading({
   return (
     <h2
       className={cn(
-        "font-display text-3xl font-bold leading-[1.1] tracking-display sm:text-4xl md:text-5xl",
+        "font-display text-4xl font-medium leading-none tracking-tight2 sm:text-[56px]",
         className,
       )}
     >
