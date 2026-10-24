@@ -132,7 +132,7 @@ export function About() {
           {PRINCIPLES.map((p) => (
             <div
               key={p.n}
-              className="rounded-card shadow-ring bg-surface-elevated p-6 transition-all duration-300 hover:-translate-y-1 sm:p-8"
+              className="card-hover rounded-card shadow-ring bg-surface-elevated p-6 sm:p-8"
             >
               <span className="font-medium text-xs text-accent-ink">{p.n}</span>
               <h3 className="mt-4 font-display text-xl font-medium tracking-tight2">{p.title}</h3>
@@ -152,7 +152,7 @@ export function About() {
             <Link
               key={o.title}
               href={o.href}
-              className="group rounded-card shadow-ring bg-surface-elevated p-6 transition-all duration-300 hover:-translate-y-1 hover:border-border-active"
+              className="group card-hover rounded-card shadow-ring bg-surface-elevated p-6 hover:border-border-active"
             >
               <h3 className="font-display text-lg font-medium tracking-tight2">{o.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">{o.body}</p>
