@@ -191,7 +191,7 @@ export function Integrations() {
     <Section id="integrations">
       <div className="text-center">
         <SectionLabel>Industries &amp; integrations</SectionLabel>
-        <SectionHeading className="mx-auto mt-4 max-w-2xl">
+        <SectionHeading className="mx-auto mt-4 max-w-3xl">
           Pick your industry. Follow one call from ring to booked.
         </SectionHeading>
       </div>
@@ -204,10 +204,10 @@ export function Integrations() {
             aria-selected={active === i}
             onClick={() => setActive(i)}
             className={
-              "rounded-full border px-4 py-2 text-sm transition-colors duration-200 " +
+              "rounded-btn px-4 py-2 text-sm font-medium transition-colors duration-200 " +
               (active === i
-                ? "border-white bg-white text-bg"
-                : "border-border-active text-text-secondary hover:text-text-primary")
+                ? "bg-text-primary text-bg"
+                : "bg-surface text-text-primary hover:bg-border-subtle")
             }
           >
             {n.label}
@@ -219,18 +219,18 @@ export function Integrations() {
         {/* Sticky panel: follows the scroll and shows what the active step means for the business. */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <SectionLabel>The journey of one {niche.label} call</SectionLabel>
-          <p className="mt-3 font-display text-2xl font-bold leading-tight tracking-display sm:text-3xl">{niche.journey.scenario}</p>
-          <div className="mt-7 hidden rounded-2xl border border-border-active bg-surface-elevated p-6 lg:block" aria-live="polite">
+          <p className="mt-3 font-display text-2xl font-medium leading-tight tracking-tight2 sm:text-3xl">{niche.journey.scenario}</p>
+          <div className="mt-7 hidden rounded-card bg-surface-elevated p-6 shadow-float lg:block" aria-live="polite">
             <div key={step} className="anim-fade">
-              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-accent/15 text-accent">
+              <span className="grid h-16 w-16 place-items-center rounded-card bg-accent-tint text-accent-ink">
                 <ChannelIcon channel={cur.channel} className="h-8 w-8" />
               </span>
-              <p className="mt-4 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">{cur.when}</p>
-              <p className="mt-1 font-display text-lg font-bold tracking-display">{cur.title}</p>
-              <p className="mt-4 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-accent">For you</p>
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-text-muted">{cur.when}</p>
+              <p className="mt-1 font-display text-xl font-medium tracking-tight2">{cur.title}</p>
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-accent-ink">For you</p>
               <p className="mt-1 text-sm leading-relaxed text-text-primary">{cur.benefit}</p>
             </div>
-            <p className="mt-6 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">
+            <p className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-text-muted">
               Step {step + 1} of {niche.journey.steps.length}
             </p>
           </div>
@@ -255,20 +255,20 @@ export function Integrations() {
                 aria-hidden="true"
                 className={
                   "absolute left-0 top-0 grid h-8 w-8 place-items-center rounded-full border transition-colors duration-500 sm:h-10 sm:w-10 " +
-                  (i <= step ? "border-accent bg-accent text-bg" : "border-border-active bg-bg text-text-muted")
+                  (i <= step ? "border-accent bg-accent text-text-primary" : "border-border-active bg-bg text-text-muted")
                 }
               >
                 <ChannelIcon channel={st.channel} className="h-4 w-4 sm:h-5 sm:w-5" />
               </span>
-              <div className={"rounded-2xl border bg-surface p-5 transition-all duration-500 sm:p-6 " + (i === step ? "border-border-active opacity-100" : "border-border-subtle opacity-45")}>
-                <div className="flex flex-wrap items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">
+              <div className={"rounded-card bg-surface p-5 transition-all duration-500 sm:p-6 " + (i === step ? "opacity-100 shadow-float" : "opacity-60")}>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-text-muted">
                   <span>{st.when}</span>
-                  <span className="rounded-full border border-border-active px-2 py-0.5 text-text-secondary">{st.channel}</span>
+                  <span className="rounded-full bg-bg px-2 py-0.5 text-text-secondary shadow-ring">{st.channel}</span>
                 </div>
-                <h4 className="mt-3 font-display text-xl font-bold tracking-display">{st.title}</h4>
+                <h4 className="mt-3 font-display text-xl font-medium tracking-tight2">{st.title}</h4>
                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">{st.journey}</p>
                 <p className="mt-3 text-sm leading-relaxed text-text-primary lg:hidden">
-                  <span className="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-accent">For you </span>
+                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-accent-ink">For you </span>
                   {st.benefit}
                 </p>
               </div>
@@ -278,24 +278,24 @@ export function Integrations() {
       </div>
 
       {/* Everything else, at the end. */}
-      <div className="mx-auto mt-20 max-w-3xl rounded-2xl border border-border-active bg-surface-elevated p-6 sm:p-8">
-        <p className="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-accent">What this means for your business</p>
+      <div className="mx-auto mt-20 max-w-3xl rounded-panel bg-surface p-6 sm:p-10">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-accent-ink">What this means for your business</p>
         <p className="mt-2 text-lg leading-relaxed text-text-primary">{niche.journey.summary}</p>
-        <h3 className="mt-8 font-display text-lg font-bold tracking-display">Popular use cases in {niche.label}</h3>
+        <h3 className="mt-8 font-display text-xl font-medium tracking-tight2">Popular use cases in {niche.label}</h3>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {niche.calls.map((x) => (
-            <li key={x} className="rounded-xl border border-border-subtle bg-surface px-4 py-3 text-sm text-text-secondary">{x}</li>
+            <li key={x} className="rounded-card bg-surface-elevated px-4 py-3 text-sm shadow-ring text-text-secondary">{x}</li>
           ))}
         </ul>
         <p className="mt-4 text-sm leading-relaxed text-text-secondary">{niche.handoff}</p>
       </div>
 
-      <h3 className="mt-16 text-center font-display text-xl font-bold tracking-display">Integrates with your CRM</h3>
-      <ul key={active} className="reveal-stagger is-visible mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+      <h3 className="mt-16 text-center font-display text-2xl font-medium tracking-tight2">Integrates with your CRM</h3>
+      <ul key={active} className="reveal-stagger is-visible mt-8 flex flex-wrap items-center justify-center gap-3 rounded-panel bg-surface p-6 sm:p-10">
         {niche.tools.map((t) => (
-          <li key={t.name} className="grid h-24 w-24 place-items-center rounded-2xl bg-white p-3 ring-1 ring-white/10 sm:h-28 sm:w-28">
+          <li key={t.name} className="grid h-24 w-24 place-items-center rounded-card bg-bg p-3 shadow-ring sm:h-28 sm:w-28">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/integrations/${t.file}`} alt={t.name} className="h-full w-full object-contain" />
+            <img src={`/integrations/${t.file}`} alt={t.name} className="h-10 w-10 object-contain sm:h-12 sm:w-12" />
           </li>
         ))}
       </ul>

@@ -90,46 +90,32 @@ export function CallStage() {
         : "Ready when you are";
 
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-3xl border bg-surface-elevated p-6 transition-colors duration-500 sm:p-10",
-        live ? "border-accent/50 shadow-accent-glow" : "border-border-active",
-      )}
-    >
-      {/* slow ambient glow behind the orb, brighter while live */}
-      <span
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[110px] transition-opacity duration-700",
-          live ? "opacity-[0.08]" : "opacity-[0.03]",
-          !reduceMotion && "animate-radial-pulse",
-        )}
-      />
-
-      <div className="relative grid items-center gap-8 md:grid-cols-[1fr_1fr]">
-        <div className="relative mx-auto aspect-square w-full max-w-[18.75rem] sm:max-w-[25rem]">
-          <VoiceOrb className="absolute inset-0" />
+    <div id="demo" className="scroll-mt-24 rounded-panel bg-tile-sky p-6 text-tile-skyInk sm:p-12">
+      <div className="grid items-center gap-10 md:grid-cols-2">
+        <div className="relative mx-auto aspect-square w-full max-w-[18rem] sm:max-w-[22rem]">
+          <div aria-hidden className="absolute inset-0 rounded-full bg-bg/60 shadow-ring" />
+          <VoiceOrb className="absolute inset-[6%]" />
         </div>
 
         <div className="text-center md:text-left">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border-active bg-bg/60 px-3 py-1.5">
+          <div className="inline-flex items-center gap-2 rounded-full bg-bg px-3 py-1.5 text-text-primary shadow-ring">
             <span
               className={cn(
                 "h-2 w-2 rounded-full",
-                live ? "bg-accent" : status === "connecting" ? "bg-yellow-400" : "bg-text-muted",
+                live ? "bg-accent" : status === "connecting" ? "bg-yellow-500" : "bg-text-muted",
                 (live || status === "connecting") && !reduceMotion && "animate-pulse",
               )}
             />
-            <span role="status" aria-live="polite" className="font-mono text-xs uppercase tracking-[0.16em] text-text-primary">
+            <span role="status" aria-live="polite" className="text-xs font-medium uppercase tracking-[0.14em]">
               {label}
             </span>
-            {live && <span className="font-mono text-xs tabular-nums text-text-secondary">{mmss(secs)}</span>}
+            {live && <span className="text-xs tabular-nums text-text-secondary">{mmss(secs)}</span>}
           </div>
 
-          <h3 className="mt-5 font-display text-2xl font-bold tracking-display sm:text-3xl">
+          <h2 className="mt-5 font-display text-3xl font-medium leading-tight tracking-tight2 sm:text-[44px] sm:leading-[1.1]">
             {live ? "You're on the line with Hartley & Moore." : "Call a law firm's intake line, live."}
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+          </h2>
+          <p className="mt-3 text-base leading-relaxed">
             {live
               ? "Use made-up details. Calls end automatically after 5 minutes."
               : "Hartley & Moore is a made-up firm. Play a caller who was just in an accident. Allow your microphone and say hello."}
@@ -146,24 +132,24 @@ export function CallStage() {
               </Button>
             )}
             {ended && !live && status !== "connecting" && (
-              <Button href="/contact" variant="outline" size="lg" data-track="post_call">
+              <Button href="/contact" variant="accent" size="lg" data-track="post_call">
                 Get one trained on your firm
               </Button>
             )}
           </div>
           {ended && !live && status !== "connecting" && (
-            <p className="mt-3 text-sm text-text-secondary">Want this answering your firm&apos;s phones? Tell us how your intake works.</p>
+            <p className="mt-3 text-sm">Want this answering your firm&apos;s phones? Tell us how your intake works.</p>
           )}
-          <p className="mt-5 font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-muted">Try saying</p>
+          <p className="mt-6 text-xs font-medium uppercase tracking-[0.14em]">Try saying</p>
           <ul className="mt-2 flex flex-wrap justify-center gap-2 md:justify-start">
             {["“I was rear-ended last night.”", "“Do I have a case?”", "“Can I talk to a lawyer?”"].map((t) => (
-              <li key={t} className="rounded-full border border-border-active px-3 py-1 text-xs text-text-secondary">{t}</li>
+              <li key={t} className="rounded-full bg-bg px-3 py-1 text-sm text-text-primary shadow-ring">{t}</li>
             ))}
           </ul>
           {inApp && !live && (
-            <p className="mt-4 text-xs text-text-secondary">Opened from Instagram or Facebook? Tap ••• and choose “Open in browser” so the demo can use your microphone.</p>
+            <p className="mt-4 text-xs">Opened from Instagram or Facebook? Tap ••• and choose “Open in browser” so the demo can use your microphone.</p>
           )}
-          {status === "error" && <p className="mt-4 font-mono text-xs text-red-400">{error}</p>}
+          {status === "error" && <p className="mt-4 text-xs font-medium text-red-700">{error}</p>}
         </div>
       </div>
     </div>

@@ -1,32 +1,32 @@
 import Link from "next/link";
-import { Section, SectionHeading, SectionLabel } from "@/components/ui/Section";
-import { IconArrowRight } from "@/components/ui/icons";
+import { Section, SectionLabel } from "@/components/ui/Section";
 
 const PAGES = [
-  { href: "/voice-agent", kicker: "Voice agents", title: "Meet Maoshi", body: "See how an AI receptionist answers every call, and talk to one live." },
-  { href: "/services", kicker: "Automation", title: "AI automations & workflows", body: "Workflows that connect your tools and take the repetitive work off your team." },
-  { href: "/about", kicker: "Who we are", title: "One founder, no hand-offs", body: "The people who build your system are the people who answer when you call." },
+  { href: "/voice-agent", kicker: "Voice agents", tile: "bg-tile-sky text-tile-skyInk", pill: "bg-text-primary", accent: true, title: "Meet Maoshi", body: "See how an AI receptionist answers every call, and talk to one live." },
+  { href: "/services", kicker: "Automation", tile: "bg-tile-peach text-tile-peachInk", pill: "bg-tile-peachInk", title: "AI automations & workflows", body: "Workflows that connect your tools and take the repetitive work off your team." },
+  { href: "/about", kicker: "Who we are", tile: "bg-tile-lime text-tile-limeInk", pill: "bg-tile-limeInk", title: "One founder, no hand-offs", body: "The people who build your system are the people who answer when you call." },
 ];
 
 export function Explore() {
   return (
     <Section id="explore">
-      <SectionLabel>Explore</SectionLabel>
-      <SectionHeading className="mt-4 max-w-2xl">Where to next?</SectionHeading>
+      <div className="text-center">
+        <SectionLabel>Explore</SectionLabel>
+        <h2 className="mt-4 font-display text-4xl font-medium leading-none tracking-tight2 sm:text-[72px]">Where to next?</h2>
+      </div>
       <div className="mt-12 grid gap-4 md:grid-cols-3">
         {PAGES.map((p) => (
           <Link
             key={p.href}
             href={p.href}
-            className="group rounded-2xl border border-border-subtle bg-surface p-6 transition-all hover:-translate-y-1 hover:border-border-active sm:p-7"
+            className={`flex flex-col rounded-[32px] p-7 sm:p-8 ${p.tile}`}
           >
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">{p.kicker}</span>
-            <h3 className="mt-3 font-display text-xl font-bold tracking-display">{p.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-text-secondary">{p.body}</p>
-            <span className="mt-5 inline-flex items-center gap-2 text-sm text-text-primary">
-              Open
-              <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </span>
+            <span className={`w-fit rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-bg ${p.pill}`}>{p.kicker}</span>
+            <h3 className="mt-6 font-display text-3xl font-medium leading-none tracking-display sm:text-4xl">
+              {p.accent ? <>Meet <span className="text-accent-ink">Maoshi</span></> : p.title}
+            </h3>
+            <p className="mb-10 mt-4 text-base leading-snug">{p.body}</p>
+            <span className="mt-auto w-fit rounded-btn bg-bg px-4 py-2 text-sm font-medium">Open →</span>
           </Link>
         ))}
       </div>
