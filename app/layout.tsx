@@ -29,7 +29,7 @@ const ORG_JSON_LD = {
   "@type": "ProfessionalService",
   name: "Flow State",
   url: SITE_URL,
-  email: "flowstate.agents@gmail.com",
+  email: "salvino@flowstateaiagents.com",
   telephone: "+1-629-281-8264",
   sameAs: ["https://www.instagram.com/flowstate.agents", "https://www.youtube.com/channel/UCSzJ1MweDDLcGezsNY1juLw"],
   description:

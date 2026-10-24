@@ -244,7 +244,7 @@ export function FinalCTA() {
             {status === "error" && (
               <p className="text-sm text-text-secondary">
                 Something went wrong. Call +1 (629) 281-8264 or email
-                flowstate.agents@gmail.com and
+                salvino@flowstateaiagents.com and
                 we&rsquo;ll sort it out.
               </p>
             )}
