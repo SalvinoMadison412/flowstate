@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
-import { IconInstagram, IconLinkedIn, IconX, IconYouTube } from "@/components/ui/icons";
+import {
+  IconInstagram,
+  IconLinkedIn,
+  IconX,
+  IconYouTube,
+} from "@/components/ui/icons";
 
-const CONTACT_EMAIL = "flowstate.agents@gmail.com";
+const CONTACT_EMAIL = "salvino@flowstateaiagents.com";
 const CONTACT_PHONE = "+1 (629) 281-8264";
 
 const COLUMNS = [
@@ -32,8 +37,16 @@ const COLUMNS = [
 
 // Add { label, href, Icon } entries only for profiles that exist.
 const SOCIALS: { label: string; href: string; Icon: typeof IconLinkedIn }[] = [
-  { label: "Flow State on Instagram", href: "https://www.instagram.com/flowstate.agents", Icon: IconInstagram },
-  { label: "Flow State on YouTube", href: "https://www.youtube.com/channel/UCSzJ1MweDDLcGezsNY1juLw", Icon: IconYouTube },
+  {
+    label: "Flow State on Instagram",
+    href: "https://www.instagram.com/flowstate.agents",
+    Icon: IconInstagram,
+  },
+  {
+    label: "Flow State on YouTube",
+    href: "https://www.youtube.com/channel/UCSzJ1MweDDLcGezsNY1juLw",
+    Icon: IconYouTube,
+  },
   // { label: "Flow State on LinkedIn", href: "LINKEDIN_URL", Icon: IconLinkedIn },
   // { label: "Flow State on X", href: "X_URL", Icon: IconX },
 ];
@@ -48,18 +61,20 @@ export function Footer() {
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-text-secondary">
               Meet the AI that answers your phone.
             </p>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="mt-4 inline-block text-sm text-text-primary underline-offset-4 hover:underline"
-            >
-              {CONTACT_EMAIL}
-            </a>
-            <a
-              href="tel:+16292818264"
-              className="mt-2 block text-sm text-text-primary underline-offset-4 hover:underline"
-            >
-              {CONTACT_PHONE}
-            </a>
+            <div className="mt-4 flex flex-col items-start gap-2">
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-sm text-text-primary underline-offset-4 hover:underline"
+              >
+                {CONTACT_EMAIL}
+              </a>
+              <a
+                href="tel:+16292818264"
+                className="text-sm text-text-primary underline-offset-4 hover:underline"
+              >
+                {CONTACT_PHONE}
+              </a>
+            </div>
           </div>
 
           {COLUMNS.map((col) => (
@@ -72,7 +87,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+                      className="text-sm text-text-secondary transition-colors duration-300 hover:text-text-primary"
                     >
                       {link.label}
                     </Link>
@@ -86,8 +101,13 @@ export function Footer() {
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-border-subtle pt-6 sm:flex-row sm:items-center">
           <p className="font-medium text-xs text-text-muted">
             © {new Date().getFullYear()} Flow State. All rights reserved.
-            <span aria-hidden className="mx-2 text-text-muted">&middot;</span>
-            <Link href="/crm" className="transition-colors hover:text-text-primary">
+            <span aria-hidden className="mx-2 text-text-muted">
+              &middot;
+            </span>
+            <Link
+              href="/crm"
+              className="transition-colors duration-300 hover:text-text-primary"
+            >
               Admin login
             </Link>
           </p>

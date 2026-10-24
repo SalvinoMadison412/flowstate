@@ -49,8 +49,8 @@ const config: Config = {
         mono: ["var(--font-jetbrains-mono)", "ui-monospace", "monospace"],
       },
       letterSpacing: {
-        display: "-0.04em",
-        tight2: "-0.03em",
+        display: "-0.03em",
+        tight2: "-0.025em",
         wide: "0.02em",
       },
       borderRadius: { btn: "12px", card: "18px", panel: "48px" },
