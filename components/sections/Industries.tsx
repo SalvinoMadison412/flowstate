@@ -16,20 +16,20 @@ export function Industries() {
   return (
     <Section id="industries">
       <SectionLabel>Who we work with</SectionLabel>
-      <SectionHeading className="mt-4 max-w-2xl">
+      <SectionHeading className="mt-4 max-w-3xl">
         Built for local businesses that live on bookings.
       </SectionHeading>
 
-      <Reveal className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <Reveal className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {INDUSTRIES.map((item) => (
           <div
             key={item.name}
-            className="rounded-2xl border border-border-subtle bg-surface p-5"
+            className="rounded-card bg-surface-elevated p-5 shadow-ring"
           >
-            <span className="block text-sm font-medium text-text-primary">
+            <span className="block font-medium text-text-primary">
               {item.name}
             </span>
-            <span className="mt-2 block font-mono text-[11px] leading-relaxed text-text-secondary">
+            <span className="mt-2 block text-sm leading-relaxed text-text-secondary">
               {item.stat}
             </span>
           </div>
