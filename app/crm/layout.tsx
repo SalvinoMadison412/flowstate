@@ -12,7 +12,7 @@ export default function CrmLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-[100dvh]">
+    <main className="theme-dark min-h-[100dvh] bg-bg text-text-primary">
       <CrmShell>{children}</CrmShell>
     </main>
   );
