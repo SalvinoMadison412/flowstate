@@ -58,7 +58,7 @@ export function Nav() {
                 href={link.href}
                 aria-current={pathname === link.href ? "page" : undefined}
                 className={cn(
-                  "transition-colors hover:text-accent-ink",
+                  "transition-colors duration-300 ease-[cubic-bezier(0.075,0.82,0.165,1)] hover:text-text-primary/65",
                   pathname === link.href && "text-accent-ink",
                 )}
               >
@@ -121,7 +121,7 @@ export function Nav() {
                   onClick={() => setOpen(false)}
                   aria-current={pathname === link.href ? "page" : undefined}
                   className={cn(
-                    "block rounded-btn px-3 py-3 text-base font-medium transition-colors hover:bg-surface",
+                    "block rounded-btn px-3 py-3 text-base font-medium transition-colors hover:bg-surface hover:text-text-primary/70",
                     pathname === link.href && "text-accent-ink",
                   )}
                 >
