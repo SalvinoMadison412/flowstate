@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { IconInstagram, IconLinkedIn, IconX, IconYouTube } from "@/components/ui/icons";
 
-const CONTACT_EMAIL = "flowstate.agents@gmail.com";
+const CONTACT_EMAIL = "salvino@flowstateaiagents.com";
 const CONTACT_PHONE = "+1 (629) 281-8264";
 
 const COLUMNS = [
