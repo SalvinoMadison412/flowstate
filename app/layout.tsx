@@ -1,11 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter_Tight, Inter, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // Variable font (no weight list) so intermediate weights like 575 work.
 const interTight = Inter_Tight({
   subsets: ["latin"],
   variable: "--font-inter-tight",
+  display: "swap",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -98,7 +105,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${interTight.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${interTight.variable} ${manrope.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="bg-bg font-sans text-text-primary antialiased">
         <script
