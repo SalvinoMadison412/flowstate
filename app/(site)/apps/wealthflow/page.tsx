@@ -43,7 +43,7 @@ const APP_JSON_LD = {
 
 export default function WealthFlowPage() {
   return (
-    <div className="pt-16">
+    <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_JSON_LD) }} />
       <Section>
         <SectionLabel>Apps</SectionLabel>
@@ -54,7 +54,7 @@ export default function WealthFlowPage() {
             width={96}
             height={96}
             priority
-            className="h-20 w-20 rounded-2xl border border-border-active sm:h-24 sm:w-24"
+            className="h-20 w-20 rounded-card shadow-ring sm:h-24 sm:w-24"
           />
           <SectionHeading>WealthFlow</SectionHeading>
         </div>
@@ -66,10 +66,10 @@ export default function WealthFlowPage() {
         </p>
         <p className="mt-3 text-sm text-text-muted">Android for now, iOS planned.</p>
         <div className="mt-8 flex flex-wrap gap-4 text-sm">
-          <Link href="/apps/wealthflow/privacy" className="rounded-full border border-accent px-5 py-3 font-bold text-accent transition-colors hover:bg-accent hover:text-bg">
+          <Link href="/apps/wealthflow/privacy" className="rounded-btn bg-text-primary px-[18px] py-3 font-medium text-bg transition-colors hover:bg-text-primary/85">
             Privacy policy
           </Link>
-          <Link href="/apps/wealthflow/delete-account" className="rounded-full border border-border-active px-5 py-3 text-text-primary transition-colors hover:border-text-secondary">
+          <Link href="/apps/wealthflow/delete-account" className="rounded-btn bg-surface px-[18px] py-3 text-text-primary transition-colors hover:bg-border-subtle">
             Delete your account
           </Link>
         </div>
@@ -79,8 +79,8 @@ export default function WealthFlowPage() {
         <SectionLabel>Why it is different</SectionLabel>
         <Reveal className="mt-10 grid gap-4 sm:grid-cols-2">
           {PROMISES.map((p) => (
-            <div key={p.title} className="rounded-2xl border border-border-subtle bg-surface p-6 sm:p-8">
-              <h3 className="font-display text-lg font-bold tracking-display">{p.title}</h3>
+            <div key={p.title} className="rounded-card shadow-ring bg-surface-elevated p-6 sm:p-8">
+              <h3 className="font-display text-lg font-medium tracking-tight2">{p.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">{p.body}</p>
             </div>
           ))}

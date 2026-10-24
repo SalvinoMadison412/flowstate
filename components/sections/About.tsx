@@ -63,16 +63,16 @@ export function About() {
 
         <Reveal className="mt-12 grid gap-6 md:grid-cols-2">
           {FOUNDERS.map((f) => (
-            <div key={f.name} className="flex flex-col rounded-2xl border border-border-active bg-surface-elevated p-6 sm:p-8">
+            <div key={f.name} className="flex flex-col rounded-card shadow-ring bg-surface-elevated p-6 sm:p-8">
               <Image
                 src={f.photo}
                 alt={f.name}
                 width={640}
                 height={640}
-                className="aspect-square w-full rounded-2xl border border-border-active object-cover object-top"
+                className="aspect-square w-full rounded-card shadow-ring object-cover object-top"
               />
-              <h3 className="mt-6 font-display text-xl font-bold tracking-display">{f.name}</h3>
-              <div className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-text-secondary">
+              <h3 className="mt-6 font-display text-xl font-medium tracking-tight2">{f.name}</h3>
+              <div className="mt-1 font-medium text-xs uppercase tracking-[0.2em] text-text-secondary">
                 {f.role}
               </div>
               {f.bio.map((p) => (
@@ -85,13 +85,13 @@ export function About() {
                   href={f.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 underline-offset-4 hover:text-accent hover:underline"
+                  className="inline-flex items-center gap-2 underline-offset-4 hover:text-accent-ink hover:underline"
                 >
                   <IconLinkedIn className="h-4 w-4" />
                   LinkedIn
                 </a>
                 {"email" in f && (
-                  <a href={`mailto:${f.email}`} className="underline-offset-4 hover:text-accent hover:underline">
+                  <a href={`mailto:${f.email}`} className="underline-offset-4 hover:text-accent-ink hover:underline">
                     {f.email}
                   </a>
                 )}
@@ -102,10 +102,10 @@ export function About() {
       </Section>
 
       <Section id="instagram">
-        <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-border-active bg-surface-elevated p-6 sm:flex-row sm:items-center sm:p-8">
+        <div className="flex flex-col items-start justify-between gap-6 rounded-card shadow-ring bg-surface-elevated p-6 sm:flex-row sm:items-center sm:p-8">
           <div>
             <SectionLabel>Follow Flow State</SectionLabel>
-            <h2 className="mt-3 font-display text-2xl font-bold tracking-display">
+            <h2 className="mt-3 font-display text-2xl font-medium tracking-tight2">
               See what we&apos;re building on Instagram.
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-secondary">
@@ -117,7 +117,7 @@ export function About() {
             href="https://www.instagram.com/flowstate.agents"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent px-5 py-3 text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-bg"
+            className="inline-flex shrink-0 items-center gap-2 rounded-btn bg-accent px-5 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-accent/85"
           >
             <IconInstagram className="h-4 w-4" />
             @flowstate.agents
@@ -132,10 +132,10 @@ export function About() {
           {PRINCIPLES.map((p) => (
             <div
               key={p.n}
-              className="rounded-2xl border border-border-subtle bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-border-active sm:p-8"
+              className="rounded-card shadow-ring bg-surface-elevated p-6 transition-all duration-300 hover:-translate-y-1 sm:p-8"
             >
-              <span className="font-mono text-xs text-accent">{p.n}</span>
-              <h3 className="mt-4 font-display text-xl font-bold tracking-display">{p.title}</h3>
+              <span className="font-medium text-xs text-accent-ink">{p.n}</span>
+              <h3 className="mt-4 font-display text-xl font-medium tracking-tight2">{p.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">{p.body}</p>
             </div>
           ))}
@@ -152,9 +152,9 @@ export function About() {
             <Link
               key={o.title}
               href={o.href}
-              className="group rounded-2xl border border-border-subtle bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-border-active"
+              className="group rounded-card shadow-ring bg-surface-elevated p-6 transition-all duration-300 hover:-translate-y-1 hover:border-border-active"
             >
-              <h3 className="font-display text-lg font-bold tracking-display">{o.title}</h3>
+              <h3 className="font-display text-lg font-medium tracking-tight2">{o.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">{o.body}</p>
               <span className="mt-5 inline-flex items-center gap-2 text-sm text-text-primary">
                 Learn more
