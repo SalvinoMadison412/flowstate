@@ -3,26 +3,24 @@ import Link from "next/link";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "filled" | "outline" | "ghost";
+type Variant = "filled" | "accent" | "outline" | "ghost";
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-wide transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-40";
+  "inline-flex items-center justify-center gap-2 rounded-btn font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-40";
 
 const variants: Record<Variant, string> = {
-  // Primary CTA — one of the few sanctioned cyan uses.
-  filled:
-    "bg-white text-bg hover:bg-accent hover:text-bg hover:shadow-accent-glow",
-  // White border, fills white with black text on hover.
-  outline:
-    "border border-white/80 text-text-primary hover:bg-white hover:text-bg",
-  ghost:
-    "border border-border-active text-text-primary hover:border-white hover:bg-white/5",
+  // Primary CTA: ink fill.
+  filled: "bg-text-primary text-bg hover:bg-text-primary/85",
+  // Second CTA: cyan fill with dark text (cyan is never text on white).
+  accent: "bg-accent text-text-primary hover:bg-accent/85",
+  outline: "bg-surface text-text-primary hover:bg-border-subtle",
+  ghost: "bg-surface text-text-primary hover:bg-border-subtle",
 };
 
 const sizes: Record<Size, string> = {
-  md: "h-10 px-5 text-sm",
-  lg: "h-12 px-7 text-[0.95rem]",
+  md: "h-10 px-4 text-sm",
+  lg: "h-12 px-[18px] text-lg",
 };
 
 type CommonProps = {

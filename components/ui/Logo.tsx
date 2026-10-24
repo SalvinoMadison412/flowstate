@@ -9,8 +9,8 @@ type LogoProps = {
 };
 
 /**
- * Flow State logo mark: white-on-transparent PNG (public/logo-mark.png), made
- * for dark surfaces. `accentDot` is kept for callers but no longer applies.
+ * Flow State logo mark: white-on-transparent PNG (public/logo-mark.png); the
+ * `logo-mark` class inverts it on light pages (see globals.css). `accentDot` is kept for callers but no longer applies.
  */
 export function FlowStateIcon({
   className,
@@ -25,7 +25,7 @@ export function FlowStateIcon({
       alt="Flow State"
       width={512}
       height={512}
-      className={cn("h-8 w-8 object-contain", className)}
+      className={cn("logo-mark h-8 w-8 object-contain", className)}
     />
   );
 }
@@ -43,7 +43,7 @@ export function Logo({ variant = "full", className, accentDot = false }: LogoPro
       )}
     >
       <FlowStateIcon className="h-9 w-9 shrink-0" />
-      <span className="font-sans text-[1.35rem] font-bold leading-none tracking-[-0.01em]">
+      <span className="text-[1.35rem] font-semibold leading-none tracking-tight2">
         Flowstate
       </span>
     </span>
