@@ -90,6 +90,14 @@ export const metadata: Metadata = {
       "Meet the AI that answers your phone.",
   },
   robots: { index: true, follow: true },
+  // Transparent mark: dark on light browser chrome, white on dark.
+  icons: {
+    icon: [
+      { url: "/favicon-light.png", type: "image/png", media: "(prefers-color-scheme: light)" },
+      { url: "/favicon-dark.png", type: "image/png", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: "/favicon-light.png",
+  },
 };
 
 export const viewport: Viewport = {
