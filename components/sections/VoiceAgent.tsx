@@ -122,7 +122,7 @@ export function VoiceAgentDetails() {
         <div className="flex flex-col gap-4">
           <Reveal className="flex flex-col gap-4">
             {POINTS.map((p) => (
-              <div key={p.title} className="rounded-card bg-surface-elevated p-5 shadow-ring">
+              <div key={p.title} className="card-hover rounded-card bg-surface-elevated p-5 shadow-ring">
                 <h3 className="font-display text-xl font-medium tracking-tight2">{p.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">{p.body}</p>
               </div>

@@ -78,7 +78,7 @@ export function Services() {
           <article
             key={s.id}
             id={s.id}
-            className="scroll-mt-24 rounded-card shadow-ring bg-surface-elevated p-6 transition-colors duration-300 sm:p-9"
+            className="scroll-mt-24 card-hover rounded-card shadow-ring bg-surface-elevated p-6 sm:p-9"
           >
             <div
               className={cn(

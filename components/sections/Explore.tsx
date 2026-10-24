@@ -19,7 +19,7 @@ export function Explore() {
           <Link
             key={p.href}
             href={p.href}
-            className={`flex flex-col rounded-[32px] p-7 sm:p-8 ${p.tile}`}
+            className={`flex flex-col card-hover rounded-[32px] p-7 sm:p-8 ${p.tile}`}
           >
             <span className={`w-fit rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-bg ${p.pill}`}>{p.kicker}</span>
             <h3 className="mt-6 font-display text-3xl font-medium leading-none tracking-display sm:text-4xl">

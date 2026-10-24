@@ -17,7 +17,7 @@ export function Guarantee() {
       </div>
       <Reveal className="mt-10 grid gap-4 md:grid-cols-3">
         {TERMS.map((t) => (
-          <div key={t.big} className="rounded-card bg-surface-elevated p-6 shadow-ring">
+          <div key={t.big} className="card-hover rounded-card bg-surface-elevated p-6 shadow-ring">
             <p className="font-display text-3xl font-medium tracking-tight2 text-accent-ink">{t.big}</p>
             <h3 className="mt-3 font-display text-lg font-medium tracking-tight2">{t.title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-text-secondary">{t.body}</p>
