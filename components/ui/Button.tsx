@@ -2,12 +2,25 @@ import { forwardRef } from "react";
 import Link from "next/link";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { IconArrowRight } from "@/components/ui/icons";
+
+/** A trailing "→" in string children becomes an aligned SVG arrow that nudges right on hover. */
+function withArrow(children: React.ReactNode) {
+  if (typeof children !== "string" || !children.trimEnd().endsWith("→"))
+    return children;
+  return (
+    <>
+      {children.replace(/\s*→\s*$/, "")}
+      <IconArrowRight className="h-[1.1em] w-[1.1em] shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.165,0.84,0.44,1)] group-hover/btn:translate-x-0.5" />
+    </>
+  );
+}
 
 type Variant = "filled" | "accent" | "outline" | "ghost";
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-btn font-medium transition-[color,background-color,transform] duration-300 ease-[cubic-bezier(0.075,0.82,0.165,1)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-40";
+  "group/btn inline-flex items-center justify-center gap-2 rounded-btn font-medium transition-[color,background-color,transform] duration-300 ease-[cubic-bezier(0.075,0.82,0.165,1)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-40";
 
 const variants: Record<Variant, string> = {
   // Primary CTA: ink fill.
@@ -42,32 +55,34 @@ type ButtonAsLink = CommonProps &
 
 type ButtonProps = ButtonAsButton | ButtonAsLink;
 
-export const Button = forwardRef<HTMLButtonElement & HTMLAnchorElement, ButtonProps>(
-  ({ variant = "filled", size = "md", className, children, ...props }, ref) => {
-    const classes = cn(base, variants[variant], sizes[size], className);
+export const Button = forwardRef<
+  HTMLButtonElement & HTMLAnchorElement,
+  ButtonProps
+>(({ variant = "filled", size = "md", className, children, ...props }, ref) => {
+  const classes = cn(base, variants[variant], sizes[size], className);
+  children = withArrow(children);
 
-    if ("href" in props && props.href !== undefined) {
-      const { href, ...rest } = props;
-      // Client-side nav keeps the shared layout, and any live call, mounted.
-      if (href.startsWith("/"))
-        return (
-          <Link ref={ref} href={href} className={classes} {...rest}>
-            {children}
-          </Link>
-        );
+  if ("href" in props && props.href !== undefined) {
+    const { href, ...rest } = props;
+    // Client-side nav keeps the shared layout, and any live call, mounted.
+    if (href.startsWith("/"))
       return (
-        <a ref={ref} href={href} className={classes} {...rest}>
+        <Link ref={ref} href={href} className={classes} {...rest}>
           {children}
-        </a>
+        </Link>
       );
-    }
-
     return (
-      <button ref={ref} className={classes} {...(props as ButtonAsButton)}>
+      <a ref={ref} href={href} className={classes} {...rest}>
         {children}
-      </button>
+      </a>
     );
-  },
-);
+  }
+
+  return (
+    <button ref={ref} className={classes} {...(props as ButtonAsButton)}>
+      {children}
+    </button>
+  );
+});
 
 Button.displayName = "Button";

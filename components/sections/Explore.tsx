@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconArrowRight } from "@/components/ui/icons";
 import { Section, SectionLabel } from "@/components/ui/Section";
 
 const PAGES = [
@@ -46,7 +47,7 @@ export function Explore() {
             key={p.href}
             href={p.href}
             style={{ top: `${88 + i * 28}px` }}
-            className={`sticky flex min-h-[22rem] flex-col rounded-t-[48px] px-6 pb-10 pt-8 sm:px-12 sm:pb-12 sm:pt-10 lg:min-h-[26rem] ${i === PAGES.length - 1 ? "rounded-b-[48px]" : "-mb-px"} ${p.tile}`}
+            className={`group/open sticky flex min-h-[22rem] flex-col rounded-t-[48px] px-6 pb-10 pt-8 sm:px-12 sm:pb-12 sm:pt-10 lg:min-h-[26rem] ${i === PAGES.length - 1 ? "rounded-b-[48px]" : "-mb-px"} ${p.tile}`}
           >
             <div className="flex items-center justify-between">
               <span
@@ -68,8 +69,9 @@ export function Explore() {
               )}
             </h3>
             <p className="mb-10 mt-4 max-w-xl text-lg leading-snug">{p.body}</p>
-            <span className="mt-auto w-fit rounded-btn bg-bg px-4 py-2 text-sm font-medium">
-              Open →
+            <span className="mt-auto inline-flex w-fit items-center gap-2 rounded-btn bg-bg px-4 py-2 text-sm font-medium">
+              Open
+              <IconArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/open:translate-x-0.5" />
             </span>
           </Link>
         ))}

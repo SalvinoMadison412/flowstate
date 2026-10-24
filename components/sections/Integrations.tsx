@@ -207,7 +207,7 @@ export function Integrations() {
               "rounded-btn px-4 py-2 text-sm font-medium transition-colors duration-200 " +
               (active === i
                 ? "bg-text-primary text-bg"
-                : "bg-surface text-text-primary hover:bg-border-subtle")
+                : "bg-surface text-text-primary hover:bg-border-subtle hover:text-text-primary/70")
             }
           >
             {n.label}

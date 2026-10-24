@@ -87,7 +87,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+                      className="text-sm text-text-secondary transition-colors duration-300 hover:text-text-primary"
                     >
                       {link.label}
                     </Link>
@@ -106,7 +106,7 @@ export function Footer() {
             </span>
             <Link
               href="/crm"
-              className="transition-colors hover:text-text-primary"
+              className="transition-colors duration-300 hover:text-text-primary"
             >
               Admin login
             </Link>
