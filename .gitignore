@@ -25,3 +25,8 @@ node_modules/
 
 # strategy docs — never publish
 council/
+
+# lead data (local only)
+/leads/
+/notes/*
+!/notes/BOOKING_SETUP.md
