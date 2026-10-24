@@ -287,3 +287,17 @@ h3,
 
 @keyframes orb-full-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes orb-bg-in { from { background-color: rgb(var(--bg) / 0); } to { background-color: rgb(var(--bg)); } }
+
+/* Clay-style hover motion (easings measured on clay.com): cards lift with a
+   soft shadow + inset ring on a long expo-out, a tiny scale on a quart-out. */
+.card-hover {
+  transition:
+    transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    box-shadow 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.card-hover:hover {
+  transform: scale(1.012);
+  box-shadow:
+    0 12px 24px -12px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 2px rgba(209, 205, 199, 0.6);
+}

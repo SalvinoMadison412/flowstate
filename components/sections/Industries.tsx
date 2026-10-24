@@ -24,7 +24,7 @@ export function Industries() {
         {INDUSTRIES.map((item) => (
           <div
             key={item.name}
-            className="rounded-card bg-surface-elevated p-5 shadow-ring"
+            className="card-hover rounded-card bg-surface-elevated p-5 shadow-ring"
           >
             <span className="block font-medium text-text-primary">
               {item.name}
