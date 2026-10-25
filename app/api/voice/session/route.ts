@@ -1,13 +1,14 @@
 /**
  * POST /api/voice/session
  *
- * Public: mints a short-lived OpenAI Realtime client secret for the website's
- * "talk to our AI" button. The browser then connects to OpenAI directly over
- * WebRTC; OPENAI_API_KEY never leaves the server, and the persona is fixed here
- * so a visitor can't swap in their own instructions.
+ * Public: mints a single-use Gemini Live ephemeral token for the website's
+ * "talk to our AI" button. The browser then talks to Gemini directly over a
+ * WebSocket; GEMINI_API_KEY never leaves the server. The whole session setup
+ * (model, voice, persona) is locked into the token, so a visitor can't swap in
+ * their own instructions: Gemini ignores the setup the browser sends.
  */
 import { clientIp } from "@/lib/clientIp";
-import { GREETING_TRIGGER, INSTRUCTIONS, LEGAL_INSTRUCTIONS, REALTIME_MODEL, VOICE } from "@/lib/voiceAgent";
+import { GREETING_TRIGGER, INSTRUCTIONS, LEGAL_INSTRUCTIONS, LIVE_MODEL, VOICE } from "@/lib/voiceAgent";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -16,9 +17,10 @@ const WINDOW_MS = 10 * 60_000;
 const MAX_PER_WINDOW = 5;
 // ponytail: per-instance memory, resets on deploy and isn't shared across
 // replicas. Move to Supabase/Redis if the demo gets scraped. The daily cap is
-// per instance too (real ceiling is DAILY_MAX x instances), so also set a
-// monthly budget limit on the OpenAI project. The 5-minute call cap is
-// browser-only. See lib/clientIp.ts for how the IP is read.
+// per instance too, and the Gemini free tier's own daily limit is the real
+// ceiling. The 5-minute call cap is browser-only, but the token's expireTime
+// below ends the session server-side shortly after. See lib/clientIp.ts for
+// how the IP is read.
 const hits = new Map<string, number[]>();
 const DAILY_MAX = Number(process.env.VOICE_DEMO_DAILY_MAX) || 150;
 let day = "",
@@ -28,7 +30,7 @@ const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 export async function POST(req: Request) {
-  const key = process.env.OPENAI_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
   if (!key) return json({ error: "Demo not configured." }, 503);
 
   const ip = clientIp(req);
@@ -51,20 +53,24 @@ export async function POST(req: Request) {
   const { persona } = await req.json().catch(() => ({}));
   const instructions = persona === "legal" ? LEGAL_INSTRUCTIONS : INSTRUCTIONS;
 
-  const res = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
+  const res = await fetch("https://generativelanguage.googleapis.com/v1beta/auth_tokens", {
     method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "content-type": "application/json" },
+    headers: { "x-goog-api-key": key, "content-type": "application/json" },
     body: JSON.stringify({
-      expires_after: { anchor: "created_at", seconds: 60 },
-      session: {
-        type: "realtime",
-        model: REALTIME_MODEL,
-        instructions,
-        audio: { output: { voice: VOICE } },
+      uses: 1,
+      newSessionExpireTime: new Date(now + 60_000).toISOString(),
+      expireTime: new Date(now + 6 * 60_000).toISOString(), // 5-minute call + slack
+      bidiGenerateContentSetup: {
+        model: `models/${LIVE_MODEL}`,
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } },
+        },
+        systemInstruction: { parts: [{ text: instructions }] },
       },
     }),
   });
   if (!res.ok) return json({ error: "Could not start the demo." }, 502);
-  const { value } = await res.json();
-  return json({ secret: value, model: REALTIME_MODEL, greeting: GREETING_TRIGGER });
+  const { name } = await res.json();
+  return json({ token: name, model: LIVE_MODEL, greeting: GREETING_TRIGGER });
 }
