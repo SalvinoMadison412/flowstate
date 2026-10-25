@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { About } from "@/components/sections/About";
-import { Industries } from "@/components/sections/Industries";
 import { PageCTA } from "@/components/sections/PageCTA";
 
 export const metadata: Metadata = {
@@ -14,7 +13,6 @@ export default function AboutPage() {
   return (
     <div>
       <About />
-      <Industries />
       <PageCTA heading="Talk to the founder directly." />
     </div>
   );
