@@ -25,6 +25,7 @@ export const FOUNDERS = [
     role: "Compliance & Finance",
     photo: "/founders/sherwin.webp",
     linkedin: "https://www.linkedin.com/in/sherwin-judas-madison-b7b649338/",
+    email: "sherwin@flowstateaiagents.com",
     bio: [
       "Sherwin is a Chartered Accountancy candidate who has spent the past one and a half years at SRVN & Associates working closely with businesses on accounting, taxation, and advisory.",
       "He supports Flow State on compliance and finance: the numbers are tracked carefully, and everything is held to the discipline he'd bring to an audit.",
@@ -51,7 +52,7 @@ export function About() {
     <>
       <Section id="about">
         <SectionLabel>About</SectionLabel>
-        <SectionHeading className="mt-4 max-w-2xl">
+        <SectionHeading as="h1" className="mt-4 max-w-2xl">
           Run by a founder who builds the systems, backed by finance and compliance.
         </SectionHeading>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-text-secondary">
@@ -117,7 +118,7 @@ export function About() {
             href="https://www.instagram.com/flowstate.agents"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-2 rounded-btn bg-accent px-5 py-3 text-sm font-medium text-text-primary transition-colors hover:bg-accent/85"
+            className="inline-flex shrink-0 items-center gap-2 rounded-btn bg-gradient-to-r from-[#0b1d3a] via-[#0f6e78] to-[#1a8fa3] px-5 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
             <IconInstagram className="h-4 w-4" />
             @flowstate.agents

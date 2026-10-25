@@ -66,7 +66,7 @@ export function Services() {
   return (
     <Section id="services">
       <SectionLabel>What we do</SectionLabel>
-      <SectionHeading className="mt-4 max-w-3xl">
+      <SectionHeading as="h1" className="mt-4 max-w-3xl">
         Two services. Each one stands on its own.
       </SectionHeading>
       <p className="mt-5 max-w-2xl text-lg text-text-secondary">

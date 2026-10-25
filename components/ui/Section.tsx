@@ -55,18 +55,21 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
 export function SectionHeading({
   children,
   className,
+  as: Tag = "h2",
 }: {
   children: React.ReactNode;
   className?: string;
+  /** "h1" for the first heading on a page that has no hero. */
+  as?: "h1" | "h2";
 }) {
   return (
-    <h2
+    <Tag
       className={cn(
         "font-display text-4xl font-medium leading-none tracking-tight2 sm:text-[56px]",
         className,
       )}
     >
       {children}
-    </h2>
+    </Tag>
   );
 }
