@@ -4,7 +4,7 @@
  * Public: books a 30-minute strategy call on the owner's Google Calendar and
  * invites the visitor (Google emails them the invite + Meet link). Uses an
  * OAuth refresh token for the owner's account, so no extra dependency; see
- * BOOKING_SETUP.md. Returns 503 when the Google env vars aren't set, so the form
+ * notes/BOOKING_SETUP.md. Returns 503 when the Google env vars aren't set, so the form
  * can fall back to a plain lead.
  */
 import { clientIp } from "@/lib/clientIp";

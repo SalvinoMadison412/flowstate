@@ -3,9 +3,10 @@
 /**
  * One shared voice call for the whole page: the hero button, the 3D orb, the
  * waveform and the demo section all read the same connection. The browser talks
- * to OpenAI Realtime over WebRTC using a short-lived secret from
- * /api/voice/session. `levels` is a ref (not state) so 60fps visuals can read
- * it without re-rendering React.
+ * to Gemini Live over a WebSocket using a single-use token from
+ * /api/voice/session: mic audio goes up as 16-bit PCM, the agent's 24kHz PCM
+ * comes back and is played gaplessly. `levels` is a ref (not state) so 60fps
+ * visuals can read it without re-rendering React.
  */
 import {
   createContext,
@@ -35,7 +36,21 @@ type VoiceCall = {
 
 const Ctx = createContext<VoiceCall | null>(null);
 
-const MAX_CALL_MS = 5 * 60_000; // client-side cap; the ephemeral key can't enforce it
+const MAX_CALL_MS = 5 * 60_000; // client-side cap; the token's expireTime ends it server-side too
+
+const LIVE_URL =
+  "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained";
+
+// AudioWorklet that hands raw mic samples to the main thread.
+const CAPTURE_WORKLET = `registerProcessor("capture", class extends AudioWorkletProcessor {
+  process([input]) { if (input[0]) this.port.postMessage(input[0].slice()); return true; }
+});`;
+
+const toBase64 = (bytes: Uint8Array) => {
+  let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
 
 /** Smoothed 0..1 loudness of a stream, written into `levels.current[key]`. */
 function meter(ctx: AudioContext, stream: MediaStream, levels: MutableRefObject<Levels>, key: keyof Levels) {
@@ -103,19 +118,25 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
     if (teardown.current) return;
     setError("");
     setStatus("connecting");
-    if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined")
+    if (!navigator.mediaDevices?.getUserMedia || typeof AudioWorkletNode === "undefined")
       return fail("Live calls don't work in this browser. Open this page in Safari or Chrome to try it.");
     const cleanups: (() => void)[] = [];
     const mine = () => cleanups.forEach((c) => c());
     teardown.current = mine;
+    const alive = () => teardown.current === mine;
     // True once End call was pressed mid-connect; anything created after that is released.
     const cancelled = () => {
-      if (teardown.current === mine) return false;
+      if (alive()) return false;
       mine();
       return true;
     };
+    // Created inside the click so Safari lets it play sound.
+    const audioCtx = new AudioContext();
+    cleanups.push(() => void audioCtx.close());
     try {
-      const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mic = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
       cleanups.push(() => mic.getTracks().forEach((t) => t.stop()));
       if (cancelled()) return;
 
@@ -125,55 +146,107 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ persona }),
         headers: { "content-type": "application/json" },
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (cancelled()) return;
       if (!res.ok) return fail(data.error || "Could not start the demo.");
 
-      const conn = new RTCPeerConnection();
-      cleanups.push(() => conn.close());
-      const audioCtx = new AudioContext();
-      cleanups.push(() => void audioCtx.close());
       cleanups.push(meter(audioCtx, mic, levels, "mic"));
+      const worklet = URL.createObjectURL(new Blob([CAPTURE_WORKLET], { type: "text/javascript" }));
+      await audioCtx.audioWorklet.addModule(worklet);
+      URL.revokeObjectURL(worklet);
+      if (cancelled()) return;
+      const capture = new AudioWorkletNode(audioCtx, "capture");
+      audioCtx.createMediaStreamSource(mic).connect(capture);
+      capture.connect(audioCtx.destination); // outputs silence; keeps the worklet running
+      cleanups.push(() => capture.disconnect());
 
-      const audio = new Audio();
-      audio.autoplay = true;
-      conn.ontrack = (e) => {
-        audio.srcObject = e.streams[0];
-        cleanups.push(meter(audioCtx, e.streams[0], levels, "agent"));
+      // Agent audio: 24kHz PCM chunks scheduled back to back. `out` also feeds the agent meter.
+      const out = audioCtx.createGain();
+      out.connect(audioCtx.destination);
+      const outStream = audioCtx.createMediaStreamDestination();
+      out.connect(outStream);
+      cleanups.push(meter(audioCtx, outStream.stream, levels, "agent"));
+      const playing = new Set<AudioBufferSourceNode>();
+      let playAt = 0;
+      const play = (b64: string) => {
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const pcm = new Int16Array(bytes.buffer, 0, bytes.length >> 1);
+        const buf = audioCtx.createBuffer(1, pcm.length, 24000);
+        const ch = buf.getChannelData(0);
+        for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+        const src = audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(out);
+        playAt = Math.max(playAt, audioCtx.currentTime);
+        src.start(playAt);
+        playAt += buf.duration;
+        playing.add(src);
+        src.onended = () => playing.delete(src);
       };
-      conn.addTrack(mic.getAudioTracks()[0]);
-      conn.onconnectionstatechange = () => {
-        if (["failed", "disconnected", "closed"].includes(conn.connectionState)) stop();
+      // The visitor talked over the agent: drop whatever is still queued.
+      const flush = () => {
+        playing.forEach((s) => s.stop());
+        playing.clear();
+        playAt = 0;
       };
 
-      // Make the agent speak first, once the event channel is open.
-      const events = conn.createDataChannel("oai-events");
-      events.onopen = () => {
-        // A user-role message, not `response.instructions`: per-response instructions
-        // REPLACE the session persona for that turn, which lost the persona's script.
-        events.send(
+      const ws = new WebSocket(`${LIVE_URL}?access_token=${encodeURIComponent(data.token)}`);
+      cleanups.push(() => {
+        ws.onclose = ws.onmessage = null;
+        ws.close();
+      });
+      // The token carries the real setup (persona, voice); Gemini ignores everything here but the model.
+      ws.onopen = () => ws.send(JSON.stringify({ setup: { model: `models/${data.model}` } }));
+      ws.onclose = () => {
+        if (!alive()) return;
+        if (startedAt.current) stop();
+        else fail("Could not connect. Please try again.");
+      };
+
+      // Mic samples go up in ~100ms chunks once the session is ready.
+      let ready = false;
+      let pending: Float32Array[] = [];
+      let count = 0;
+      capture.port.onmessage = (e: MessageEvent<Float32Array>) => {
+        if (!ready || ws.readyState !== WebSocket.OPEN) return;
+        pending.push(e.data);
+        count += e.data.length;
+        if (count < audioCtx.sampleRate / 10) return;
+        const pcm = new Int16Array(count);
+        let o = 0;
+        for (const f of pending) for (const v of f) pcm[o++] = Math.max(-1, Math.min(1, v)) * 0x7fff;
+        pending = [];
+        count = 0;
+        ws.send(
           JSON.stringify({
-            type: "conversation.item.create",
-            item: { type: "message", role: "user", content: [{ type: "input_text", text: data.greeting }] },
+            realtimeInput: {
+              audio: { data: toBase64(new Uint8Array(pcm.buffer)), mimeType: `audio/pcm;rate=${audioCtx.sampleRate}` },
+            },
           }),
         );
-        events.send(JSON.stringify({ type: "response.create" }));
-        startedAt.current = Date.now();
-        track("demo_start", persona);
-        setStatus("live");
-        const t = setTimeout(stop, MAX_CALL_MS);
-        cleanups.push(() => clearTimeout(t));
       };
 
-      await conn.setLocalDescription(await conn.createOffer());
-      const answer = await fetch("https://api.openai.com/v1/realtime/calls", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${data.secret}`, "content-type": "application/sdp" },
-        body: conn.localDescription!.sdp,
-      });
-      if (cancelled()) return;
-      if (!answer.ok) return fail("Could not connect. Please try again.");
-      await conn.setRemoteDescription({ type: "answer", sdp: await answer.text() });
+      ws.onmessage = async (e) => {
+        const msg = JSON.parse(typeof e.data === "string" ? e.data : await (e.data as Blob).text());
+        if (!alive()) return;
+        if (msg.setupComplete) {
+          // Make the agent speak first.
+          ws.send(
+            JSON.stringify({
+              clientContent: { turns: [{ role: "user", parts: [{ text: data.greeting }] }], turnComplete: true },
+            }),
+          );
+          ready = true;
+          startedAt.current = Date.now();
+          track("demo_start", persona);
+          setStatus("live");
+          const t = setTimeout(stop, MAX_CALL_MS);
+          cleanups.push(() => clearTimeout(t));
+        }
+        const content = msg.serverContent;
+        if (content?.interrupted) flush();
+        for (const part of content?.modelTurn?.parts ?? []) if (part.inlineData?.data) play(part.inlineData.data);
+      };
     } catch (e) {
       if (cancelled()) return;
       fail(
