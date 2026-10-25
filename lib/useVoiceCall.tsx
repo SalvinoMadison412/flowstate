@@ -2,10 +2,11 @@
 
 /**
  * One shared voice call for the whole page: the hero button, the 3D orb, the
- * waveform and the demo section all read the same connection. The browser talks
- * to OpenAI Realtime over WebRTC using a short-lived secret from
- * /api/voice/session. `levels` is a ref (not state) so 60fps visuals can read
- * it without re-rendering React.
+ * waveform and the demo section all read the same connection. Free pipeline:
+ * the browser's speech recognition hears the visitor, /api/voice/chat gets the
+ * reply from a free OpenRouter model, and the browser's own voice speaks it.
+ * `levels` is a ref (not state) so 60fps visuals can read it without
+ * re-rendering React.
  */
 import {
   createContext,
@@ -35,7 +36,28 @@ type VoiceCall = {
 
 const Ctx = createContext<VoiceCall | null>(null);
 
-const MAX_CALL_MS = 5 * 60_000; // client-side cap; the ephemeral key can't enforce it
+const MAX_CALL_MS = 5 * 60_000; // client-side cap; the route's per-IP turn limit is the real guard
+
+// Minimal typing for the Web Speech API (not in TS's DOM lib everywhere).
+type SpeechRecognitionCtor = new () => {
+  lang: string;
+  onresult: ((e: { results: { [i: number]: { [j: number]: { transcript: string } } } }) => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  abort: () => void;
+};
+
+/** Best-sounding installed voice for the language (OS "natural"/"premium" voices beat the defaults). */
+function pickVoice(lang: string) {
+  const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith(lang.slice(0, 2)));
+  return (
+    voices.find((v) => /natural|premium|enhanced|neural/i.test(v.name)) ??
+    voices.find((v) => /google|samantha|siri/i.test(v.name)) ??
+    voices[0] ??
+    null
+  );
+}
 
 /** Smoothed 0..1 loudness of a stream, written into `levels.current[key]`. */
 function meter(ctx: AudioContext, stream: MediaStream, levels: MutableRefObject<Levels>, key: keyof Levels) {
@@ -103,14 +125,19 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
     if (teardown.current) return;
     setError("");
     setStatus("connecting");
-    if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined")
-      return fail("Live calls don't work in this browser. Open this page in Safari or Chrome to try it.");
+    const w = window as unknown as { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor };
+    const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!navigator.mediaDevices?.getUserMedia || !SR || !window.speechSynthesis)
+      return fail("Live calls don't work in this browser. Open this page in Chrome or Safari to try it.");
+    // Safari only lets speech play if the first speak() happens inside the click.
+    speechSynthesis.speak(new SpeechSynthesisUtterance(""));
     const cleanups: (() => void)[] = [];
     const mine = () => cleanups.forEach((c) => c());
     teardown.current = mine;
+    const alive = () => teardown.current === mine;
     // True once End call was pressed mid-connect; anything created after that is released.
     const cancelled = () => {
-      if (teardown.current === mine) return false;
+      if (alive()) return false;
       mine();
       return true;
     };
@@ -118,67 +145,88 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
       cleanups.push(() => mic.getTracks().forEach((t) => t.stop()));
       if (cancelled()) return;
-
-      const res = await fetch("/api/voice/session", {
-        method: "POST",
-        cache: "no-store",
-        body: JSON.stringify({ persona }),
-        headers: { "content-type": "application/json" },
-      });
-      const data = await res.json();
-      if (cancelled()) return;
-      if (!res.ok) return fail(data.error || "Could not start the demo.");
-
-      const conn = new RTCPeerConnection();
-      cleanups.push(() => conn.close());
       const audioCtx = new AudioContext();
       cleanups.push(() => void audioCtx.close());
       cleanups.push(meter(audioCtx, mic, levels, "mic"));
 
-      const audio = new Audio();
-      audio.autoplay = true;
-      conn.ontrack = (e) => {
-        audio.srcObject = e.streams[0];
-        cleanups.push(meter(audioCtx, e.streams[0], levels, "agent"));
+      const lang = navigator.language || "en-US";
+      const history: { role: "user" | "assistant"; content: string }[] = [];
+      const rec = new SR();
+      rec.lang = lang;
+      let heard = "";
+      rec.onresult = (e) => (heard = e.results[0][0].transcript);
+      rec.onerror = (e) => {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed")
+          fail("Microphone access was blocked. Allow it in your browser settings, or open this page in Chrome or Safari.");
+        else if (e.error === "network") fail("Voice recognition couldn't connect. Check your connection and try again.");
       };
-      conn.addTrack(mic.getAudioTracks()[0]);
-      conn.onconnectionstatechange = () => {
-        if (["failed", "disconnected", "closed"].includes(conn.connectionState)) stop();
+      // One phrase per recognition run: reply if something was heard, else keep listening.
+      rec.onend = () => {
+        if (!alive()) return;
+        const said = heard.trim();
+        heard = "";
+        if (said) void turn(said);
+        else listen();
       };
-
-      // Make the agent speak first, once the event channel is open.
-      const events = conn.createDataChannel("oai-events");
-      events.onopen = () => {
-        // A user-role message, not `response.instructions`: per-response instructions
-        // REPLACE the session persona for that turn, which lost the persona's script.
-        events.send(
-          JSON.stringify({
-            type: "conversation.item.create",
-            item: { type: "message", role: "user", content: [{ type: "input_text", text: data.greeting }] },
-          }),
-        );
-        events.send(JSON.stringify({ type: "response.create" }));
-        startedAt.current = Date.now();
-        track("demo_start", persona);
-        setStatus("live");
-        const t = setTimeout(stop, MAX_CALL_MS);
-        cleanups.push(() => clearTimeout(t));
+      const listen = () => {
+        if (alive()) try { rec.start(); } catch {}
       };
-
-      await conn.setLocalDescription(await conn.createOffer());
-      const answer = await fetch("https://api.openai.com/v1/realtime/calls", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${data.secret}`, "content-type": "application/sdp" },
-        body: conn.localDescription!.sdp,
+      cleanups.push(() => {
+        rec.onend = null;
+        rec.abort();
+        speechSynthesis.cancel();
       });
-      if (cancelled()) return;
-      if (!answer.ok) return fail("Could not connect. Please try again.");
-      await conn.setRemoteDescription({ type: "answer", sdp: await answer.text() });
+
+      // speechSynthesis gives no audio stream to meter, so animate the agent level while it talks.
+      const say = (text: string) =>
+        new Promise<void>((done) => {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = lang;
+          u.voice = pickVoice(lang);
+          let raf = 0;
+          const pulse = () => {
+            const target = 0.35 + 0.35 * Math.abs(Math.sin(performance.now() / 90));
+            levels.current.agent += (target - levels.current.agent) * 0.25;
+            raf = requestAnimationFrame(pulse);
+          };
+          u.onend = u.onerror = () => {
+            cancelAnimationFrame(raf);
+            levels.current.agent = 0;
+            done();
+          };
+          pulse();
+          speechSynthesis.speak(u);
+        });
+
+      const turn = async (said?: string) => {
+        if (said) history.push({ role: "user", content: said });
+        const res = await fetch("/api/voice/chat", {
+          method: "POST",
+          cache: "no-store",
+          body: JSON.stringify({ persona, messages: history }),
+          headers: { "content-type": "application/json" },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!alive()) return;
+        if (!res.ok) return fail(data.error || "Could not start the demo.");
+        history.push({ role: "assistant", content: data.reply });
+        if (!startedAt.current) {
+          startedAt.current = Date.now();
+          track("demo_start", persona);
+          setStatus("live");
+          const t = setTimeout(stop, MAX_CALL_MS);
+          cleanups.push(() => clearTimeout(t));
+        }
+        await say(data.reply);
+        listen();
+      };
+
+      await turn(); // empty history: the route adds the greeting trigger, so the agent speaks first
     } catch (e) {
       if (cancelled()) return;
       fail(
         (e as Error).name === "NotAllowedError"
-          ? "Microphone access was blocked. Allow it in your browser settings, or open this page in Safari or Chrome."
+          ? "Microphone access was blocked. Allow it in your browser settings, or open this page in Chrome or Safari."
           : "Could not start the call. Please try again.",
       );
     }

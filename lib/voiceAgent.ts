@@ -1,6 +1,6 @@
-/** Persona + model for the website's "talk to our AI" demo (OpenAI Realtime). */
-export const REALTIME_MODEL = "gpt-realtime-2.1-mini";
-export const VOICE = "marin";
+/** Persona + model for the website's "talk to our AI" demo (free OpenRouter models). */
+// OpenRouter tries these in order, so a rate-limited free model falls through to the next.
+export const CHAT_MODELS = ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free"];
 
 export type Persona = "maoshi" | "legal";
 
