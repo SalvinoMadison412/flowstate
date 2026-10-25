@@ -70,7 +70,10 @@ export async function POST(req: Request) {
       },
     }),
   });
-  if (!res.ok) return json({ error: "Could not start the demo." }, 502);
+  if (!res.ok) {
+    console.error("gemini auth_tokens failed", res.status, (await res.text()).slice(0, 300));
+    return json({ error: "Could not start the demo." }, 502);
+  }
   const { name } = await res.json();
   return json({ token: name, model: LIVE_MODEL, greeting: GREETING_TRIGGER });
 }
