@@ -6,6 +6,7 @@
  * WebRTC; OPENAI_API_KEY never leaves the server, and the persona is fixed here
  * so a visitor can't swap in their own instructions.
  */
+import { clientIp } from "@/lib/clientIp";
 import { GREETING_TRIGGER, INSTRUCTIONS, LEGAL_INSTRUCTIONS, REALTIME_MODEL, VOICE } from "@/lib/voiceAgent";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,7 @@ const MAX_PER_WINDOW = 5;
 // replicas. Move to Supabase/Redis if the demo gets scraped. The daily cap is
 // per instance too (real ceiling is DAILY_MAX x instances), so also set a
 // monthly budget limit on the OpenAI project. The 5-minute call cap is
-// browser-only. x-forwarded-for is only trustworthy behind a proxy that
-// overwrites it.
+// browser-only. See lib/clientIp.ts for how the IP is read.
 const hits = new Map<string, number[]>();
 const DAILY_MAX = Number(process.env.VOICE_DEMO_DAILY_MAX) || 150;
 let day = "",
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return json({ error: "Demo not configured." }, 503);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   if (recent.length >= MAX_PER_WINDOW)

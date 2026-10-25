@@ -7,6 +7,8 @@
  * BOOKING_SETUP.md. Returns 503 when the Google env vars aren't set, so the form
  * can fall back to a plain lead.
  */
+import { clientIp } from "@/lib/clientIp";
+
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REFRESH_TOKEN)
     return json({ error: "Booking not configured." }, 503);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const ip = clientIp(req);
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   if (recent.length >= MAX_PER_WINDOW) return json({ error: "Too many requests. Try again later." }, 429);
