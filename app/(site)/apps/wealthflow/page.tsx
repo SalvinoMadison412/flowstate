@@ -56,7 +56,7 @@ export default function WealthFlowPage() {
             priority
             className="h-20 w-20 rounded-card shadow-ring sm:h-24 sm:w-24"
           />
-          <SectionHeading>WealthFlow</SectionHeading>
+          <SectionHeading as="h1">WealthFlow</SectionHeading>
         </div>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-text-secondary">
           A privacy-first personal finance app. Import a bank statement PDF and WealthFlow reads

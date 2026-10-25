@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useReveal } from "@/lib/useReveal";
 import { IconInstagram } from "@/components/ui/icons";
@@ -33,6 +33,14 @@ export function FinalCTA() {
   const [when, setWhen] = useState("");
   const [bookedFor, setBookedFor] = useState("");
   const [bookError, setBookError] = useState("");
+  // Same window /api/book enforces (1 hour to 60 days out), so the picker blocks
+  // bad times before submit. Set after mount: server and browser clocks differ.
+  const [whenRange, setWhenRange] = useState({ min: "", max: "" });
+  useEffect(() => {
+    const local = (ms: number) =>
+      new Date(ms - new Date(ms).getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+    setWhenRange({ min: local(Date.now() + 61 * 60_000), max: local(Date.now() + 60 * 86_400_000) });
+  }, []);
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">(
     "idle",
   );
@@ -101,9 +109,9 @@ export function FinalCTA() {
           shown && "is-visible",
         )}
       >
-        <h2 className="font-display text-3xl font-medium leading-[1.1] tracking-tight2 sm:text-5xl">
+        <h1 className="font-display text-3xl font-medium leading-[1.1] tracking-tight2 sm:text-5xl">
           Book a free strategy call.
-        </h2>
+        </h1>
         <p className="mx-auto mt-5 max-w-lg text-lg text-text-secondary">
           Tell us what&rsquo;s eating your team&rsquo;s time. We&rsquo;ll show you how a
           voice agent or an automation could take it on. 30 minutes, no
@@ -214,6 +222,8 @@ export function FinalCTA() {
                 type="datetime-local"
                 value={when}
                 onChange={(e) => setWhen(e.target.value)}
+                min={whenRange.min || undefined}
+                max={whenRange.max || undefined}
                 className={cn(inputClass)}
               />
               {bookError && <p className="mt-2 text-sm text-text-secondary">{bookError}</p>}
