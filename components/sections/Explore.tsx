@@ -41,13 +41,14 @@ export function Explore() {
       </div>
       {/* Clay-style stack: each tile sticks under the nav and the next one slides over it,
           leaving a strip of the previous tile's rounded top visible. */}
-      <div className="mt-12">
+      {/* overflow-clip (not hidden) rounds off the stuck tiles behind the last one without breaking sticky. */}
+      <div className="mt-12 overflow-clip rounded-b-[48px]">
         {PAGES.map((p, i) => (
           <Link
             key={p.href}
             href={p.href}
             style={{ top: `${88 + i * 28}px` }}
-            className={`group/open sticky flex min-h-[22rem] flex-col rounded-t-[48px] px-6 pb-10 pt-8 sm:px-12 sm:pb-12 sm:pt-10 lg:min-h-[26rem] ${i === PAGES.length - 1 ? "rounded-b-[48px]" : "-mb-px"} ${p.tile}`}
+            className={`group/open sticky flex min-h-[22rem] flex-col rounded-t-[48px] px-6 pb-10 pt-8 sm:px-12 sm:pb-12 sm:pt-10 lg:min-h-[26rem] ${i === PAGES.length - 1 ? "rounded-b-[48px]" : "-mb-12 !pb-[88px] sm:!pb-24"} ${p.tile}`}
           >
             <div className="flex items-center justify-between">
               <span

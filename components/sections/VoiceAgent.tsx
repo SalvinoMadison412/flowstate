@@ -134,15 +134,18 @@ export function VoiceAgent() {
 export function VoiceAgentDetails() {
   return (
     <Section>
-      {/* Stacked sticky tiles (same Clay-style effect as Explore). */}
-      <div>
+      {/* Stacked sticky tiles (same Clay-style effect as Explore). overflow-clip
+          rounds off the stuck tiles behind the last one without breaking sticky. */}
+      <div className="overflow-clip rounded-b-[48px]">
         {STEPS.map((st, i) => (
           <div
             key={st.title}
             style={{ top: `${88 + i * 28}px` }}
             className={cn(
               "sticky flex min-h-[18rem] flex-col rounded-t-[48px] px-6 pb-10 pt-8 sm:px-12 sm:pb-12 sm:pt-10 lg:min-h-[22rem]",
-              i === STEPS.length - 1 ? "rounded-b-[48px]" : "-mb-px",
+              // Non-last tiles run 48px under the next one, so its rounded top sits on
+              // this tile's colour instead of showing a square seam.
+              i === STEPS.length - 1 ? "rounded-b-[48px]" : "-mb-12 !pb-[88px] sm:!pb-24",
               st.tile,
             )}
           >
