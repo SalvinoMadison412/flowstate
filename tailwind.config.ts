@@ -9,8 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Tokens are CSS variables (app/globals.css): light on :root, the
-        // original dark values under .theme-dark (the CRM).
+        // Tokens are CSS variables on :root (app/globals.css).
         bg: "rgb(var(--bg) / <alpha-value>)",
         surface: {
           DEFAULT: "rgb(var(--surface) / <alpha-value>)",
@@ -24,7 +23,6 @@ const config: Config = {
           DEFAULT: "rgb(var(--accent) / <alpha-value>)",
           ink: "rgb(var(--accent-ink) / <alpha-value>)",
           tint: "rgb(var(--accent-tint) / <alpha-value>)",
-          glow: "rgba(0, 200, 240, 0.12)", // dark (CRM) only
         },
         text: {
           primary: "rgb(var(--text-primary) / <alpha-value>)",
@@ -42,7 +40,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // Inter Tight (variable) — the marketing site face. The CRM keeps `sans`.
+        // Inter Tight (variable) — the marketing site face.
         display: ["var(--font-inter-tight)", "Arial", "sans-serif"],
         site: ["var(--font-inter-tight)", "Arial", "sans-serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
