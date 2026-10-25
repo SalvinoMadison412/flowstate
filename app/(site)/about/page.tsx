@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { About } from "@/components/sections/About";
+import { WhyAI } from "@/components/sections/WhyAI";
 import { PageCTA } from "@/components/sections/PageCTA";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function AboutPage() {
   return (
     <div>
       <About />
+      <WhyAI />
       <PageCTA heading="Talk to the founder directly." />
     </div>
   );
