@@ -1,6 +1,6 @@
-/** Persona + model for the website's "talk to our AI" demo (free OpenRouter models). */
-// OpenRouter tries these in order, so a rate-limited free model falls through to the next.
-export const CHAT_MODELS = ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free"];
+/** Persona + model for the website's "talk to our AI" demo (Gemini Live, free tier). */
+export const LIVE_MODEL = "gemini-3.8-live";
+export const VOICE = "Kore";
 
 export type Persona = "maoshi" | "legal";
 

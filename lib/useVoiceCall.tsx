@@ -2,11 +2,11 @@
 
 /**
  * One shared voice call for the whole page: the hero button, the 3D orb, the
- * waveform and the demo section all read the same connection. Free pipeline:
- * the browser's speech recognition hears the visitor, /api/voice/chat gets the
- * reply from a free OpenRouter model, and the browser's own voice speaks it.
- * `levels` is a ref (not state) so 60fps visuals can read it without
- * re-rendering React.
+ * waveform and the demo section all read the same connection. The browser talks
+ * to Gemini Live over a WebSocket using a single-use token from
+ * /api/voice/session: mic audio goes up as 16-bit PCM, the agent's 24kHz PCM
+ * comes back and is played gaplessly. `levels` is a ref (not state) so 60fps
+ * visuals can read it without re-rendering React.
  */
 import {
   createContext,
@@ -36,28 +36,21 @@ type VoiceCall = {
 
 const Ctx = createContext<VoiceCall | null>(null);
 
-const MAX_CALL_MS = 5 * 60_000; // client-side cap; the route's per-IP turn limit is the real guard
+const MAX_CALL_MS = 5 * 60_000; // client-side cap; the token's expireTime ends it server-side too
 
-// Minimal typing for the Web Speech API (not in TS's DOM lib everywhere).
-type SpeechRecognitionCtor = new () => {
-  lang: string;
-  onresult: ((e: { results: { [i: number]: { [j: number]: { transcript: string } } } }) => void) | null;
-  onerror: ((e: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  abort: () => void;
+const LIVE_URL =
+  "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained";
+
+// AudioWorklet that hands raw mic samples to the main thread.
+const CAPTURE_WORKLET = `registerProcessor("capture", class extends AudioWorkletProcessor {
+  process([input]) { if (input[0]) this.port.postMessage(input[0].slice()); return true; }
+});`;
+
+const toBase64 = (bytes: Uint8Array) => {
+  let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
 };
-
-/** Best-sounding installed voice for the language (OS "natural"/"premium" voices beat the defaults). */
-function pickVoice(lang: string) {
-  const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith(lang.slice(0, 2)));
-  return (
-    voices.find((v) => /natural|premium|enhanced|neural/i.test(v.name)) ??
-    voices.find((v) => /google|samantha|siri/i.test(v.name)) ??
-    voices[0] ??
-    null
-  );
-}
 
 /** Smoothed 0..1 loudness of a stream, written into `levels.current[key]`. */
 function meter(ctx: AudioContext, stream: MediaStream, levels: MutableRefObject<Levels>, key: keyof Levels) {
@@ -125,12 +118,8 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
     if (teardown.current) return;
     setError("");
     setStatus("connecting");
-    const w = window as unknown as { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor };
-    const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!navigator.mediaDevices?.getUserMedia || !SR || !window.speechSynthesis)
-      return fail("Live calls don't work in this browser. Open this page in Chrome or Safari to try it.");
-    // Safari only lets speech play if the first speak() happens inside the click.
-    speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+    if (!navigator.mediaDevices?.getUserMedia || typeof AudioWorkletNode === "undefined")
+      return fail("Live calls don't work in this browser. Open this page in Safari or Chrome to try it.");
     const cleanups: (() => void)[] = [];
     const mine = () => cleanups.forEach((c) => c());
     teardown.current = mine;
@@ -141,92 +130,128 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       mine();
       return true;
     };
+    // Created inside the click so Safari lets it play sound.
+    const audioCtx = new AudioContext();
+    cleanups.push(() => void audioCtx.close());
     try {
-      const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mic = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
       cleanups.push(() => mic.getTracks().forEach((t) => t.stop()));
       if (cancelled()) return;
-      const audioCtx = new AudioContext();
-      cleanups.push(() => void audioCtx.close());
-      cleanups.push(meter(audioCtx, mic, levels, "mic"));
 
-      const lang = navigator.language || "en-US";
-      const history: { role: "user" | "assistant"; content: string }[] = [];
-      const rec = new SR();
-      rec.lang = lang;
-      let heard = "";
-      rec.onresult = (e) => (heard = e.results[0][0].transcript);
-      rec.onerror = (e) => {
-        if (e.error === "not-allowed" || e.error === "service-not-allowed")
-          fail("Microphone access was blocked. Allow it in your browser settings, or open this page in Chrome or Safari.");
-        else if (e.error === "network") fail("Voice recognition couldn't connect. Check your connection and try again.");
-      };
-      // One phrase per recognition run: reply if something was heard, else keep listening.
-      rec.onend = () => {
-        if (!alive()) return;
-        const said = heard.trim();
-        heard = "";
-        if (said) void turn(said);
-        else listen();
-      };
-      const listen = () => {
-        if (alive()) try { rec.start(); } catch {}
-      };
-      cleanups.push(() => {
-        rec.onend = null;
-        rec.abort();
-        speechSynthesis.cancel();
+      const res = await fetch("/api/voice/session", {
+        method: "POST",
+        cache: "no-store",
+        body: JSON.stringify({ persona }),
+        headers: { "content-type": "application/json" },
       });
+      const data = await res.json().catch(() => ({}));
+      if (cancelled()) return;
+      if (!res.ok) return fail(data.error || "Could not start the demo.");
 
-      // speechSynthesis gives no audio stream to meter, so animate the agent level while it talks.
-      const say = (text: string) =>
-        new Promise<void>((done) => {
-          const u = new SpeechSynthesisUtterance(text);
-          u.lang = lang;
-          u.voice = pickVoice(lang);
-          let raf = 0;
-          const pulse = () => {
-            const target = 0.35 + 0.35 * Math.abs(Math.sin(performance.now() / 90));
-            levels.current.agent += (target - levels.current.agent) * 0.25;
-            raf = requestAnimationFrame(pulse);
-          };
-          u.onend = u.onerror = () => {
-            cancelAnimationFrame(raf);
-            levels.current.agent = 0;
-            done();
-          };
-          pulse();
-          speechSynthesis.speak(u);
-        });
+      cleanups.push(meter(audioCtx, mic, levels, "mic"));
+      const worklet = URL.createObjectURL(new Blob([CAPTURE_WORKLET], { type: "text/javascript" }));
+      await audioCtx.audioWorklet.addModule(worklet);
+      URL.revokeObjectURL(worklet);
+      if (cancelled()) return;
+      const capture = new AudioWorkletNode(audioCtx, "capture");
+      audioCtx.createMediaStreamSource(mic).connect(capture);
+      capture.connect(audioCtx.destination); // outputs silence; keeps the worklet running
+      cleanups.push(() => capture.disconnect());
 
-      const turn = async (said?: string) => {
-        if (said) history.push({ role: "user", content: said });
-        const res = await fetch("/api/voice/chat", {
-          method: "POST",
-          cache: "no-store",
-          body: JSON.stringify({ persona, messages: history }),
-          headers: { "content-type": "application/json" },
-        });
-        const data = await res.json().catch(() => ({}));
+      // Agent audio: 24kHz PCM chunks scheduled back to back. `out` also feeds the agent meter.
+      const out = audioCtx.createGain();
+      out.connect(audioCtx.destination);
+      const outStream = audioCtx.createMediaStreamDestination();
+      out.connect(outStream);
+      cleanups.push(meter(audioCtx, outStream.stream, levels, "agent"));
+      const playing = new Set<AudioBufferSourceNode>();
+      let playAt = 0;
+      const play = (b64: string) => {
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const pcm = new Int16Array(bytes.buffer, 0, bytes.length >> 1);
+        const buf = audioCtx.createBuffer(1, pcm.length, 24000);
+        const ch = buf.getChannelData(0);
+        for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+        const src = audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(out);
+        playAt = Math.max(playAt, audioCtx.currentTime);
+        src.start(playAt);
+        playAt += buf.duration;
+        playing.add(src);
+        src.onended = () => playing.delete(src);
+      };
+      // The visitor talked over the agent: drop whatever is still queued.
+      const flush = () => {
+        playing.forEach((s) => s.stop());
+        playing.clear();
+        playAt = 0;
+      };
+
+      const ws = new WebSocket(`${LIVE_URL}?access_token=${encodeURIComponent(data.token)}`);
+      cleanups.push(() => {
+        ws.onclose = ws.onmessage = null;
+        ws.close();
+      });
+      // The token carries the real setup (persona, voice); Gemini ignores everything here but the model.
+      ws.onopen = () => ws.send(JSON.stringify({ setup: { model: `models/${data.model}` } }));
+      ws.onclose = () => {
         if (!alive()) return;
-        if (!res.ok) return fail(data.error || "Could not start the demo.");
-        history.push({ role: "assistant", content: data.reply });
-        if (!startedAt.current) {
+        if (startedAt.current) stop();
+        else fail("Could not connect. Please try again.");
+      };
+
+      // Mic samples go up in ~100ms chunks once the session is ready.
+      let ready = false;
+      let pending: Float32Array[] = [];
+      let count = 0;
+      capture.port.onmessage = (e: MessageEvent<Float32Array>) => {
+        if (!ready || ws.readyState !== WebSocket.OPEN) return;
+        pending.push(e.data);
+        count += e.data.length;
+        if (count < audioCtx.sampleRate / 10) return;
+        const pcm = new Int16Array(count);
+        let o = 0;
+        for (const f of pending) for (const v of f) pcm[o++] = Math.max(-1, Math.min(1, v)) * 0x7fff;
+        pending = [];
+        count = 0;
+        ws.send(
+          JSON.stringify({
+            realtimeInput: {
+              audio: { data: toBase64(new Uint8Array(pcm.buffer)), mimeType: `audio/pcm;rate=${audioCtx.sampleRate}` },
+            },
+          }),
+        );
+      };
+
+      ws.onmessage = async (e) => {
+        const msg = JSON.parse(typeof e.data === "string" ? e.data : await (e.data as Blob).text());
+        if (!alive()) return;
+        if (msg.setupComplete) {
+          // Make the agent speak first.
+          ws.send(
+            JSON.stringify({
+              clientContent: { turns: [{ role: "user", parts: [{ text: data.greeting }] }], turnComplete: true },
+            }),
+          );
+          ready = true;
           startedAt.current = Date.now();
           track("demo_start", persona);
           setStatus("live");
           const t = setTimeout(stop, MAX_CALL_MS);
           cleanups.push(() => clearTimeout(t));
         }
-        await say(data.reply);
-        listen();
+        const content = msg.serverContent;
+        if (content?.interrupted) flush();
+        for (const part of content?.modelTurn?.parts ?? []) if (part.inlineData?.data) play(part.inlineData.data);
       };
-
-      await turn(); // empty history: the route adds the greeting trigger, so the agent speaks first
     } catch (e) {
       if (cancelled()) return;
       fail(
         (e as Error).name === "NotAllowedError"
-          ? "Microphone access was blocked. Allow it in your browser settings, or open this page in Chrome or Safari."
+          ? "Microphone access was blocked. Allow it in your browser settings, or open this page in Safari or Chrome."
           : "Could not start the call. Please try again.",
       );
     }
