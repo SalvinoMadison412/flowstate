@@ -1,51 +1,16 @@
 import { cn } from "@/lib/utils";
 
-type LogoProps = {
-  /** "full" = icon + wordmark, "icon" = F mark only (favicon / avatar crop). */
-  variant?: "full" | "icon";
-  className?: string;
-  /** Accent the circuit dot in cyan instead of monochrome. Off by default. */
-  accentDot?: boolean;
-};
-
-/**
- * Flow State logo mark: white-on-transparent PNG (public/logo-mark.png); the
- * `logo-mark` class inverts it on light pages (see globals.css). `accentDot` is kept for callers but no longer applies.
- */
-export function FlowStateIcon({
-  className,
-}: {
-  className?: string;
-  accentDot?: boolean;
-}) {
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/logo-mark.png"
-      alt="Flow State"
-      width={512}
-      height={512}
-      className={cn("logo-mark h-8 w-8 object-contain", className)}
-    />
-  );
-}
-
-export function Logo({ variant = "full", className, accentDot = false }: LogoProps) {
-  if (variant === "icon") {
-    return <FlowStateIcon className={className} accentDot={accentDot} />;
-  }
-
+/** Flow State wordmark: Kaushan Script in the midnight→teal gradient, no icon. */
+export function Logo({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex select-none items-center gap-2.5 text-text-primary",
+        // pb/pr keep the script's swashes inside the clipped gradient box.
+        "inline-block select-none bg-gradient-to-r from-[#0b1d3a] via-[#0f6e78] to-[#1a8fa3] bg-clip-text pb-1 pr-1 font-[family-name:var(--font-wordmark)] text-[1.75rem] leading-none text-transparent",
         className,
       )}
     >
-      <FlowStateIcon className="h-9 w-9 shrink-0" />
-      <span className="font-[family-name:var(--font-manrope)] text-[1.35rem] font-bold leading-none tracking-[-0.03em]">
-        Flowstate
-      </span>
+      Flowstate
     </span>
   );
 }

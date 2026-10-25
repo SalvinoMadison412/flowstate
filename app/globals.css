@@ -17,33 +17,8 @@
   --text-muted: 102 100 95;
 }
 
-/* The CRM keeps the original dark palette. `:root:has()` carries it to
-   body, scrollbars and selection too. */
-.theme-dark,
-:root:has(.theme-dark) {
-  color-scheme: dark;
-  --bg: 8 8 8;
-  --surface: 17 17 17;
-  --surface-elevated: 23 23 23;
-  --border-subtle: 34 34 34;
-  --border-active: 51 51 51;
-  --accent: 0 200 240;
-  --accent-ink: 0 200 240;
-  --accent-tint: 11 42 49;
-  --text-primary: 255 255 255;
-  --text-secondary: 153 153 153;
-  --text-muted: 85 85 85;
-}
-
 html {
   scroll-behavior: smooth;
-}
-
-/* Only the CRM was designed against the bigger root size. */
-@media (min-width: 1280px) {
-  html:has(.theme-dark) {
-    font-size: 112.5%;
-  }
 }
 
 body {
@@ -61,24 +36,6 @@ h3,
   font-family: var(--font-inter-tight), Arial, sans-serif;
   font-weight: 500;
   letter-spacing: -0.03em;
-}
-
-/* CRM headings keep the old heavy look (Cal Sans is gone; Inter 700). */
-.theme-dark h1,
-.theme-dark h2,
-.theme-dark h3,
-.theme-dark .font-display {
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-/* The logo PNG is white; invert it on light pages. */
-.logo-mark {
-  filter: invert(1);
-}
-.theme-dark .logo-mark {
-  filter: none;
 }
 
 ::selection {
