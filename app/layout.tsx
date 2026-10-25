@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, Inter, Manrope, JetBrains_Mono } from "next/font/google";
+import { Inter_Tight, Inter, Kaushan_Script, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // Variable font (no weight list) so intermediate weights like 575 work.
@@ -9,10 +9,11 @@ const interTight = Inter_Tight({
   display: "swap",
 });
 
-const manrope = Manrope({
+// Wordmark only (components/ui/Logo.tsx).
+const wordmark = Kaushan_Script({
   subsets: ["latin"],
-  weight: ["700"],
-  variable: "--font-manrope",
+  weight: ["400"],
+  variable: "--font-wordmark",
   display: "swap",
 });
 
@@ -113,7 +114,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${interTight.variable} ${manrope.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${interTight.variable} ${wordmark.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="bg-bg font-sans text-text-primary antialiased">
         <script

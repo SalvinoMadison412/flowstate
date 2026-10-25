@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -18,31 +17,12 @@ const LINKS = [
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  // The CRM link is private: it only appears once signed in, so visitors
-  // browsing the marketing site never see it.
-  const [signedIn, setSignedIn] = useState(false);
-
-  useEffect(() => {
-    // Without config there is no CRM to link to, and touching the client
-    // would throw — the marketing site must not depend on Supabase.
-    if (!isSupabaseConfigured) return;
-    void supabase.auth
-      .getSession()
-      .then(({ data }) => setSignedIn(!!data.session));
-    const { data } = supabase.auth.onAuthStateChange((_e, s) =>
-      setSignedIn(!!s),
-    );
-    return () => data.subscription.unsubscribe();
-  }, []);
-
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [open]);
-
-  const links = signedIn ? [...LINKS, { label: "CRM", href: "/crm" }] : LINKS;
 
   return (
     <header className="sticky top-0 z-50 px-4 pt-3 sm:px-6">
@@ -52,7 +32,7 @@ export function Nav() {
         </Link>
 
         <ul className="hidden items-center gap-7 text-sm font-medium lg:flex">
-          {links.map((link) => (
+          {LINKS.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
@@ -114,7 +94,7 @@ export function Nav() {
       >
         <div className="min-h-0 overflow-hidden">
           <ul className="flex flex-col gap-1 p-3">
-            {links.map((link) => (
+            {LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
